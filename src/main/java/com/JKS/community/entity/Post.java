@@ -4,6 +4,9 @@ import com.JKS.community.entity.Base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 public class Post extends BaseEntity {
@@ -24,4 +27,12 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    // category
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    // comment
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comment = new ArrayList<>();
 }
