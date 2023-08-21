@@ -4,6 +4,11 @@ Community Project for Spring Boot Study
 
 
 ### 프로젝트를 진행하며 문제가 생겼던 부분들
+
+
+#### spring.io에서 Dependency Versions 확인
+https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Reference Doc. -> Dependency Versions
+
 #### H2 DB 버전 오류
 
     Spring 3.12 버전을 사용하려면 H2 2.1 이상의 버전을 사용해야 함
