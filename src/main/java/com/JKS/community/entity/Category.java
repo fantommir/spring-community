@@ -1,11 +1,17 @@
 package com.JKS.community.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
 
     @Id @GeneratedValue
@@ -13,10 +19,10 @@ public class Category {
     private Long id;
 
     private String name;
-    private int order_num;
+//    private int order_num;
     private Boolean enabled;
 
-    private int depth;
+    private int depth = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -25,6 +31,24 @@ public class Category {
     @OneToMany(mappedBy = "parent")
     private List<Category> children = new ArrayList<>();
 
-     @OneToMany(mappedBy = "category")
-     private List<Post> posts;
+    @OneToMany(mappedBy = "category")
+    private List<Post> posts = new ArrayList<>();
+
+    @Builder
+    public Category(String name, Category parent) {
+        this.name = name;
+        this.parent = parent;
+        this.enabled = true;
+
+        this.depth = 0;
+        if (parent != null) {
+            this.depth = parent.getDepth() + 1;
+            parent.addChildCategory(this);
+        }
+    }
+
+    private void addChildCategory(Category category) {
+        this.children.add(category);
+    }
+
 }
