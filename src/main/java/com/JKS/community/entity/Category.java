@@ -20,7 +20,7 @@ public class Category {
 
     private String name;
 //    private int order_num;
-    private Boolean enabled;
+    private Boolean enabled = true;
 
     private int depth = 0;
 
@@ -38,9 +38,7 @@ public class Category {
     public Category(String name, Category parent) {
         this.name = name;
         this.parent = parent;
-        this.enabled = true;
 
-        this.depth = 0;
         if (parent != null) {
             this.depth = parent.getDepth() + 1;
             parent.addChildCategory(this);
