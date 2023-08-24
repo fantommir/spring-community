@@ -3,10 +3,9 @@ package com.JKS.community.service;
 import com.JKS.community.entity.Member;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MemberService {
-    Member registerMember(Member member);
+    void registerMember(Member member);
     Member login(String username, String password);
 
     // 회원 검색
@@ -16,7 +15,7 @@ public interface MemberService {
     List<Member> getMemberList();
 
     // 회원 상세 정보 조회
-    Optional<Member> getMember(Long memberId);
+    Member getMember(Long memberId);
 
     // 회원 정보 수정
     Member updateMember(Long memberId, Member updatedMember);

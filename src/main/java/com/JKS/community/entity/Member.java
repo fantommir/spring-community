@@ -39,11 +39,12 @@ public class Member {
         this.name = name;
     }
 
-    // update member
-    public Member updateMember(Member member) {
-        this.password = member.getPassword();
-        this.name = member.getName();
-        return this;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

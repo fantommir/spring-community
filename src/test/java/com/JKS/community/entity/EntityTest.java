@@ -123,7 +123,7 @@ class EntityTest {
 
     private Member createMember(int num) {
         Member member = Member.builder()
-                .login_id("testloginid" + num)
+                .loginId("testloginid" + num)
                 .password("testpassword" + num)
                 .name("testname" + num)
                 .build();
