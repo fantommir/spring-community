@@ -1,6 +1,6 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.entity.Base.BaseEntity;
+import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment extends BaseEntity {
+public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue
     private Long id;
 
     private String content;
-    private int like_count;
-    private int dislike_count;
+    private int like_count = 0;
+    private int dislike_count = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")

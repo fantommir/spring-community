@@ -1,6 +1,6 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.entity.Base.BaseEntity;
+import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post extends BaseEntity {
+public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue
     @Column(name = "post_id")
@@ -21,11 +21,11 @@ public class Post extends BaseEntity {
 
     private String title;
     private String content;
-    private int view_count;
-    private int like_count;
-    private int dislike_count;
+    private int view_count = 0;
+    private int like_count = 0;
+    private int dislike_count = 0;
 
-    private Boolean enabled;
+    private Boolean enabled = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -46,11 +46,6 @@ public class Post extends BaseEntity {
         this.content = content;
         this.member = member;
         this.category = category;
-
-        this.view_count = 0;
-        this.like_count = 0;
-        this.dislike_count = 0;
-        this.enabled = true;
     }
 
     public void addComment(Comment comment) {
