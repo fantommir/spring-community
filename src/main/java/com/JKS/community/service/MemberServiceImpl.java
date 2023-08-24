@@ -19,8 +19,7 @@ public class MemberServiceImpl implements MemberService {
         if (memberRepository.existsByLoginId(member.getLoginId())) {
             throw new IllegalArgumentException("이미 존재하는 회원입니다.");
         }
-        /* TODO : 비밀번호 암호화 */
-//         member.setPassword(passwordEncoder.encode(member.getPassword())); // Spring Security의 PasswordEncoder를 사용한다고 가정
+
         memberRepository.save(member);
     }
 
