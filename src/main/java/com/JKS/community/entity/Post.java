@@ -1,5 +1,7 @@
 package com.JKS.community.entity;
 
+import com.JKS.community.dto.PostCreateDto;
+import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -50,5 +52,10 @@ public class Post extends BaseTimeEntity {
 
     public void addComment(Comment comment) {
         this.comments.add(comment);
+    }
+
+    public void update(PostUpdateDto postUpdateDto) {
+        this.title = postUpdateDto.getTitle();
+        this.content = postUpdateDto.getContent();
     }
 }
