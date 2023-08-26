@@ -6,6 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
-
-    Optional<Reaction> findByPostIdAndMemberId(Long postId, Long memberId);
+    Optional<Reaction> findByMemberIdAndPostId(Long memberId, Long postId);
 }

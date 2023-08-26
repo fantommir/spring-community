@@ -19,4 +19,22 @@ public class Reaction {
     private Post post;
 
     private ReactionType reactionType;
+
+    public static Reaction of(Member member, Post post, boolean isLike) {
+        Reaction reaction = new Reaction();
+        reaction.member = member;
+        reaction.post = post;
+        reaction.reactionType = isLike ? ReactionType.LIKE : ReactionType.DISLIKE;
+        return reaction;
+    }
+
+
+    public void toggleReaction() {
+        if (this.reactionType == ReactionType.LIKE) {
+            this.reactionType = ReactionType.DISLIKE;
+        } else {
+            this.reactionType = ReactionType.LIKE;
+        }
+    }
+
 }

@@ -61,4 +61,16 @@ public class Post extends BaseTimeEntity {
         this.title = postUpdateDto.getTitle();
         this.content = postUpdateDto.getContent();
     }
+
+    public void increaseViewCount() {
+        this.view_count++;
+    }
+
+    public void increaseLikeCount() {
+        this.like_count++;
+    }
+
+    public void increaseDislikeCount() {
+        this.dislike_count++;
+    }
 }
