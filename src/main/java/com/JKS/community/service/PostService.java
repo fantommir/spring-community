@@ -27,9 +27,6 @@ public interface PostService {
     // 글 검색
     Page<Post> searchPostsByKeyword(String keyword, Pageable pageable);
 
-    // 글 추천 (다시 좋아요를 누르면 취소)
-    void toggleLikePost(Long userId, Long postId);
+    void reactPost(Long memberId, Long postId, boolean isLike);
 
-    // 글 비추천 (다시 싫어요를 누르면 취소)
-    void toggleDislikePost(Long userId, Long postId);
 }
