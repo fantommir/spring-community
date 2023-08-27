@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -70,20 +72,22 @@ public class PostServiceImpl implements PostService {
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post Id:" + postId));
 
-        // 검색한 Post 엔티티를 삭제
-        postRepository.delete(existingPost);
+        // 검색한 Post 엔티티를 비활성화
+        existingPost.disable();
     }
 
     @Override
-    // 게시글을 검색하고 조회수를 증가시키는 메서드
+    // 게시글을 조회하는 메서드 (enabled가 true인 경우만 조회)
     public Post getPost(Long postId) {
         // postId로 Post 엔티티를 검색
         // 해당 아이디를 가진 Post가 없다면 예외 발생
-        Post existingPost = postRepository.findById(postId)
+        Post existingPost = postRepository.findByEnabledTrueAndId(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post Id:" + postId));
 
         // 검색한 Post 엔티티의 조회수를 증가시킴
         existingPost.increaseViewCount();
+
+        postRepository.save(existingPost);
 
         // 조회수가 증가된 Post 엔티티를 반환
         return existingPost;
@@ -92,13 +96,13 @@ public class PostServiceImpl implements PostService {
     @Override
     // 모든 게시글을 페이지에 맞게 검색하는 메서드
     public Page<Post> getPostList(Pageable pageable) {
-        return postRepository.findAll(pageable);
+        return postRepository.findAllByEnabledTrue(pageable);
     }
 
     @Override
-    // Keyword를 포함하는 게시글을 페이지에 맞게 검색하는 메서드
+    // 키워드를 포함하는 게시글을 페이지에 맞게 검색하는 메서드 (enabled가 true인 경우만 조회)
     public Page<Post> searchPostsByKeyword(String keyword, Pageable pageable) {
-        return postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+        return postRepository.searchActivePostsByKeyword(keyword, pageable);
     }
 
     @Override

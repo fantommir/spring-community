@@ -73,4 +73,12 @@ public class Post extends BaseTimeEntity {
     public void increaseDislikeCount() {
         this.dislike_count++;
     }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
+    }
 }

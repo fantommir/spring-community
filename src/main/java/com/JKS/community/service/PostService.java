@@ -29,4 +29,5 @@ public interface PostService {
 
     void reactPost(Long memberId, Long postId, boolean isLike);
 
+
 }
