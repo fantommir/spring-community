@@ -28,3 +28,14 @@ https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Refer
     Post와 Comment 엔티티에서 like 필드를 사용해서 오류 발생. 
     오류문의 좌우스크롤을 움직이지 않고 앞 부분만 짧게 읽은 게 문제가 됨.
     친절하게 expected "identifier"가 있던 걸 3시간만에 발견.
+<br> <br>
+
+#### @Transacional과 @Rollback(value = false)
+*트랜잭션의 전파와 Rollback Flow에 대해 공부하기!!!*
+
+    학습용 프로젝트라 Test 실행 후 H2 DB에서 값을 확인하려고 @Rollback(value = false) 어노테이션 사용
+    Service에서 예외처리를 한 후, 테스트 케이스에서 assertThrows로 검증하려고 함
+    Service의 트랜잭션 안에서 계획대로 Unchecked Exception(IllegalArgumentException)이 발생해서 롤백
+    롤백하려니 Test의 트랜잭션이 전파돼서 @Rollback(value = false)도 전파
+    
+    org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
