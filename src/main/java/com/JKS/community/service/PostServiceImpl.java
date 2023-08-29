@@ -28,7 +28,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 생성하는 메서드
-    public Post createPost(PostCreateDto postCreateDto) {
+    public Post create(PostCreateDto postCreateDto) {
         // 1. memberId와 categoryId를 이용하여 Member와 Category 엔티티를 검색
         // 해당 아이디를 가진 Member 혹은 Category가 없다면 예외 발생
         Member member = memberRepository.findById(postCreateDto.getMemberId())
@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 수정하는 메서드
-    public Post updatePost(Long postId, PostUpdateDto updatedPostDto) {
+    public Post update(Long postId, PostUpdateDto updatedPostDto) {
         // postId로 Post 엔티티를 검색
         // 해당 아이디를 가진 Post가 없다면 예외 발생
         Post existingPost = postRepository.findById(postId)
@@ -66,7 +66,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 삭제하는 메서드
-    public void deletePost(Long postId) {
+    public void delete(Long postId) {
         // postId로 Post 엔티티를 검색
         // 해당 아이디를 가진 Post가 없다면 예외 발생
         Post existingPost = postRepository.findById(postId)
@@ -78,7 +78,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 조회하는 메서드 (enabled가 true인 경우만 조회)
-    public Post getPost(Long postId) {
+    public Post get(Long postId) {
         // postId로 Post 엔티티를 검색
         // 해당 아이디를 가진 Post가 없다면 예외 발생
         Post existingPost = postRepository.findByEnabledTrueAndId(postId)
@@ -87,27 +87,25 @@ public class PostServiceImpl implements PostService {
         // 검색한 Post 엔티티의 조회수를 증가시킴
         existingPost.increaseViewCount();
 
-        postRepository.save(existingPost);
-
         // 조회수가 증가된 Post 엔티티를 반환
         return existingPost;
     }
 
     @Override
     // 모든 게시글을 페이지에 맞게 검색하는 메서드
-    public Page<Post> getPostList(Pageable pageable) {
+    public Page<Post> getList(Pageable pageable) {
         return postRepository.findAllByEnabledTrue(pageable);
     }
 
     @Override
     // 키워드를 포함하는 게시글을 페이지에 맞게 검색하는 메서드 (enabled가 true인 경우만 조회)
-    public Page<Post> searchPostsByKeyword(String keyword, Pageable pageable) {
+    public Page<Post> searchListByKeyword(String keyword, Pageable pageable) {
         return postRepository.searchActivePostsByKeyword(keyword, pageable);
     }
 
     @Override
     // 게시글에 대한 반응을 저장하는 메서드
-    public void reactPost(Long memberId, Long postId, boolean isLike) {
+    public void react(Long memberId, Long postId, boolean isLike) {
         // memberId와 postId로 Member와 Post 엔티티를 검색
         // 해당 아이디를 가진 Member 혹은 Post가 없다면 예외 발생
         Member member = memberRepository.findById(memberId)
