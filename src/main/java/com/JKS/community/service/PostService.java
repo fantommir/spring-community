@@ -22,10 +22,12 @@ public interface PostService {
     // 글 목록 조회 (페이징)
     Page<Post> getList(Pageable pageable);
 
+    Page<Post> getListByCategory(Long categoryId, Pageable pageable);
+
     // 글 검색
     Page<Post> searchListByKeyword(String keyword, Pageable pageable);
 
-    void react(Long memberId, Long postId, boolean isLike);
+    void react(Long memberId, Long postId, Boolean isLike);
 
 
 }

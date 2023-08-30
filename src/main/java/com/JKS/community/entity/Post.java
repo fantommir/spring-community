@@ -66,12 +66,12 @@ public class Post extends BaseTimeEntity {
         this.viewCount++;
     }
 
-    public void increaseLikeCount() {
-        this.likeCount++;
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 
-    public void increaseDislikeCount() {
-        this.dislikeCount++;
+    public void setDislikeCount(int dislikeCount) {
+        this.dislikeCount = dislikeCount;
     }
 
     public void enable() {

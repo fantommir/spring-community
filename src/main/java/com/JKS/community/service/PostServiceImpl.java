@@ -98,39 +98,60 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    // 키워드를 포함하는 게시글을 페이지에 맞게 검색하는 메서드 (enabled가 true인 경우만 조회)
+    public Page<Post> getListByCategory(Long categoryId, Pageable pageable) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new IllegalArgumentException("Invalid category ID: " + categoryId);
+        }
+        return postRepository.findAllByEnabledTrueAndCategoryId(categoryId, pageable);
+    }
+
+
+    @Override
     public Page<Post> searchListByKeyword(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.isEmpty()) {
+            throw new IllegalArgumentException("invalid keyword");
+        }
         return postRepository.searchActivePostsByKeyword(keyword, pageable);
     }
 
     @Override
-    // 게시글에 대한 반응을 저장하는 메서드
-    public void react(Long memberId, Long postId, boolean isLike) {
-        // memberId와 postId로 Member와 Post 엔티티를 검색
-        // 해당 아이디를 가진 Member 혹은 Post가 없다면 예외 발생
+    public void react(Long memberId, Long postId, Boolean isLike) {
+        // Check if memberId and postId are valid.
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("No member found with id " + memberId));
-
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID: " + memberId));
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("No post found with id " + postId));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid post ID: " + postId));
 
-        // 해당 Member가 해당 Post에 기존 반응이 있는지 확인
+        // Check if the user has already reacted to the post.
         Optional<Reaction> optionalReaction = reactionRepository.findByMemberIdAndPostId(memberId, postId);
 
-        // 이미 반응이 있다면 예외 발생
-        if (optionalReaction.isPresent()) {
-            throw new IllegalArgumentException("You've already reacted to this post.");
+        Reaction existingReaction = optionalReaction.orElse(null);
+        if (existingReaction == null) {
+            // If there's no existing reaction, create a new one.
+            Reaction newReaction = Reaction.of(member, post, isLike);
+            reactionRepository.save(newReaction);
+
+            // Increase the corresponding count in the post.
+            if (isLike) {
+                post.setLikeCount(post.getLikeCount() + 1);
+            } else {
+                post.setDislikeCount(post.getDislikeCount() + 1);
+            }
+        } else if (existingReaction.isLike() != isLike) {
+            // If there's an existing reaction and the type is different,
+            // update the reaction and adjust the counts in the post.
+            existingReaction.update(isLike);
+
+            if (isLike) {
+                post.setLikeCount(post.getLikeCount() + 1);
+                post.setDislikeCount(post.getDislikeCount() - 1);
+            } else {
+                post.setDislikeCount(post.getDislikeCount() + 1);
+                post.setLikeCount(post.getLikeCount() - 1);
+            }
         }
 
-        // 새로운 Reaction을 생성하고 저장
-        Reaction newReaction = Reaction.of(member, post, isLike);
-        reactionRepository.save(newReaction);
-
-        // 이 Post에 대한 좋아요 혹은 싫어요 카운트 증가
-        if(isLike){
-            post.increaseLikeCount();
-        }else{
-            post.increaseDislikeCount();
-        }
+        // Save the updated post.
+        postRepository.save(post);
     }
 }

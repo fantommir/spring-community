@@ -18,6 +18,7 @@ public class Reaction {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @Enumerated(EnumType.STRING)
     private ReactionType reactionType;
 
     public static Reaction of(Member member, Post post, boolean isLike) {
@@ -28,13 +29,12 @@ public class Reaction {
         return reaction;
     }
 
+    public void update(Boolean isLike) {
+        this.reactionType = isLike ? ReactionType.LIKE : ReactionType.DISLIKE;
+    }
 
-    public void toggleReaction() {
-        if (this.reactionType == ReactionType.LIKE) {
-            this.reactionType = ReactionType.DISLIKE;
-        } else {
-            this.reactionType = ReactionType.LIKE;
-        }
+    public boolean isLike() {
+        return this.reactionType == ReactionType.LIKE;
     }
 
 }
