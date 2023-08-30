@@ -1,5 +1,6 @@
 package com.JKS.community.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ public class PostCreateDto {
     private Long memberId; // Member ID
     private Long categoryId; // Category ID
 
+    @Builder
     public PostCreateDto(String title, String content, Long memberId, Long categoryId) {
         this.title = title;
         this.content = content;

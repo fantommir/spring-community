@@ -1,24 +1,19 @@
 package com.JKS.community.service;
 
 import com.JKS.community.entity.Member;
-import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class MemberServiceImplTest {
-
-    @AfterEach
-    public void afterEach() {
-        memberService.getMemberList().forEach(member -> memberService.withdrawalMember(member.getId()));
-    }
 
     @Autowired
     MemberService memberService;

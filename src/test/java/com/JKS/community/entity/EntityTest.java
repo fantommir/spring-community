@@ -116,7 +116,7 @@ class EntityTest {
 
 
         // 포스트에 달린 댓글들 아이디 확인
-        Post findPost = postRepository.findByTitle("한식");
+        Post findPost = postRepository.findByTitle("한식").get();
         Assertions.assertThat(findPost.getComments().size()).isEqualTo(3);
     }
 

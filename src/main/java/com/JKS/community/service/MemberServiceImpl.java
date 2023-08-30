@@ -4,12 +4,14 @@ import com.JKS.community.entity.Member;
 import com.JKS.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -28,10 +30,10 @@ public class MemberServiceImpl implements MemberService {
         Optional<Member> member = memberRepository.findByLoginId(loginId);
 
         if (member.isEmpty()) {
-            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("아이디가 일치하지 않습니다.");
         }
         if (!member.get().getPassword().equals(password)) {
-            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
         return member.get();
@@ -49,11 +51,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member getMember(Long memberId) {
-        if (memberRepository.findById(memberId).isEmpty()) {
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
-        return memberRepository.findById(memberId).get();
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
+
 
     @Override
     public Member updateMember(Long memberId, Member updatedMember) {

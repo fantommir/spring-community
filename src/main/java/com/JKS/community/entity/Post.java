@@ -23,9 +23,9 @@ public class Post extends BaseTimeEntity {
 
     private String title;
     private String content;
-    private int view_count = 0;
-    private int like_count = 0;
-    private int dislike_count = 0;
+    private int viewCount = 0;
+    private int likeCount = 0;
+    private int dislikeCount = 0;
 
     private Boolean enabled = true;
 
@@ -63,14 +63,22 @@ public class Post extends BaseTimeEntity {
     }
 
     public void increaseViewCount() {
-        this.view_count++;
+        this.viewCount++;
     }
 
-    public void increaseLikeCount() {
-        this.like_count++;
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 
-    public void increaseDislikeCount() {
-        this.dislike_count++;
+    public void setDislikeCount(int dislikeCount) {
+        this.dislikeCount = dislikeCount;
+    }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
     }
 }
