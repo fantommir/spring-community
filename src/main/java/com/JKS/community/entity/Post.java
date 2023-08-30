@@ -1,6 +1,5 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.dto.PostCreateDto;
 import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -43,7 +42,7 @@ public class Post extends BaseTimeEntity {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post")
-    private List<Reaction> reaction;
+    private List<Reaction> reactions = new ArrayList<>();
 
     @Builder
     public Post(String title, String content, Member member, Category category) {

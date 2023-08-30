@@ -33,7 +33,7 @@ public class Member {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<Reaction> reaction;
+    private List<Reaction> reactions = new ArrayList<>();
 
     @Builder
     public Member(String loginId, String password, String name) {

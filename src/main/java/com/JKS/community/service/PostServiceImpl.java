@@ -74,6 +74,8 @@ public class PostServiceImpl implements PostService {
 
         // 검색한 Post 엔티티를 비활성화
         existingPost.disable();
+
+        // TODO: 게시글에 달린 댓글들도 비활성화
     }
 
     @Override

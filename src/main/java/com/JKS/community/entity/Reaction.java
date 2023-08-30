@@ -18,6 +18,10 @@ public class Reaction {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
     @Enumerated(EnumType.STRING)
     private ReactionType reactionType;
 
