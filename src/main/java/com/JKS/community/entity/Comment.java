@@ -23,6 +23,7 @@ public class Comment extends BaseTimeEntity {
     private int dislikeCount = 0;
     private String ref;
     private int level = 0;
+    private boolean enabled = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -45,5 +46,21 @@ public class Comment extends BaseTimeEntity {
 
         post.addComment(comment);
         return comment;
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+
+    public void delete() {
+        this.enabled = false;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public void setDislikeCount(int dislikeCount) {
+        this.dislikeCount = dislikeCount;
     }
 }

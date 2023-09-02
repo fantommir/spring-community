@@ -1,13 +1,13 @@
 package com.JKS.community.service;
 
 import com.JKS.community.dto.PostCreateDto;
+import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Category;
 import com.JKS.community.entity.Member;
 import com.JKS.community.entity.Post;
 import com.JKS.community.repository.CategoryRepository;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +60,13 @@ class PostServiceImplTest {
                 .categoryId(childCategory.getId()).build();
 
         // when
-        Post created = postService.create(postCreateDto);
+        PostDto created = postService.create(postCreateDto);
 
         // then
-        Post findPost = postService.get(created.getId());
+        PostDto findPostDto = postService.get(created.getId());
 
-        assertThat(findPost.getTitle()).isEqualTo(postCreateDto.getTitle());
-        assertThat(findPost.getContent()).isEqualTo(postCreateDto.getContent());
+        assertThat(findPostDto.getTitle()).isEqualTo(postCreateDto.getTitle());
+        assertThat(findPostDto.getContent()).isEqualTo(postCreateDto.getContent());
     }
 
     @Test
@@ -103,7 +103,7 @@ class PostServiceImplTest {
 
         PostUpdateDto updateDTO = new PostUpdateDto(title+"updated", content+"updated");
 
-        Post created = postService.create(createDTO);
+        PostDto created = postService.create(createDTO);
 
         created = postService.update(created.getId(),updateDTO);
 
@@ -135,7 +135,7 @@ class PostServiceImplTest {
                 .memberId(newMember.getId())
                 .categoryId(childCategory.getId()).build();
 
-        Post created = postService.create(createDTO);
+        PostDto created = postService.create(createDTO);
 
         postService.delete(created.getId());
 
@@ -163,12 +163,12 @@ class PostServiceImplTest {
                 .memberId(newMember.getId())
                 .categoryId(childCategory.getId()).build();
 
-        Post created = postService.create(createDTO);
+        PostDto created = postService.create(createDTO);
 
-        Post found = postService.get(created.getId());
+        PostDto postDto = postService.get(created.getId());
 
-        assertThat(found.getTitle()).isEqualTo(title);
-        assertThat(found.getContent()).isEqualTo(content);
+        assertThat(postDto.getTitle()).isEqualTo(title);
+        assertThat(postDto.getContent()).isEqualTo(content);
     }
 
     @Test
@@ -193,7 +193,7 @@ class PostServiceImplTest {
             postService.create(createDTO);
         }
 
-        List<Post> posts = postService.getList(PageRequest.of(0, 10)).getContent();
+        List<PostDto> posts = postService.getList(PageRequest.of(0, 10)).getContent();
 
         assertThat(posts.get(9).getTitle()).isEqualTo("title9");
         assertThat(posts.get(9).getContent()).isEqualTo("content9");
@@ -209,8 +209,7 @@ class PostServiceImplTest {
                 .content(content)
                 .memberId(newMember.getId())
                 .categoryId(childCategory.getId()).build();
-
-        Post created = postService.create(createDTO);
+        postService.create(createDTO);
 
         assertThat(postService.getListByCategory(childCategory.getId(), PageRequest.of(0, 10)).getContent().get(0).getTitle()).isEqualTo(title);
         assertThat(postService.getListByCategory(childCategory.getId(), PageRequest.of(0, 10)).getContent().get(0).getContent()).isEqualTo(content);
@@ -221,7 +220,6 @@ class PostServiceImplTest {
         // given
         Long invalidCategoryId = -1L;
         Pageable pageable = PageRequest.of(0, 10);
-
 
         // fail: get post list with invalid categoryId.
         assertThatThrownBy(()->{postService.getListByCategory(invalidCategoryId, pageable);})
@@ -263,7 +261,7 @@ class PostServiceImplTest {
                 .memberId(newMember.getId())
                 .categoryId(childCategory.getId()).build();
 
-        Post created = postService.create(createDTO);
+        PostDto created = postService.create(createDTO);
 
         postService.react(newMember.getId(), created.getId(), true);
         assertThat(postService.get(created.getId()).getLikeCount()).isEqualTo(1);
@@ -285,7 +283,7 @@ class PostServiceImplTest {
                 .memberId(newMember.getId())
                 .categoryId(childCategory.getId()).build();
 
-        Post created = postService.create(createDTO);
+        PostDto created = postService.create(createDTO);
 
         // fail: react with invalid memberId.
         assertThatThrownBy(()->{postService.react(-1L, created.getId(), true);})

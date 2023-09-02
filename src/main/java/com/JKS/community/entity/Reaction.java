@@ -25,10 +25,20 @@ public class Reaction {
     @Enumerated(EnumType.STRING)
     private ReactionType reactionType;
 
+    // Post에 대한 Reaction 생성
     public static Reaction of(Member member, Post post, boolean isLike) {
         Reaction reaction = new Reaction();
         reaction.member = member;
         reaction.post = post;
+        reaction.reactionType = isLike ? ReactionType.LIKE : ReactionType.DISLIKE;
+        return reaction;
+    }
+
+    // Comment에 대한 Reaction 생성
+    public static Reaction of(Member member, Comment comment, Boolean isLike) {
+        Reaction reaction = new Reaction();
+        reaction.member = member;
+        reaction.comment = comment;
         reaction.reactionType = isLike ? ReactionType.LIKE : ReactionType.DISLIKE;
         return reaction;
     }

@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
     Optional<Reaction> findByMemberIdAndPostId(Long memberId, Long postId);
+
+    Optional<Reaction> findByMemberIdAndCommentId(Long memberId, Long commentId);
 }
