@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -21,7 +20,7 @@ public class Comment extends BaseTimeEntity {
     private String content;
     private int likeCount = 0;
     private int dislikeCount = 0;
-    private String ref;
+    private Long parentId;
     private int level = 0;
     private boolean enabled = true;
 
@@ -36,9 +35,9 @@ public class Comment extends BaseTimeEntity {
     @OneToMany(mappedBy = "comment")
     private List<Reaction> reactions = new ArrayList<>();
 
-    public static Comment of(String ref, int level, Post post, Member member, String content) {
+    public static Comment of(Long parentId, int level, Post post, Member member, String content) {
         Comment comment = new Comment();
-        comment.ref = ref;
+        comment.parentId = parentId;
         comment.level = level;
         comment.post = post;
         comment.member = member;

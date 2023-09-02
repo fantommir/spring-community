@@ -1,6 +1,8 @@
 package com.JKS.community.service;
 
 import com.JKS.community.entity.Member;
+import com.JKS.community.exception.MemberAlreadyExistsException;
+import com.JKS.community.exception.MemberNotFoundException;
 import com.JKS.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void registerMember(Member member) {
         if (memberRepository.existsByLoginId(member.getLoginId())) {
-            throw new IllegalArgumentException("이미 존재하는 회원입니다.");
+            throw new MemberAlreadyExistsException("이미 존재하는 회원입니다.");
         }
 
         memberRepository.save(member);

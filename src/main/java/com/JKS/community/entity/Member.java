@@ -22,10 +22,6 @@ public class Member {
     private String password;
     private String name;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "role_id")
-//    private Role role;
-
     @OneToMany(mappedBy = "member")
     private List<Post> posts = new ArrayList<>();
 

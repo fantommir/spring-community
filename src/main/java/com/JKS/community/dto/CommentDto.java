@@ -11,7 +11,7 @@ public class CommentDto {
     private String content;
     private int likeCount;
     private int dislikeCount;
-    private String ref;
+    private Long parentId;
     private int level;
     private boolean enabled;
 
@@ -25,7 +25,7 @@ public class CommentDto {
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
         this.dislikeCount = comment.getDislikeCount();
-        this.ref = comment.getRef();
+        this.parentId = comment.getParentId();
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
 

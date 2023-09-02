@@ -2,6 +2,7 @@ package com.JKS.community.service;
 
 import com.JKS.community.dto.PostCreateDto;
 import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Post;
 import org.springframework.data.domain.Page;
@@ -9,10 +10,10 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostService {
     // 글 작성
-    PostDto create(PostCreateDto postCreateDto);
+    PostDto create(PostFormDto postFormDto);
 
     // 글 수정
-    PostDto update(Long postId, PostUpdateDto updatedPostDto);
+    PostDto update(Long postId, PostFormDto postFormDto);
 
     // 글 삭제
     void delete(Long postId);

@@ -1,6 +1,7 @@
 package com.JKS.community.entity;
 
 import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -57,9 +58,9 @@ public class Post extends BaseTimeEntity {
         this.comments.add(comment);
     }
 
-    public void update(PostUpdateDto postUpdateDto) {
-        this.title = postUpdateDto.getTitle();
-        this.content = postUpdateDto.getContent();
+    public void update(PostFormDto postFormDto) {
+        this.title = postFormDto.getTitle();
+        this.content = postFormDto.getContent();
     }
 
     public void increaseViewCount() {

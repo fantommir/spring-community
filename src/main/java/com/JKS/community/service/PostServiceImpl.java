@@ -2,6 +2,7 @@ package com.JKS.community.service;
 
 import com.JKS.community.dto.PostCreateDto;
 import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.*;
 import com.JKS.community.exception.CategoryNotFoundException;
@@ -34,19 +35,19 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 생성하는 메서드
-    public PostDto create(PostCreateDto postCreateDto) {
+    public PostDto create(PostFormDto postFormDto) {
         // 1. memberId와 categoryId를 이용하여 Member와 Category 엔티티를 검색
         // 해당 아이디를 가진 Member 혹은 Category가 없다면 예외 발생
-        Member member = memberRepository.findById(postCreateDto.getMemberId())
-                .orElseThrow(() -> new MemberNotFoundException("Invalid memberId:" + postCreateDto.getMemberId()));
+        Member member = memberRepository.findById(postFormDto.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("Invalid memberId:" + postFormDto.getMemberId()));
 
-        Category category = categoryRepository.findById(postCreateDto.getCategoryId())
-                .orElseThrow(() -> new CategoryNotFoundException("Invalid categoryId:" + postCreateDto.getCategoryId()));
+        Category category = categoryRepository.findById(postFormDto.getCategoryId())
+                .orElseThrow(() -> new CategoryNotFoundException("Invalid categoryId:" + postFormDto.getCategoryId()));
 
         // 2. 검색한 Member와 Category 엔티티를 이용하여 새로운 Post 엔티티 생성
         Post newPost = Post.builder()
-                .title(postCreateDto.getTitle())
-                .content(postCreateDto.getContent())
+                .title(postFormDto.getTitle())
+                .content(postFormDto.getContent())
                 .member(member)
                 .category(category)
                 .build();
@@ -58,14 +59,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     // 게시글을 수정하는 메서드
-    public PostDto update(Long postId, PostUpdateDto updatedPostDto) {
+    public PostDto update(Long postId, PostFormDto postFormDto) {
         // postId로 Post 엔티티를 검색
         // 해당 아이디를 가진 Post가 없다면 예외 발생
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 
         // 검색한 Post 엔티티의 정보를 수정
-        existingPost.update(updatedPostDto);
+        existingPost.update(postFormDto);
 
         // 수정된 Post 엔티티를 저장하고 반환
         postRepository.save(existingPost);

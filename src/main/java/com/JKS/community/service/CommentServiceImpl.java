@@ -1,7 +1,7 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.CommentCreateDto;
 import com.JKS.community.dto.CommentDto;
+import com.JKS.community.dto.CommentFormDto;
 import com.JKS.community.entity.Comment;
 import com.JKS.community.entity.Member;
 import com.JKS.community.entity.Post;
@@ -36,25 +36,25 @@ public class CommentServiceImpl implements CommentService {
     private final ReactionRepository reactionRepository;
 
     @Override
-    public CommentDto create(CommentCreateDto commentCreateDto) {
-        Post post = postRepository.findById(commentCreateDto.getPostId())
-                .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + commentCreateDto.getPostId()));
-        Member member = memberRepository.findById(commentCreateDto.getMemberId())
-                .orElseThrow(() -> new CommentNotFoundException("Invalid member Id:" + commentCreateDto.getMemberId()));
-        if (commentCreateDto.getParentId() == null) {
+    public CommentDto create(CommentFormDto commentFormDto) {
+        Post post = postRepository.findById(commentFormDto.getPostId())
+                .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + commentFormDto.getPostId()));
+        Member member = memberRepository.findById(commentFormDto.getMemberId())
+                .orElseThrow(() -> new CommentNotFoundException("Invalid member Id:" + commentFormDto.getMemberId()));
+        if (commentFormDto.getParentId() == null) {
             // This is a top-level comment.
-            Comment comment = Comment.of(UUID.randomUUID().toString(), 0, post, member, commentCreateDto.getContent());
+            Comment comment = Comment.of(null, 0, post, member, commentFormDto.getContent());
             commentRepository.save(comment);
             return new CommentDto(comment);
         } else {
             // This is a reply to another comment.
-            Comment parentComment = commentRepository.findById(commentCreateDto.getParentId())
-                    .orElseThrow(() -> new CommentNotFoundException("Invalid parent comment Id:" + commentCreateDto.getParentId()));
+            Comment parentComment = commentRepository.findById(commentFormDto.getParentId())
+                    .orElseThrow(() -> new CommentNotFoundException("Invalid parent comment Id:" + commentFormDto.getParentId()));
 
-            String newCommentRef = parentComment.getRef();
+            Long parentId = parentComment.getParentId();
             int newCommentLevel = parentComment.getLevel() + 1;
 
-            Comment createdComment = Comment.of(newCommentRef, newCommentLevel, post, member, commentCreateDto.getContent());
+            Comment createdComment = Comment.of(parentId, newCommentLevel, post, member, commentFormDto.getContent());
             commentRepository.save(createdComment);
             return new CommentDto(createdComment);
         }
@@ -130,8 +130,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentDto> getListByMember(Long memberId) {
-        Page<Comment> commentPage = commentRepository.findAllByMemberIdAndEnabledTrue(memberId);
+    public Page<CommentDto> getListByMember(Long memberId, Pageable pageable) {
+        Page<Comment> commentPage = commentRepository.findAllByMemberIdAndEnabledTrue(memberId, pageable);
         List<CommentDto> commentDtoList = commentPage.getContent().stream()
                 .map(CommentDto::new)
                 .toList();

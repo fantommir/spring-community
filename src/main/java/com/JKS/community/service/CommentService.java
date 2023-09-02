@@ -1,14 +1,14 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.CommentCreateDto;
 import com.JKS.community.dto.CommentDto;
+import com.JKS.community.dto.CommentFormDto;
 import com.JKS.community.entity.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CommentService {
     // 댓글 달기
-    CommentDto create(CommentCreateDto commentCreateDto);
+    CommentDto create(CommentFormDto commentCreateDto);
 
     // 댓글 수정
     CommentDto update(Long commentId, String content);
@@ -23,7 +23,7 @@ public interface CommentService {
     CommentDto react(Long memberId, Long commentId, Boolean isLike);
 
     // 특정 회원 댓글 조회
-    Page<CommentDto> getListByMember(Long memberId);
+    Page<CommentDto> getListByMember(Long memberId, Pageable pageable);
 
 //    TODO: 상위 5개 댓글 조회
 //    Page<CommentDto> getTop5(Long postId);

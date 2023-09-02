@@ -9,5 +9,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Page<Comment> findByPostIdAndEnabledTrue(Long postId, Pageable pageable);
 
-    Page<Comment> findAllByMemberIdAndEnabledTrue(Long memberId);
+    Page<Comment> findAllByMemberIdAndEnabledTrue(Long memberId, Pageable pageable);
 }
