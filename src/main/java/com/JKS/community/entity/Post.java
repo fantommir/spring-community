@@ -1,8 +1,6 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
-import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

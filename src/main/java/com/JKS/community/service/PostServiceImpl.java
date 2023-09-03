@@ -1,9 +1,7 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.PostCreateDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
-import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.*;
 import com.JKS.community.exception.CategoryNotFoundException;
 import com.JKS.community.exception.MemberNotFoundException;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

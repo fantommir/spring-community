@@ -1,10 +1,7 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.PostCreateDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
-import com.JKS.community.dto.PostUpdateDto;
-import com.JKS.community.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

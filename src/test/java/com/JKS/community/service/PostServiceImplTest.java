@@ -1,12 +1,10 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.PostCreateDto;
+import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
-import com.JKS.community.dto.PostUpdateDto;
 import com.JKS.community.entity.Category;
 import com.JKS.community.entity.Member;
-import com.JKS.community.entity.Post;
 import com.JKS.community.exception.CategoryNotFoundException;
 import com.JKS.community.exception.MemberNotFoundException;
 import com.JKS.community.exception.PostNotFoundException;
@@ -46,7 +44,7 @@ class PostServiceImplTest {
                 .loginId("loginId")
                 .password("password")
                 .name("name").build();
-        memberService.registerMember(newMember);
+        memberService.register(new MemberFormDto(newMember));
 
         Category parentCategory = new Category("parent", null);
         childCategory = new Category("child", parentCategory);

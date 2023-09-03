@@ -1,25 +1,30 @@
 package com.JKS.community.service;
 
+import com.JKS.community.dto.MemberDto;
+import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface MemberService {
-    void registerMember(Member member);
-    Member login(String username, String password);
+    MemberDto register(MemberFormDto memberFormDto);
+    MemberDto login(MemberFormDto memberFormDto);
 
     // 회원 검색
-    List<Member> searchMembersByName(String name);
+    Page<MemberDto> getListByName(String name, Pageable pageable);
 
     // 회원 목록 조회
-    List<Member> getMemberList();
+    Page<MemberDto> getList(Pageable pageable);
 
     // 회원 상세 정보 조회
-    Member getMember(Long memberId);
+    MemberDto get(Long memberId);
 
     // 회원 정보 수정
-    Member updateMember(Long memberId, Member updatedMember);
+    MemberDto update(Long memberId, MemberFormDto memberFormDto);
 
     // 회원 탈퇴
-    void withdrawalMember(Long memberId);
+    void withdrawal(Long memberId);
+
 }
