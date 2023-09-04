@@ -26,7 +26,7 @@ public class Reaction {
     private ReactionType reactionType;
 
     // Post에 대한 Reaction 생성
-    public static Reaction of(Member member, Post post, boolean isLike) {
+    public static Reaction of(Member member, Post post, Boolean isLike) {
         Reaction reaction = new Reaction();
         reaction.member = member;
         reaction.post = post;
