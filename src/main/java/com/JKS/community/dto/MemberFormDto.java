@@ -1,7 +1,6 @@
 package com.JKS.community.dto;
 
 import com.JKS.community.entity.Member;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
