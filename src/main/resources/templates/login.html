@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>Login</title>
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" th:href="@{/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 </head>
 <body>
 <div class="container">
-    <h2 class="text-center">Login</h2>
+    <h2 class="text-center">로그인</h2>
 
     <!-- Display error message -->
     <div th:if="${errorMessage != null}" class="alert alert-danger" role="alert">
@@ -27,22 +27,17 @@
             <input type ="password" id ="password" name ="password" class ="form-control"/>
         </div>
 
-        <div class="form-check mb-3">
-            <input type="checkbox" id="rememberUsername" class="form-check-input"/>
-            <label for="rememberUsername" class="form-check-label">Remember username</label>
-        </div>
-
-        <div class="form-check mb-3">
-            <input type="checkbox" id="keepLoggedIn" class="form-check-input"/>
-            <label for="keepLoggedIn" class="form-check-label">Keep me logged in</label>
-        </div>
-
         <!-- Submit button -->
-        <button type ='submit' class ='btn btn-primary'>Login?</button>
-        <p><a href='#'>Forgot your username?</a></p>
-        <p><a href='#'>Sign up here.</a></p>
+        <form action="#" th:action="@{/login}" method="get" class="d-flex">
+            <button type="submit" class="btn btn-outline-success">로그인</button >
+        </form >
+        <p><a href='#'>비밀번호 찾기</a></p>
+        <p><a href='#'>회원가입</a></p>
 
     </form>
 </div>
+
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

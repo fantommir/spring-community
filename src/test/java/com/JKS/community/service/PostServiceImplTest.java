@@ -46,8 +46,8 @@ class PostServiceImplTest {
                 .name("name").build();
         memberService.register(new MemberFormDto(newMember));
 
-        Category parentCategory = new Category("parent", null);
-        childCategory = new Category("child", parentCategory);
+        Category parentCategory = Category.of("parent", null, true);
+        childCategory = Category.of("child", parentCategory, true);
         categoryRepository.save(parentCategory);
         categoryRepository.save(childCategory);
     }

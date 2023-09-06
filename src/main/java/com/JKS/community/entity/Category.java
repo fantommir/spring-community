@@ -1,5 +1,6 @@
 package com.JKS.community.entity;
 
+import com.JKS.community.dto.CategoryFormDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,7 +20,6 @@ public class Category {
     private Long id;
 
     private String name;
-//    private int order_num;
     private Boolean enabled = true;
 
     private int depth = 0;
@@ -36,18 +36,40 @@ public class Category {
     private List<Post> posts = new ArrayList<>();
 
     @Builder
-    public Category(String name, Category parent) {
-        this.name = name;
-        this.parent = parent;
-
+    public static Category of(String name, Category parent, Boolean enabled) {
+        Category category = new Category();
+        category.name = name;
+        category.parent = parent;
+        category.depth = parent != null ? parent.getDepth() + 1 : 0;
+        category.enabled = enabled;
         if (parent != null) {
-            this.depth = parent.getDepth() + 1;
-            parent.addChildCategory(this);
+            parent.addChildCategory(category);
         }
+        return category;
     }
 
     private void addChildCategory(Category category) {
         this.children.add(category);
+    }
+
+    public void update(CategoryFormDto categoryFormDto, Category parent) {
+        this.name = categoryFormDto.getName();
+        this.enabled = categoryFormDto.getEnabled();
+        if (parent != null) {
+            if (this.parent != null) {
+                this.parent.getChildren().remove(this); // 기존 부모 카테고리에서 제거
+            }
+            parent.addChildCategory(this); // 새 부모 카테고리에 추가
+            this.parent = parent;
+            this.depth = parent.getDepth() + 1;
+        } else {
+            // parentId가 null인 경우 (즉, 최상위 카테고리인 경우)
+            if (this.parent != null) {
+                this.parent.getChildren().remove(this); // 기존 부모 카테고리에서 제거
+                this.depth = 0; // depth 재설정
+                this.parent = null;
+            }
+        }
     }
 
 }
