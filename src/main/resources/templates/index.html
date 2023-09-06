@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class=" container-fluid">
+        <a class="navbar-brand" href="#">Website Name</a>
+
+        <!-- User Information, Posts, Comments, Login/Logout/Register -->
+        <div class=" collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class ="nav-item"><a th:href="@{/member/info}" class ="nav-link">내 정보 </a></li >
+                <li class ="nav-item"><a th:href="@{/member/posts}" class ="nav-link">내 글 </a></li >
+                <li class ="nav-item"><a th:href="@{/member/comments}" class ="nav-link">내 댓글 </a></li >
+            </ul >
+
+            <!-- If logged in -->
+            <div th:if="${isLogged}">
+                <form action="#" th:action="@{/logout}" method="post" class ="d-flex">
+                    <button type="submit" class="btn btn-outline-success">로그아웃</button >
+                </form >
+            </div >
+
+            <!-- If not logged in -->
+            <div th:unless="${isLogged}">
+                <a th:href="@{/login}" class="btn btn-outline-success">로그인</a>
+
+                <!-- ... -->
+
+            </div >
+
+        </div>
+    </div>
+</nav>
+
+<div th:replace="~{footer :: navigation}"></div>
+
+<!-- Categories (Forums) -->
+
+<!-- Posts -->
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+</body >
+</html > 
