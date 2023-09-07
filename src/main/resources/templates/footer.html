@@ -1,27 +1,78 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
+</head>
 <body>
-<footer th:fragment="navigation">
-    <nav>
-        <ul>
-            <li th:each="category : ${categories}">
-                <a th:href="@{'/category/' + ${category.id}}" th:text="${category.name}"></a>
-            </li>
-        </ul>
+<footer th:fragment="navbar">
+    <header id="header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">MyCommunity</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userInformationBar" aria-controls="userInformationBar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="userInformationBar">
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li class='nav-item me-3'>
+                            <a class='nav-link' href='#'>내 정보</a>
+                        </li>
+                        <li class='nav-item me-3'>
+                            <a class='nav-link' href='#'>내 글</a>
+                        </li>
+                        <li  class='nav-item me-3'>
+                            <a class='nav-link' href='#'>내 댓글</a>
+                        </li>
+
+                        <!-- 로그아웃 상태일 때 -->
+                        <li>
+                            <a href="#" class="btn btn-primary" th:href="@{/login}">로그인</a>
+                        </li>
+
+                        <!-- 로그인 상태일 때 -->
+                        <!--<button type='button' onclick='logout()' th:if="${isLoggedIn}">Logout</button>-->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+</footer>
+
+<footer th:fragment="categoryList">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <!-- Parent Category Loop -->
+                    <li th:each ="category : ${categoryList}" th:if="${category.parentId == null}" class='nav-item dropdown'>
+                        <!-- Parent Category Name -->
+                        <a th:text="${category.name}" id="${'navbarDropdown'+${category.id}}" role='button' data-bs-toggle='dropdown' aria-expanded='false' class='nav-link dropdown-toggle'></a>
+
+                        <!-- Child Category Loop -->
+                        <ul th:if="${not #lists.isEmpty(category.children)}" class='dropdown-menu' aria-labelledby="${'navbarDropdown'+${category.id}}">
+                            <li th:each = "subCategory : ${category.children}">
+                                <!-- Child Category Name -->
+                                <a th:text="${subCategory.name}"  class='dropdown-item'></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </nav>
 
-    <div th:if="${page.totalPages > 1}">
-        <ul>
-            <li th:each="pageNumber : ${#numbers.sequence(0, page.totalPages - 1)}">
-                <a th:href="@{/category(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
-            </li>
-        </ul>
-    </div>
 </footer>
-<footer th:fragment="copyParam (param1, param2)">
-    <p>파라미터 자리 입니다.</p>
-    <p th:text="${param1}"></p>
-    <p th:text="${param2}"></p>
-</footer>
+
+
+
+
+
 </body>
+<script src="../static/js/bootstrap.bundle.min.js"></script>
 </html>
