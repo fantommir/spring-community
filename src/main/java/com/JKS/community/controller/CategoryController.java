@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/category")
 @RequiredArgsConstructor
@@ -22,8 +24,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CategoryDto>> getList(Pageable pageable) {
-        return ResponseEntity.ok(categoryService.getList(pageable));
+    public ResponseEntity<List<CategoryDto>> getList() {
+        return ResponseEntity.ok(categoryService.getList());
     }
 
     @GetMapping("/{id}")

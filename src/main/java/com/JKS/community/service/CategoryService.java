@@ -12,7 +12,7 @@ public interface CategoryService {
     public CategoryDto create(CategoryFormDto categoryFormDto);
 
     // 모든 카테고리 목록 조회
-    public Page<CategoryDto> getList(Pageable pageable);
+    public List<CategoryDto> getList();
 
     // 특정 카테고리 조회
     public CategoryDto get(Long id);

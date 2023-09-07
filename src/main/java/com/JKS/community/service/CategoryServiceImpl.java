@@ -38,9 +38,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<CategoryDto> getList(Pageable pageable) {
-        Page<Category> page = categoryRepository.findAll(pageable);
-        return page.map(CategoryDto::new);
+    public List<CategoryDto> getList() {
+        List<Category> categoryList = categoryRepository.findAllByDepth(0);
+        return categoryList.stream().map(CategoryDto::new).toList();
     }
 
     @Override
