@@ -9,7 +9,9 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 @Transactional
@@ -20,59 +22,33 @@ class CommunityApplicationTests {
 	CategoryService categoryService;
 
 	@Test
-	void 더미데이터() {
-		// 나라 카테고리 생성
-		CategoryFormDto countryCategory = CategoryFormDto.builder()
-				.name("국가")
-				.enabled(true)
-				.parentId(null)
-				.build();
-		Long countryId = categoryService.create(countryCategory).getId();
+	void createDummyData() {
+		// Main Categories
+		Map<String, List<String>> categoriesMap = new HashMap<>();
+		categoriesMap.put("국가", Arrays.asList("중국", "미국", "일본", "한국", "영국"));
+		categoriesMap.put("음식", Arrays.asList("한식", "중식", "일식", "양식"));
+		categoriesMap.put("게임", Arrays.asList("FPS", "RPG","MMO"));
+		categoriesMap.put("스포츠" ,Arrays.asList("축구","야구","농구"));
 
-		// 각 나라별 카테고리 생성
-		List<String> countries = Arrays.asList("중국", "미국", "일본", "한국", "영국");
-		for (String country : countries) {
-			CategoryFormDto countryFormDto = CategoryFormDto.builder()
-					.name(country)
+		for (String mainCategory : categoriesMap.keySet()) {
+			CategoryFormDto mainCategoryFormDto = CategoryFormDto.builder()
+					.name(mainCategory)
 					.enabled(true)
-					.parentId(countryId)
+					.parentId(null)
 					.build();
-			Long createdCountryId = categoryService.create(countryFormDto).getId();
+			Long createdMainCategoryId = categoryService.create(mainCategoryFormDto).getId();
 
-			// 한국의 도시들 추가
-			if (country.equals("한국")) {
-				List<String> citiesInKorea = Arrays.asList("서울", "부천", "부산", "인천");
-				for (String city : citiesInKorea) {
-					CategoryFormDto cityCategory = CategoryFormDto.builder()
-							.name(city)
-							.enabled(true)
-							.parentId(createdCountryId)
-							.build();
-					categoryService.create(cityCategory);
-				}
-			}
-
-			// 중국의 도시들 추가
-			else if (country.equals("중국")) {
-				String cityInChina = "베이징";
-				CategoryFormDto cityCategory = CategoryFormDto.builder()
-						.name(cityInChina)
+			List<String> subCategories = categoriesMap.get(mainCategory);
+			for (String subCategory : subCategories) {
+				CategoryFormDto subCategoryFormDto = CategoryFormDto.builder()
+						.name(subCategory)
 						.enabled(true)
-						.parentId(createdCountryId)
+						.parentId(createdMainCategoryId)
 						.build();
-				categoryService.create(cityCategory);
-			}
-
-			// 일본의 도시들 추가
-			else if (country.equals("일본")) {
-				List<String> citiesInJapan= Arrays.asList("도쿄","아키하바라");
-				for(String city: citiesInJapan){
-					CategoryFormDto cityCategory=  CategoryFormDto.builder()
-							.name(city).enabled(true).parentId(createdCountryId).build();
-					categoryService.create(cityCategory);
-				}
+				categoryService.create(subCategoryFormDto);
 			}
 		}
 	}
+
 
 }
