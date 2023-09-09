@@ -7,9 +7,6 @@ import com.JKS.community.exception.CategoryNotFoundException;
 import com.JKS.community.repository.CategoryRepository;
 import com.JKS.community.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

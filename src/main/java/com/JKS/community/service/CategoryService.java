@@ -2,8 +2,6 @@ package com.JKS.community.service;
 
 import com.JKS.community.dto.CategoryDto;
 import com.JKS.community.dto.CategoryFormDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 

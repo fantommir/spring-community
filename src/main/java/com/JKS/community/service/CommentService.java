@@ -2,7 +2,6 @@ package com.JKS.community.service;
 
 import com.JKS.community.dto.CommentDto;
 import com.JKS.community.dto.CommentFormDto;
-import com.JKS.community.entity.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
