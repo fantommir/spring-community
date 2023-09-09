@@ -9,17 +9,17 @@ import java.util.List;
 
 public interface CategoryService {
     // 카테고리 생성
-    public CategoryDto create(CategoryFormDto categoryFormDto);
+    CategoryDto create(CategoryFormDto categoryFormDto);
 
     // 모든 카테고리 목록 조회
-    public List<CategoryDto> getList();
+    List<CategoryDto> getList();
 
     // 특정 카테고리 조회
-    public CategoryDto get(Long id);
+    CategoryDto get(Long id);
 
     // 카테고리 정보 수정
-    public void update(Long id, CategoryFormDto categoryFormDto);
+    void update(Long id, CategoryFormDto categoryFormDto);
 
     // 특정 카테고리 삭제
-    public void delete(Long id);
+    void delete(Long id);
 }

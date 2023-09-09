@@ -23,13 +23,13 @@ public class Member {
     private String name;
 
     @OneToMany(mappedBy = "member")
-    private List<Post> posts = new ArrayList<>();
+    private final List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<Comment> comments = new ArrayList<>();
+    private final List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<Reaction> reactions = new ArrayList<>();
+    private final List<Reaction> reactions = new ArrayList<>();
 
     @Builder
     public Member(String loginId, String password, String name) {
