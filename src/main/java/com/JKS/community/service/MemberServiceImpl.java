@@ -60,16 +60,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Page<MemberDto> getListByName(String name, Pageable pageable) {
-        List<Member> memberList = memberRepository.findAllByNameContaining(name, pageable).getContent();
-        List<MemberDto> memberDtoList = memberList.stream().map(MemberDto::new).toList();
-        return new PageImpl<>(memberDtoList, pageable, memberDtoList.size());
+        return memberRepository.findAllByNameContaining(name, pageable).map(MemberDto::new);
     }
 
     @Override
     public Page<MemberDto> getList(Pageable pageable) {
-        List<Member> memberList = memberRepository.findAll(pageable).getContent();
-        List<MemberDto> memberDtoList = memberList.stream().map(MemberDto::new).toList();
-        return new PageImpl<>(memberDtoList, pageable, memberDtoList.size());
+        return memberRepository.findAll(pageable).map(MemberDto::new);
     }
 
     @Override

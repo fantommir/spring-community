@@ -2,6 +2,7 @@ package com.JKS.community.controller;
 
 
 import com.JKS.community.dto.CategoryDto;
+import com.JKS.community.dto.PostDto;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.MemberService;
 import com.JKS.community.service.PostService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -34,5 +36,14 @@ public class NavigationController {
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public String category(@PathVariable Long categoryId, Model model, Pageable pageable) {
+        CategoryDto categoryDto = categoryService.get(categoryId);
+        Page<PostDto> postDtoPage = postService.getListByCategory(categoryId, pageable);
+        model.addAttribute("category", categoryDto);
+        model.addAttribute("postList", postDtoPage);
+        return "posts-by-category";
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
@@ -10,7 +10,7 @@
     <header id="header">
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">MyCommunity</a>
+                <a class="navbar-brand" href="/">MyCommunity</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userInformationBar" aria-controls="userInformationBar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -58,7 +58,7 @@
                         <ul th:if="${not #lists.isEmpty(category.children)}" class='dropdown-menu' aria-labelledby="${'navbarDropdown'+${category.id}}">
                             <li th:each = "subCategory : ${category.children}">
                                 <!-- Child Category Name -->
-                                <a th:text="${subCategory.name}"  class='dropdown-item'></a>
+                                <a th:text="${subCategory.name}" class='dropdown-item' th:href="@{/category/{id}(id=${subCategory.id})}"></a>
                             </li>
                         </ul>
                     </li>
@@ -68,9 +68,6 @@
     </nav>
 
 </footer>
-
-
-
 
 
 </body>

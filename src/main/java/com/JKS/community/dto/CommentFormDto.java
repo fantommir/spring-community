@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class CommentFormDto {
 
@@ -19,12 +18,12 @@ public class CommentFormDto {
     private Long memberId;
 
     @Builder
-    public CommentFormDto(Comment comment) {
-        this.id = comment.getId();
-        this.content = comment.getContent();
-        this.parentId = comment.getParentId();
-        this.level = comment.getLevel();
-        this.postId = comment.getPost().getId();
-        this.memberId = comment.getMember().getId();
+    public CommentFormDto(Long id, String content, Long parentId, int level, Long postId, Long memberId) {
+        this.id = id;
+        this.content = content;
+        this.parentId = parentId;
+        this.level = level;
+        this.postId = postId;
+        this.memberId = memberId;
     }
 }

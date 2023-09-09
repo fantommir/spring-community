@@ -54,25 +54,14 @@ class EntityTest {
 
     @Test
     public void test_post() throws Exception {
-        Post post = Post.builder()
-                .title("음식")
-                .content("중식")
-                .member(member1)
-                .category(chinaCategory)
-                .build();
+        Post post = Post.of("음식", "중식", member1, chinaCategory);
 
         postRepository.save(post);
     }
 
     @Test
     public void test_comment() throws Exception {
-        Post post = Post.builder()
-                .title("중식")
-                .content("중식이 노래 좋음")
-                .member(member1)
-                .category(chinaCategory)
-                .build();
-
+        Post post = Post.of("중식", "중식이 노래 좋음", member1, chinaCategory);
         postRepository.save(post);
 
         for (int i=0; i<3; i++) {
@@ -85,7 +74,6 @@ class EntityTest {
                 .orElseThrow(() -> new IllegalArgumentException ("Invalid post title:" + "한식"));
         Assertions.assertThat(findPost.getComments().size()).isEqualTo(3);
     }
-
 
     private Member createMember(int num) {
         Member member = Member.builder()

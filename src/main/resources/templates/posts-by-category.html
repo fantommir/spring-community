@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts by Category</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container my-5">
+    <h1 th:text="${category.name}">Category Name</h1>
+
+    <!-- Tab Nav -->
+    <ul class='nav nav-tabs'>
+        <!-- Subcategory Loop -->
+        <li class='nav-item' th:each='subCategory : ${category.children}'>
+            <!-- Subcategory Name -->
+            <a class='nav-link' data-bs-toggle='tab' th:href="'#' + ${subCategory.name}" th:text='${subCategory.name}'></a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class='tab-content'>
+        <!-- Subcategory Loop -->
+        <div th:each='subCategory : ${category.children}' class='tab-pane fade' role ='tabpanel' th:id='${subCategory.name}'>
+
+            <!-- Post Table for each Sub-category-->
+            <table class="table table-striped my-4">
+                <thead>
+                <tr>
+                    <th scope="col">탭</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">조회</th>
+                    <th scope="col">추천</th>
+                    <th scope="col">날짜</th>
+                </tr>
+                </thead>
+
+                <!-- Post Loop for each Sub-category -->
+                <tbody th:each='post : ${subCategory.posts}'>
+                    <tr>
+                        <td th:text="${subCategory.name}">임시 탭</td>
+                        <td th:text="${post.title}">임시 제목</td>
+                        <td th:text="${post.viewCount}">1557</td>
+                        <td th:text="${post.likeCount}">3</td>
+                        <!--<div class='d-flex flex-column'>-->
+                        <!--<span th:text='${#dates.format(post.createdDate, 'yyyy-MM-dd')}'></span>-->
+                        <!--<span th:text='${#dates.format(post.createdDate, 'HH:mm:ss')}'></span>-->
+                        <!--</div>-->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.min.js"></script>-->
+<script src="../static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.JKS.community.entity.Post;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,8 @@ public class PostDto {
     private String memberName;
     private Long categoryId;
     private String categoryName;
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
     private List<CommentDto> comments = new ArrayList<>();
 
     public PostDto(Post post) {
@@ -37,6 +40,8 @@ public class PostDto {
         this.memberName = post.getMember().getName();
         this.categoryId = post.getCategory().getId();
         this.categoryName = post.getCategory().getName();
+        this.createdDate = post.getCreatedDate();
+        this.modifiedDate = post.getLastModifiedDate();
 
         if (post.getComments() != null) {
             for (Comment comment : post.getComments()) {

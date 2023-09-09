@@ -4,6 +4,8 @@ import com.JKS.community.entity.Comment;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class CommentDto {
@@ -14,9 +16,9 @@ public class CommentDto {
     private Long parentId;
     private int level;
     private boolean enabled;
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
 
-    // assuming Member has fields 'id' and 'name'
-    // if not, you may need to create separate DTOs for these entities
     private Long memberId;
     private String memberName;
 
@@ -28,12 +30,11 @@ public class CommentDto {
         this.parentId = comment.getParentId();
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
+        this.createdDate = comment.getCreatedDate();
+        this.modifiedDate = comment.getLastModifiedDate();
 
-        // make sure that Member is not null before accessing its fields
         if (comment.getMember() != null) {
             this.memberId = comment.getMember().getId();
-            // assuming there is a getName() method in Member
-            // replace with appropriate method call if needed
             this.memberName = comment.getMember().getName();
         }
 

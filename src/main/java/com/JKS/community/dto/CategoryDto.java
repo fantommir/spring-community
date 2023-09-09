@@ -9,8 +9,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class CategoryDto {
 
@@ -21,7 +20,6 @@ public class CategoryDto {
     private Long parentId;
     private List<CategoryDto> children = new ArrayList<>();
 
-    @Builder
     public CategoryDto(Category category) {
         this.id = category.getId();
         this.name = category.getName();
