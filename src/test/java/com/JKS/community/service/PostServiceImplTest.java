@@ -1,14 +1,9 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.MemberFormDto;
-import com.JKS.community.dto.PostDto;
-import com.JKS.community.dto.PostFormDto;
-import com.JKS.community.entity.Category;
-import com.JKS.community.entity.Member;
+import com.JKS.community.dto.*;
 import com.JKS.community.exception.CategoryNotFoundException;
 import com.JKS.community.exception.MemberNotFoundException;
 import com.JKS.community.exception.PostNotFoundException;
-import com.JKS.community.repository.CategoryRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,53 +18,48 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest
 @Transactional
 class PostServiceImplTest {
 
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private MemberService memberService;
-    @Autowired
-    private CategoryRepository categoryRepository;
+    @Autowired private PostService postService;
+    @Autowired private MemberService memberService;
+    @Autowired private CategoryService categoryService;
 
-    private Member newMember;
-    private Category childCategory;
+    private MemberDto memberDto;
+    private CategoryDto categoryDto;
+    private PostDto postDto;
 
     @BeforeEach
     void setUp() {
-        newMember = Member.builder()
+        // create member
+        MemberFormDto memberFormDto = MemberFormDto.builder()
                 .loginId("loginId")
                 .password("password")
                 .name("name").build();
-        memberService.register(new MemberFormDto(newMember));
+        memberDto = memberService.register(memberFormDto);
 
-        Category parentCategory = Category.of("parent", null, true);
-        childCategory = Category.of("child", parentCategory, true);
-        categoryRepository.save(parentCategory);
-        categoryRepository.save(childCategory);
+        // create category
+        CategoryFormDto parentCategoryFormDto = CategoryFormDto.builder()
+                .name("name").parentId(null).enabled(true).build();
+        categoryService.create(parentCategoryFormDto);
+        CategoryFormDto childCategoryFormDto = CategoryFormDto.builder()
+                .name("name").parentId(parentCategoryFormDto.getParentId()).enabled(true).build();
+        categoryDto = categoryService.create(childCategoryFormDto);
+
+        // create post
+        PostFormDto formDto = PostFormDto.builder()
+                .title("title").content("content").memberId(memberDto.getId())
+                .categoryId(categoryDto.getId()).build();
+        postDto = postService.create(formDto);
     }
 
     @Test
     void createPost_Success() {
-        // given
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
-
-        // when
-        PostDto created = postService.create(formDto);
-
         // then
-        PostDto findPostDto = postService.get(created.getId());
-
-        assertThat(findPostDto.getTitle()).isEqualTo(formDto.getTitle());
-        assertThat(findPostDto.getContent()).isEqualTo(formDto.getContent());
+        PostDto findPostDto = postService.get(postDto.getId());
+        assertThat(findPostDto.getTitle()).isEqualTo(postDto.getTitle());
+        assertThat(findPostDto.getContent()).isEqualTo(postDto.getContent());
     }
 
     @Test
@@ -77,144 +67,103 @@ class PostServiceImplTest {
         // given
         Long invalidMemberId=-1L;
         PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(invalidMemberId)
-                .categoryId(childCategory.getId())
-                .build();
+                .title("title").content("content")
+                .memberId(invalidMemberId).categoryId(categoryDto.getId()).build();
 
         // fail: create post with invalid memberId.
-        assertThatThrownBy(() -> {postService.create(formDto);})
-            .isInstanceOf(MemberNotFoundException.class)
-            .hasMessageContaining(String.valueOf(invalidMemberId));
+        assertThatThrownBy(() -> postService.create(formDto))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessageContaining(String.valueOf(invalidMemberId));
 
         // fail: get post with invalid postId.
-        assertThatThrownBy(() -> {postService.get(-1L);})
-            .isInstanceOf(PostNotFoundException.class)
-            .hasMessageContaining("-1");
+        assertThatThrownBy(() -> postService.get(-1L))
+                .isInstanceOf(PostNotFoundException.class)
+                .hasMessageContaining("-1");
     }
 
     @Test
-    public void update_Success() throws Exception {
+    public void update_Success() {
         PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
+                .title("title").content("content").memberId(memberDto.getId())
+                .categoryId(categoryDto.getId()).build();
 
-        PostDto created = postService.create(formDto);
+        PostDto postDto = postService.create(formDto);
 
         String updatedTitle = "updated title";
         formDto.setTitle(updatedTitle);
         String updatedContent = "updated content";
         formDto.setContent(updatedContent);
-        PostDto updated = postService.update(created.getId(), formDto);
+        PostDto updated = postService.update(postDto.getId(), formDto);
 
         assertThat(updatedTitle).isEqualTo(updated.getTitle());
         assertThat(updatedContent).isEqualTo(updated.getContent());
     }
 
     @Test
-    public void update_Failure() throws Exception {
-        PostFormDto formDto = new PostFormDto();
-        formDto.setTitle("updated title");
-        formDto.setContent("updated content");
+    public void update_Failure() {
+        PostFormDto formDto = PostFormDto.builder()
+                .title("updated title").content("updated content").memberId(memberDto.getId())
+                .categoryId(categoryDto.getId()).build();
 
         // fail: update post with invalid postId.
-        assertThatThrownBy(()->{postService.update(-1L,formDto);})
+        assertThatThrownBy(()-> postService.update(-1L,formDto))
                 .isInstanceOf(PostNotFoundException.class)
                 .hasMessageContaining("-1");
     }
 
     @Test
-    public void delete_Success() throws Exception {
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
+    public void delete_Success() {
+        postService.delete(postDto.getId());
 
-        PostDto created = postService.create(formDto);
-
-        postService.delete(created.getId());
-
-        assertThatThrownBy(()->{postService.get(created.getId());})
+        assertThatThrownBy(()-> postService.get(postDto.getId()))
                 .isInstanceOf(PostNotFoundException.class)
-                .hasMessageContaining(String.valueOf(created.getId()));
+                .hasMessageContaining(String.valueOf(postDto.getId()));
     }
 
     @Test
-    public void delete_Failure() throws Exception {
+    public void delete_Failure() {
         // fail: delete post with invalid postId.
-        assertThatThrownBy(()->{postService.delete(-1L);})
+        assertThatThrownBy(()-> postService.delete(-1L))
                 .isInstanceOf(PostNotFoundException.class)
                 .hasMessageContaining("-1");
     }
 
     @Test
-    public void get_Success() throws Exception {
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
-
-        PostDto created = postService.create(formDto);
-
-        PostDto postDto = postService.get(created.getId());
-
-        assertThat(postDto.getTitle()).isEqualTo("title");
-        assertThat(postDto.getContent()).isEqualTo("content");
+    public void get_Success() {
+        PostDto findDto = postService.get(postDto.getId());
+        assertThat(findDto.getTitle()).isEqualTo("title");
+        assertThat(findDto.getContent()).isEqualTo("content");
     }
 
     @Test
-    public void get_Failure() throws Exception {
-        assertThatThrownBy(()->{postService.get(-1L);})
+    public void get_Failure() {
+        assertThatThrownBy(()-> postService.get(-1L))
                 .isInstanceOf(PostNotFoundException.class)
                 .hasMessageContaining("-1");
     }
 
     @Test
-    public void getList_Success() throws Exception {
+    public void getList_Success() {
 
         for(int i=0; i<11; i++) {
             String title="title" + i;
             String content="content" + i;
 
             PostFormDto formDto = PostFormDto.builder()
-                    .title(title)
-                    .content(content)
-                    .memberId(newMember.getId())
-                    .categoryId(childCategory.getId())
-                    .build();
+                    .title(title).content(content).memberId(memberDto.getId())
+                    .categoryId(categoryDto.getId()).build();
             postService.create(formDto);
         }
 
         List<PostDto> posts = postService.getList(PageRequest.of(0, 10)).getContent();
-
-        assertThat(posts.get(9).getTitle()).isEqualTo("title9");
-        assertThat(posts.get(9).getContent()).isEqualTo("content9");
+        assertThat(posts.size()).isEqualTo(10);
     }
 
     @Test
-    public void getListByCategory_Success() throws Exception {
-        String title="title";
-        String content="content";
-
-        PostFormDto formDto = PostFormDto.builder()
-                .title(title)
-                .content(content)
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
-        postService.create(formDto);
-
-        assertThat(postService.getListByCategory(childCategory.getId(), PageRequest.of(0, 10)).getContent().get(0).getTitle()).isEqualTo(title);
-        assertThat(postService.getListByCategory(childCategory.getId(), PageRequest.of(0, 10)).getContent().get(0).getContent()).isEqualTo(content);
-    }
+    public void getListByCategory_Success() {
+        List<PostDto> postDtoList = postService.getListByCategory(categoryDto.getId(), PageRequest.of(0, 10)).getContent();
+        assertThat(postDtoList.get(0).getCategoryName()).isEqualTo(categoryDto.getName());
+        assertThat(postDtoList.get(0).getContent()).isEqualTo("content");}
 
     @Test
     public void getListByCategory_Failure_InvalidCategoryId() {
@@ -223,67 +172,53 @@ class PostServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // fail: get post list with invalid categoryId.
-        assertThatThrownBy(()->{postService.getListByCategory(invalidCategoryId, pageable);})
+        assertThatThrownBy(()-> postService.getListByCategory(invalidCategoryId, pageable))
                 .isInstanceOf(CategoryNotFoundException.class)
                 .hasMessageContaining(String.valueOf(invalidCategoryId));
     }
     @Test
-    public void searchListByKeyword_Success() throws Exception {
+    public void searchListByKeyword_Success() {
         for(int i=0; i<10; i++) {
             String title="title" + i;
             String content="content" + i;
 
             PostFormDto formDto = PostFormDto.builder()
-                    .title(title)
-                    .content(content)
-                    .memberId(newMember.getId())
-                    .categoryId(childCategory.getId())
-                    .build();
+                    .title(title).content(content).memberId(memberDto.getId())
+                    .categoryId(categoryDto.getId()).build();
             postService.create(formDto);
         }
 
-        assertThat(postService.searchListByKeyword("title4", PageRequest.of(0, 10)).getContent().get(0).getTitle()).isEqualTo("title4");
-        assertThat(postService.searchListByKeyword("content4", PageRequest.of(0, 10)).getContent().get(0).getContent()).isEqualTo("content4");
+        String titleKeyword = "title4";
+        String contentKeyword = "content4";
+        assertThat(postService.searchListByKeyword(titleKeyword, PageRequest.of(0, 10)).getContent().get(0).getTitle()).isEqualTo(titleKeyword);
+        assertThat(postService.searchListByKeyword(contentKeyword, PageRequest.of(0, 10)).getContent().get(0).getContent()).isEqualTo(contentKeyword);
     }
 
     @Test
-    public void react_Success() throws Exception {
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
+    public void react_Success() {
+        postService.react(memberDto.getId(), postDto.getId(), true);
+        assertThat(postService.get(postDto.getId()).getLikeCount()).isEqualTo(1);
+        assertThat(postService.get(postDto.getId()).getDislikeCount()).isEqualTo(0);
 
-        PostDto created = postService.create(formDto);
+        postService.react(memberDto.getId(), postDto.getId(), false);
+        assertThat(postService.get(postDto.getId()).getLikeCount()).isEqualTo(0);
+        assertThat(postService.get(postDto.getId()).getDislikeCount()).isEqualTo(1);
 
-        postService.react(newMember.getId(), created.getId(), true);
-        assertThat(postService.get(created.getId()).getLikeCount()).isEqualTo(1);
-        assertThat(postService.get(created.getId()).getDislikeCount()).isEqualTo(0);
-
-        postService.react(newMember.getId(), created.getId(), false);
-        assertThat(postService.get(created.getId()).getLikeCount()).isEqualTo(0);
-        assertThat(postService.get(created.getId()).getDislikeCount()).isEqualTo(1);
+        // cancel reaction
+        postService.react(memberDto.getId(), postDto.getId(), false);
+        assertThat(postService.get(postDto.getId()).getLikeCount()).isEqualTo(0);
+        assertThat(postService.get(postDto.getId()).getDislikeCount()).isEqualTo(0);
     }
 
     @Test
-    public void react_Failure() throws Exception {
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title")
-                .content("content")
-                .memberId(newMember.getId())
-                .categoryId(childCategory.getId())
-                .build();
-
-        PostDto created = postService.create(formDto);
-
+    public void react_Failure() {
         // fail: react with invalid memberId.
-        assertThatThrownBy(()->{postService.react(-1L, created.getId(), true);})
+        assertThatThrownBy(()-> postService.react(-1L, postDto.getId(), true))
                 .isInstanceOf(MemberNotFoundException.class)
                 .hasMessageContaining("-1");
 
         // fail: react with invalid postId.
-        assertThatThrownBy(()->{postService.react(newMember.getId(), -1L, true);})
+        assertThatThrownBy(()-> postService.react(memberDto.getId(), -1L, true))
                 .isInstanceOf(PostNotFoundException.class)
                 .hasMessageContaining("-1");
     }

@@ -40,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
         Post post = postRepository.findById(commentFormDto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + commentFormDto.getPostId()));
         Member member = memberRepository.findById(commentFormDto.getMemberId())
-                .orElseThrow(() -> new CommentNotFoundException("Invalid member Id:" + commentFormDto.getMemberId()));
+                .orElseThrow(() -> new MemberNotFoundException("Invalid member Id:" + commentFormDto.getMemberId()));
         if (commentFormDto.getParentId() == null) {
             // This is a top-level comment.
             Comment comment = Comment.of(null, 0, post, member, commentFormDto.getContent());
@@ -74,7 +74,14 @@ public class CommentServiceImpl implements CommentService {
         Comment findComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Invalid comment Id:" + commentId));
 
-        findComment.delete();
+        commentRepository.delete(findComment);
+    }
+
+    @Override
+    public CommentDto get(Long commentId) {
+        Comment findComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Invalid comment Id:" + commentId));
+        return new CommentDto(findComment);
     }
 
     @Override
@@ -82,11 +89,7 @@ public class CommentServiceImpl implements CommentService {
         postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 
-        Page<Comment> commentPage = commentRepository.findByPostIdAndEnabledTrue(postId, pageable);
-        List<CommentDto> commentDtoList = commentPage.getContent().stream()
-                .map(CommentDto::new)
-                .toList();
-        return new PageImpl<>(commentDtoList, pageable, commentPage.getTotalElements());
+        return commentRepository.findByPostIdAndEnabledTrue(postId, pageable).map(CommentDto::new);
     }
 
     @Override
@@ -96,34 +99,27 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Invalid comment ID: " + commentId));
 
-        // Check if the user has already reacted to the post.
         Optional<Reaction> optionalReaction = reactionRepository.findByMemberIdAndCommentId(memberId, commentId);
-
-        if (optionalReaction.isEmpty()) {
-            // If there's no existing reaction, create a new one.
-            Reaction newReaction = Reaction.of(member, comment, isLike);
-            reactionRepository.save(newReaction);
-
-            if (isLike) {
-                comment.setLikeCount(comment.getLikeCount() + 1);
+        if (optionalReaction.isPresent()) {
+            Reaction existingReaction = optionalReaction.get();
+            if (existingReaction.isLike() == isLike) {
+                // Cancel reaction
+                reactionRepository.delete(existingReaction);
+                comment.setLikeCount(comment.getLikeCount() - (isLike ? 1 : 0));
+                comment.setDislikeCount(comment.getDislikeCount() - (isLike ? 0 : 1));
             } else {
-                comment.setDislikeCount(comment.getDislikeCount() + 1);
+                // If the user changes their reaction, update it and adjust the counts.
+                existingReaction.update(isLike);
+                int increment = isLike ? 1 : -1;
+                comment.setLikeCount(comment.getLikeCount() + increment);
+                comment.setDislikeCount(comment.getDislikeCount() - increment);
             }
         } else {
-            // If there's an existing reaction and the type is different,
-            Reaction existingReaction = optionalReaction.get();
-
-            if (existingReaction.isLike() != isLike) {
-                existingReaction.update(isLike);
-
-                if (isLike) {
-                    comment.setLikeCount(comment.getLikeCount() + 1);
-                    comment.setDislikeCount(comment.getDislikeCount() - 1);
-                } else {
-                    comment.setDislikeCount(comment.getDislikeCount() + 1);
-                    comment.setLikeCount(comment.getLikeCount() - 1);
-                }
-            }
+            // If there's no existing reaction, create a new one.
+            Reaction newReaction = Reaction.of(member,comment, isLike);
+            reactionRepository.save(newReaction);
+            comment.setLikeCount(comment.getLikeCount()+(isLike ? 1 : 0));
+            comment.setDislikeCount(comment.getDislikeCount()+(isLike ? 0 : 1));
         }
 
         return new CommentDto(comment);
@@ -131,11 +127,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Page<CommentDto> getListByMember(Long memberId, Pageable pageable) {
-        Page<Comment> commentPage = commentRepository.findAllByMemberIdAndEnabledTrue(memberId, pageable);
-        List<CommentDto> commentDtoList = commentPage.getContent().stream()
-                .map(CommentDto::new)
-                .toList();
-
-        return new PageImpl<>(commentDtoList, commentPage.getPageable(), commentPage.getTotalElements());
+        return commentRepository.findAllByMemberIdAndEnabledTrue(memberId, pageable).map(CommentDto::new);
     }
 }

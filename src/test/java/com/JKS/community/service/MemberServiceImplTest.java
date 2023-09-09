@@ -27,12 +27,10 @@ class MemberServiceImplTest {
     private MemberService memberService;
 
     private MemberFormDto memberFormDto;
-    private MemberDto memberDto;
-    private Member member;
 
     @BeforeEach
     void setUp() {
-        member = Member.builder()
+        Member member = Member.builder()
                 .loginId("testLoginId")
                 .password("testPassword")
                 .name("testName")
@@ -42,8 +40,6 @@ class MemberServiceImplTest {
         memberFormDto.setLoginId("testLoginId");
         memberFormDto.setPassword("testPassword");
         memberFormDto.setName("testName");
-
-        memberDto = new MemberDto(member);
     }
 
     @Test
