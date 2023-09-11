@@ -93,24 +93,21 @@ class CommunityApplicationTests {
 		List<CategoryDto> categories = categoryService.getList();
 
 		for (CategoryDto category : categories) {
-			int postCount = switch (category.getName()) {
-                case "게임", "스포츠" -> 9;
-                default -> 101;
-            };
-
-            for (int i = 0; i < postCount; i++) {
-				// Assume we select a random member for each postif (!members.isEmpty()) {
-				if (!members.isEmpty()) {
-					MemberDto member = members.get(new Random().nextInt(members.size()));
-
-					PostFormDto formDto = PostFormDto.builder()
-							.title("Title " + (i + 1))
-							.content("Content " + (i + 1))
-							.memberId(member.getId())
-							.categoryId(category.getId())
-							.build();
-
-					postService.create(formDto);
+			for (CategoryDto childCategory : category.getChildren()) {
+				for (CategoryDto tab : childCategory.getChildren()) {
+					for (MemberDto memberDto : members) {
+						// 0개에서 3개 사이의 랜덤한 게시글을 생성
+						int randomPostCount = (int) (Math.random() * 3);
+						for (int i = 0; i < randomPostCount; i++) {
+							PostFormDto postFormDto = PostFormDto.builder()
+									.title(category.getName()+"/"+childCategory.getName()+"/"+tab.getName())
+									.content("This is a dummy post.")
+									.categoryId(tab.getId())
+									.memberId(memberDto.getId())
+									.build();
+							postService.create(postFormDto);
+						}
+					}
 				}
 			}
 		}

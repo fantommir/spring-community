@@ -1,12 +1,15 @@
 package com.JKS.community.controller;
 
+import com.JKS.community.dto.PageRequestDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+
+    // 정렬과 페이징 설정을 위한 메서드
+    private Pageable configurePageable(String sortField, String sortOrder, Pageable pageable) {
+        Sort sort = Sort.by(sortField);
+        sort = sortOrder.equals("desc") ? sort.descending() : sort.ascending();
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    }
 
     @PostMapping
     public ResponseEntity<PostDto> create(@Valid @RequestBody PostFormDto postFormDto) {
@@ -53,11 +63,20 @@ public class PostController {
         return postService.getList(pageable);
     }
 
-    // 특정 카테고리의 게시글 목록 조회
     @GetMapping("/category/{categoryId}")
-    public Page<PostDto> getListByCategory(@PathVariable Long categoryId, Pageable pageable) {
+    public Page<PostDto> getListByCategory(@PathVariable Long categoryId, PageRequestDto pageRequest) {
+        Pageable pageable = pageRequest.toPageable();
         return postService.getListByCategory(categoryId, pageable);
     }
+
+
+    // 특정 카테고리의 child 카테고리 게시글 목록 조회
+    @GetMapping("/category/{categoryId}/subcategories")
+    public Page<PostDto> getListByChildCategory(@PathVariable Long categoryId, PageRequestDto pageRequest) {
+        Pageable pageable = pageRequest.toPageable();
+        return postService.getListByParentCategory(categoryId, pageable);
+    }
+
 
     // 검색어를 포함하는 게시글 목록 조회
     @GetMapping("/search")

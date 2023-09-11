@@ -5,59 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts by Category</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
 </head>
 <body>
 <div class="container my-5">
     <h1 th:text="${category.name}">Category Name</h1>
 
     <!-- Tab Nav -->
-    <ul class='nav nav-tabs'>
-        <!-- Subcategory Loop -->
-        <li class='nav-item' th:each='subCategory : ${category.children}'>
-            <!-- Subcategory Name -->
-            <a class='nav-link' data-bs-toggle='tab' th:href="'#' + ${subCategory.name}" th:text='${subCategory.name}'></a>
-        </li>
-    </ul>
+    <div class='nav nav-tabs' id='myTab' role='tablist'>
+        <button class="nav-item nav-link" id='all-tab' data-bs-toggle='tab'
+                href='#all' role='tab' aria-controls='all'
+                th:onclick="'loadPosts(' + ${category.id} + ', \'all\')'">전체</button>
+        <button class="nav-item nav-link" th:each="subCategory : ${category.children}"
+                th:id="|${subCategory.name}-tab|" data-bs-toggle="tab"
+                th:href="'#' + ${subCategory.name}" role="tab"
+                th:aria-controls="${subCategory.name}" th:text="${subCategory.name}"
+                th:data-catid="${subCategory.id}"
+                onclick="loadPosts(this.getAttribute('data-catid'), this.getAttribute('href').substring(1))">
+        </button>
+    </div>
 
-    <!-- Tab Content -->
     <div class='tab-content'>
-        <!-- Subcategory Loop -->
-        <div th:each='subCategory : ${category.children}' class='tab-pane fade' role ='tabpanel' th:id='${subCategory.name}'>
-
-            <!-- Post Table for each Sub-category-->
-            <table class="table table-striped my-4">
-                <thead>
-                <tr>
-                    <th scope="col">탭</th>
-                    <th scope="col">제목</th>
-                    <th scope="col">조회</th>
-                    <th scope="col">추천</th>
-                    <th scope="col">날짜</th>
-                </tr>
-                </thead>
-
-                <!-- Post Loop for each Sub-category -->
-                <tbody th:each='post : ${subCategory.posts}'>
+        <!-- Tab Loop -->
+        <div th:each="tabName : ${tabs}" class='tab-pane fade' role ='tabpanel' th:id="${tabName}">
+            <!-- Post Table for each tab-->
+            <div>
+                <table class="table table-striped my-4">
+                    <thead>
                     <tr>
-                        <td th:text="${subCategory.name}">임시 탭</td>
-                        <td th:text="${post.title}">임시 제목</td>
-                        <td th:text="${post.viewCount}">1557</td>
-                        <td th:text="${post.likeCount}">3</td>
-                        <!--<div class='d-flex flex-column'>-->
-                        <!--<span th:text='${#dates.format(post.createdDate, 'yyyy-MM-dd')}'></span>-->
-                        <!--<span th:text='${#dates.format(post.createdDate, 'HH:mm:ss')}'></span>-->
-                        <!--</div>-->
+                        <th scope="col">탭</th>
+                        <th scope="col">제목</th>
+                        <th scope="col">조회</th>
+                        <th scope="col">추천</th>
+                        <th scope="col">날짜</th>
                     </tr>
-                </tbody>
-            </table>
+                    </thead>
+
+                    <!-- Post List for each tab -->
+                    <tbody th:id="${tabName + 'PostList'}">
+                    </tbody>
+
+                </table>
+
+                <!-- Pagination for each tab -->
+                <div th:id="${tabName + 'Pagination'}" class="btn-group mt-3"></div>
+
+            </div>
         </div>
     </div>
 </div>
 
-<!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.min.js"></script>-->
-<script src="../static/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function loadPosts(categoryId, tabId, page = 0) {
+        let url;
+        if (tabId === 'all') {
+            url = "/api/posts/category/" + categoryId + "/subcategories";
+        } else {
+            url = "/api/posts/category/" + categoryId;
+        }
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {page: page, size: 20, sortField: "createdDate", sortOrder: "desc"},
+            success: [
+                function(data) {
+                    $('#' + tabId + 'PostList').empty();
+
+                    data.content.forEach(function(post) {
+                        const row = $('<tr>').append(
+                            $('<td>').text(post.categoryName),
+                            $('<td>').append(
+                                $('<a>').attr('href', '/post/' + post.id).text(post.title)
+                            ),
+                            $('<td>').text(post.viewCount),
+                            $('<td>').text(post.likeCount),
+                            $('<td>').text(timeAgo(post.createdDate))
+                        );
+                        $('#' + tabId + 'PostList').append(row);
+                    });
+
+                    // Pagination
+                    const pagination = $('#' + tabId + 'Pagination');
+                    pagination.empty();
+
+                    for (let i = 0; i < data.totalPages; i++) {
+                        let btnClass = i === page ? 'btn-primary' : 'btn-default';
+
+                        const btn =$('<button>')
+                            .addClass('btn')
+                            .addClass(btnClass)
+                            .text(i+1)
+                            .click(function() { loadPosts(categoryId, tabId, i); });
+
+                        pagination.append(btn);
+                    }
+                }
+            ],
+
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        const categoryId = [[${category.id}]];
+        loadPosts(categoryId, 'all');
+
+        $('#all-tab').trigger('click');
+    });
+
+
+    function timeAgo(dateString) {
+        const now = new Date();
+        const postDate = new Date(dateString);
+        const diffInSeconds = Math.floor((now - postDate) / 1000);
+        let timeAgo;
+
+        if (diffInSeconds < 60) {
+            timeAgo = diffInSeconds + '초 전';
+        } else if (diffInSeconds < 3600) {
+            timeAgo = Math.floor(diffInSeconds / 60) + '분 전';
+        } else if (diffInSeconds < 86400) {
+            timeAgo = Math.floor(diffInSeconds / 3600) + '시간 전';
+        } else if (diffInSeconds < 2592000) {
+            timeAgo = Math.floor(diffInSeconds / 86400) + '일 전';
+        } else if (diffInSeconds < 31536000) {
+            timeAgo = Math.floor(diffInSeconds / 2592000) + '달 전';
+        } else {
+            timeAgo = postDate.getFullYear() + '.' + (postDate.getMonth() + 1) + '.' + postDate.getDate();
+        }
+
+        return timeAgo;
+    }
+</script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
