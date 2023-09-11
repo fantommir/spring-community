@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -66,7 +67,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDto get(Long postId) {
-        Post existingPost = postRepository.findByEnabledTrueAndId(postId)
+        Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
         existingPost.increaseViewCount();
 
@@ -75,7 +76,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostDto> getList(Pageable pageable) {
-        return postRepository.findAllByEnabledTrue(pageable).map(PostDto::new);
+        return postRepository.findAll(pageable).map(PostDto::new);
     }
 
     @Override
@@ -83,8 +84,22 @@ public class PostServiceImpl implements PostService {
         if (!categoryRepository.existsById(categoryId)) {
             throw new CategoryNotFoundException("Invalid category ID: " + categoryId);
         }
-        return postRepository.findAllByEnabledTrueAndCategoryId(categoryId, pageable).map(PostDto::new);
+        return postRepository.findAllByCategoryId(categoryId, pageable).map(PostDto::new);
     }
+
+    @Override
+    public Page<PostDto> getListByParentCategory(Long categoryId, Pageable pageable) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException("Invalid category ID: " + categoryId));
+
+        List<Long> childCategoryIds = category.getChildren().stream()
+                .map(Category::getId)
+                .toList();
+
+        return postRepository.findAllByCategoryIdIn(childCategoryIds, pageable).map(PostDto::new);
+    }
+
+
 
 
     @Override

@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts by Category</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
 </head>
 <body>
 <div class="container my-5">
     <h1 th:text="${category.name}">Category Name</h1>
 
     <!-- Tab Nav -->
-    <ul class='nav nav-tabs'>
-        <!-- Subcategory Loop -->
-        <li class='nav-item' th:each='subCategory : ${category.children}'>
-            <!-- Subcategory Name -->
-            <a class='nav-link' data-bs-toggle='tab' th:href="'#' + ${subCategory.name}" th:text='${subCategory.name}'></a>
-        </li>
-    </ul>
+    <div class='nav nav-tabs' id='myTab' role='tablist'>
+        <button class="nav-item nav-link" th:each="subCategory : ${category.children}"
+                th:id="|${subCategory.name}-tab|" data-bs-toggle="tab"
+                th:href="'#' + ${subCategory.name}" role="tab"
+                th:aria-controls="${subCategory.name}" th:text="${subCategory.name}"
+                th:data-catid="${subCategory.id}"
+                onclick="loadPosts(this.getAttribute('data-catid'), this.getAttribute('href').substring(1))">
+        </button>
+    </div>
 
     <!-- Tab Content -->
     <div class='tab-content'>
@@ -36,28 +37,46 @@
                     <th scope="col">날짜</th>
                 </tr>
                 </thead>
-
-                <!-- Post Loop for each Sub-category -->
-                <tbody th:each='post : ${subCategory.posts}'>
-                    <tr>
-                        <td th:text="${subCategory.name}">임시 탭</td>
-                        <td th:text="${post.title}">임시 제목</td>
-                        <td th:text="${post.viewCount}">1557</td>
-                        <td th:text="${post.likeCount}">3</td>
-                        <!--<div class='d-flex flex-column'>-->
-                        <!--<span th:text='${#dates.format(post.createdDate, 'yyyy-MM-dd')}'></span>-->
-                        <!--<span th:text='${#dates.format(post.createdDate, 'HH:mm:ss')}'></span>-->
-                        <!--</div>-->
-                    </tr>
+                <tbody th:id="${subCategory.name + 'PostList'}">
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.min.js"></script>-->
-<script src="../static/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function loadPosts(categoryId, tabId) {
+        $.ajax({
+            url: '/api/posts/category/' + categoryId,
+            type: 'GET',
+            success: [
+                function(data) {
+                    // Clear the existing posts
+                    $('#' + tabId + 'PostList').empty();
+
+                    // Add each post to the table
+                    data.content.forEach(function(post) {  // <- 수정된 부분
+                        const row = $('<tr>').append(
+                            $('<td>').text(post.categoryName),
+                            $('<td>').text(post.title),
+                            $('<td>').text(post.viewCount),
+                            $('<td>').text(post.likeCount),
+                            $('<td>').text(post.createdDate)
+                        );
+                        $('#' + tabId + 'PostList').append(row);
+                    });
+                }
+            ],
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+            }
+        });
+    }
+
+</script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
+

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -17,8 +18,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p WHERE p.enabled = true AND (p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
     Page<Post> searchActivePostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    Optional<Post> findByEnabledTrueAndId(Long id);
-    Page<Post> findAllByEnabledTrue(Pageable pageable);
+    Page<Post> findAllByCategoryId(Long categoryId, Pageable pageable);
 
-    Page<Post> findAllByEnabledTrueAndCategoryId(Long categoryId, Pageable pageable);
+    Page<Post> findAllByCategoryIdIn(List<Long> ids, Pageable pageable);
 }
