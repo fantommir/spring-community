@@ -12,6 +12,9 @@
 
     <!-- Tab Nav -->
     <div class='nav nav-tabs' id='myTab' role='tablist'>
+        <button class="nav-item nav-link active" id='all-tab' data-bs-toggle='tab'
+                href='#all' role='tab' aria-controls='all'
+                th:onclick="'loadPosts(' + ${category.id} + ', \'all\')'">전체</button>
         <button class="nav-item nav-link" th:each="subCategory : ${category.children}"
                 th:id="|${subCategory.name}-tab|" data-bs-toggle="tab"
                 th:href="'#' + ${subCategory.name}" role="tab"
@@ -23,23 +26,16 @@
 
     <!-- Tab Content -->
     <div class='tab-content'>
+        <!-- All Tab -->
+        <div class='tab-pane fade show active' role ='tabpanel' id='all'>
+            <!-- Post Table for All category-->
+            <div th:replace="fragement/post-table :: postTable ('all')"></div>
+        </div>
+
         <!-- Subcategory Loop -->
         <div th:each='subCategory : ${category.children}' class='tab-pane fade' role ='tabpanel' th:id='${subCategory.name}'>
-
             <!-- Post Table for each Sub-category-->
-            <table class="table table-striped my-4">
-                <thead>
-                <tr>
-                    <th scope="col">탭</th>
-                    <th scope="col">제목</th>
-                    <th scope="col">조회</th>
-                    <th scope="col">추천</th>
-                    <th scope="col">날짜</th>
-                </tr>
-                </thead>
-                <tbody th:id="${subCategory.name + 'PostList'}">
-                </tbody>
-            </table>
+            <div th:replace="fragement/post-table ::postTable (${subCategory.name})"></div>
         </div>
     </div>
 </div>
@@ -48,8 +44,14 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function loadPosts(categoryId, tabId) {
+        let url;
+        if (tabId === 'all') {
+            url = "/api/posts/category/" + categoryId + "/subcategories";
+        } else {
+            url = "/api/posts/category/" + categoryId;
+        }
         $.ajax({
-            url: '/api/posts/category/' + categoryId,
+            url: url,
             type: 'GET',
             success: [
                 function(data) {
@@ -57,7 +59,7 @@
                     $('#' + tabId + 'PostList').empty();
 
                     // Add each post to the table
-                    data.content.forEach(function(post) {  // <- 수정된 부분
+                    data.content.forEach(function(post) {
                         const row = $('<tr>').append(
                             $('<td>').text(post.categoryName),
                             $('<td>').text(post.title),
@@ -75,8 +77,10 @@
         });
     }
 
+    $(document).ready(function() {
+        loadPosts([[${category.id}]], 'all');
+    });
 </script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>
-

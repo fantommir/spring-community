@@ -59,6 +59,12 @@ public class PostController {
         return postService.getListByCategory(categoryId, pageable);
     }
 
+    // 특정 카테고리의 child 카테고리 게시글 목록 조회
+    @GetMapping("/category/{categoryId}/subcategories")
+    public Page<PostDto> getListByChildCategory(@PathVariable Long categoryId, Pageable pageable) {
+        return postService.getListByParentCategory(categoryId, pageable);
+    }
+
     // 검색어를 포함하는 게시글 목록 조회
     @GetMapping("/search")
     public Page<PostDto> searchListByKeyword(String keyword, Pageable pageable) {

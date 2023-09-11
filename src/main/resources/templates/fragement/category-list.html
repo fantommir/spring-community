@@ -1,0 +1,28 @@
+<footer th:fragment="categoryList">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <!-- Parent Category Loop -->
+                    <li th:each ="category : ${categoryList}" th:if="${category.parentId == null}" class='nav-item dropdown'>
+                        <!-- Parent Category Name -->
+                        <a th:text="${category.name}" id="${'navbarDropdown'+${category.id}}" role='button' data-bs-toggle='dropdown' aria-expanded='false' class='nav-link dropdown-toggle'></a>
+
+                        <!-- Child Category Loop -->
+                        <ul th:if="${not #lists.isEmpty(category.children)}" class='dropdown-menu' aria-labelledby="${'navbarDropdown'+${category.id}}">
+                            <li th:each = "subCategory : ${category.children}">
+                                <!-- Child Category Name -->
+                                <a th:text="${subCategory.name}" class='dropdown-item' th:href="@{/category/{id}(id=${subCategory.id})}"></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+</footer>
