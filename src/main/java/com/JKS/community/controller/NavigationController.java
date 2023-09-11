@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -44,6 +45,7 @@ public class NavigationController {
         Pageable pageable = PageRequest.of(0, 20);
         CategoryDto categoryDto = categoryService.get(categoryId);
         Page<PostDto> postDtoPage = postService.getListByParentCategory(categoryId, pageable);
+        model.addAttribute("tabs", Arrays.asList("all", "잡담", "정보", "사진", "공지"));
         model.addAttribute("category", categoryDto);
         model.addAttribute("postList", postDtoPage);
         return "posts-by-category";

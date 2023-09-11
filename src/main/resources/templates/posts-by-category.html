@@ -12,7 +12,7 @@
 
     <!-- Tab Nav -->
     <div class='nav nav-tabs' id='myTab' role='tablist'>
-        <button class="nav-item nav-link active" id='all-tab' data-bs-toggle='tab'
+        <button class="nav-item nav-link" id='all-tab' data-bs-toggle='tab'
                 href='#all' role='tab' aria-controls='all'
                 th:onclick="'loadPosts(' + ${category.id} + ', \'all\')'">전체</button>
         <button class="nav-item nav-link" th:each="subCategory : ${category.children}"
@@ -24,18 +24,32 @@
         </button>
     </div>
 
-    <!-- Tab Content -->
     <div class='tab-content'>
-        <!-- All Tab -->
-        <div class='tab-pane fade show active' role ='tabpanel' id='all'>
-            <!-- Post Table for All category-->
-            <div th:replace="fragement/post-table :: postTable ('all')"></div>
-        </div>
+        <!-- Tab Loop -->
+        <div th:each="tabName : ${tabs}" class='tab-pane fade' role ='tabpanel' th:id="${tabName}">
+            <!-- Post Table for each tab-->
+            <div>
+                <table class="table table-striped my-4">
+                    <thead>
+                    <tr>
+                        <th scope="col">탭</th>
+                        <th scope="col">제목</th>
+                        <th scope="col">조회</th>
+                        <th scope="col">추천</th>
+                        <th scope="col">날짜</th>
+                    </tr>
+                    </thead>
 
-        <!-- Subcategory Loop -->
-        <div th:each='subCategory : ${category.children}' class='tab-pane fade' role ='tabpanel' th:id='${subCategory.name}'>
-            <!-- Post Table for each Sub-category-->
-            <div th:replace="fragement/post-table ::postTable (${subCategory.name})"></div>
+                    <!-- Post List for each tab -->
+                    <tbody th:id="${tabName + 'PostList'}">
+                    </tbody>
+
+                </table>
+
+                <!-- Pagination for each tab -->
+                <div th:id="${tabName + 'Pagination'}" class="btn-group mt-3"></div>
+
+            </div>
         </div>
     </div>
 </div>
@@ -43,34 +57,53 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function loadPosts(categoryId, tabId) {
+    function loadPosts(categoryId, tabId, page = 0) {
         let url;
         if (tabId === 'all') {
             url = "/api/posts/category/" + categoryId + "/subcategories";
         } else {
             url = "/api/posts/category/" + categoryId;
         }
+
         $.ajax({
             url: url,
             type: 'GET',
+            data: {page: page, size: 20, sortField: "createdDate", sortOrder: "desc"},
             success: [
                 function(data) {
-                    // Clear the existing posts
                     $('#' + tabId + 'PostList').empty();
 
-                    // Add each post to the table
                     data.content.forEach(function(post) {
                         const row = $('<tr>').append(
                             $('<td>').text(post.categoryName),
-                            $('<td>').text(post.title),
+                            $('<td>').append(
+                                $('<a>').attr('href', '/post/' + post.id).text(post.title)
+                            ),
                             $('<td>').text(post.viewCount),
                             $('<td>').text(post.likeCount),
-                            $('<td>').text(post.createdDate)
+                            $('<td>').text(timeAgo(post.createdDate))
                         );
                         $('#' + tabId + 'PostList').append(row);
                     });
+
+                    // Pagination
+                    const pagination = $('#' + tabId + 'Pagination');
+                    pagination.empty();
+
+                    for (let i = 0; i < data.totalPages; i++) {
+                        let btnClass = i === page ? 'btn-primary' : 'btn-default';
+
+                        const btn =$('<button>')
+                            .addClass('btn')
+                            .addClass(btnClass)
+                            .text(i+1)
+                            .click(function() { loadPosts(categoryId, tabId, i); });
+
+                        pagination.append(btn);
+                    }
                 }
             ],
+
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(textStatus, errorThrown);
             }
@@ -78,8 +111,35 @@
     }
 
     $(document).ready(function() {
-        loadPosts([[${category.id}]], 'all');
+        const categoryId = [[${category.id}]];
+        loadPosts(categoryId, 'all');
+
+        $('#all-tab').trigger('click');
     });
+
+
+    function timeAgo(dateString) {
+        const now = new Date();
+        const postDate = new Date(dateString);
+        const diffInSeconds = Math.floor((now - postDate) / 1000);
+        let timeAgo;
+
+        if (diffInSeconds < 60) {
+            timeAgo = diffInSeconds + '초 전';
+        } else if (diffInSeconds < 3600) {
+            timeAgo = Math.floor(diffInSeconds / 60) + '분 전';
+        } else if (diffInSeconds < 86400) {
+            timeAgo = Math.floor(diffInSeconds / 3600) + '시간 전';
+        } else if (diffInSeconds < 2592000) {
+            timeAgo = Math.floor(diffInSeconds / 86400) + '일 전';
+        } else if (diffInSeconds < 31536000) {
+            timeAgo = Math.floor(diffInSeconds / 2592000) + '달 전';
+        } else {
+            timeAgo = postDate.getFullYear() + '.' + (postDate.getMonth() + 1) + '.' + postDate.getDate();
+        }
+
+        return timeAgo;
+    }
 </script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
