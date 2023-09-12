@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts by Category</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+<div th:replace="~{fragement/header :: header}"></div>
 <div class="container my-5">
     <h1 th:text="${category.name}">Category Name</h1>
 
@@ -24,34 +27,30 @@
         </button>
     </div>
 
-    <div class='tab-content'>
-        <!-- Tab Loop -->
-        <div th:each="tabName : ${tabs}" class='tab-pane fade' role ='tabpanel' th:id="${tabName}">
-            <!-- Post Table for each tab-->
-            <div>
-                <table class="table table-striped my-4">
-                    <thead>
-                    <tr>
-                        <th scope="col">탭</th>
-                        <th scope="col">제목</th>
-                        <th scope="col">조회</th>
-                        <th scope="col">추천</th>
-                        <th scope="col">날짜</th>
-                    </tr>
-                    </thead>
+    <!-- Post Table -->
+    <table class="table table-striped my-4">
+        <thead>
+        <tr>
+            <th scope="col">탭</th>
+            <th scope="col">제목</th>
+            <th scope="col">글쓴이</th>
+            <th scope="col">날짜</th>
+            <th scope="col">조회</th>
+            <th scope="col">추천</th>
+        </tr>
+        </thead>
 
-                    <!-- Post List for each tab -->
-                    <tbody th:id="${tabName + 'PostList'}">
-                    </tbody>
-
-                </table>
-
-                <!-- Pagination for each tab -->
-                <div th:id="${tabName + 'Pagination'}" class="btn-group mt-3"></div>
-
-            </div>
-        </div>
+        <tbody id='PostList'>
+        </tbody>
+    </table>
+    <div class="input-group rounded">
+        <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+        <span class="input-group-text border-0" id="search-addon">
+            <i class="fas fa-search"></i>
+         </span>
+        <a type='button' th:href="@{/post/create}" class='btn btn-primary'>글쓰기</a>
     </div>
+    <div id='Pagination' class="btn-group mt-3"></div>
 </div>
 
 
@@ -71,39 +70,40 @@
             data: {page: page, size: 20, sortField: "createdDate", sortOrder: "desc"},
             success: [
                 function(data) {
-                    $('#' + tabId + 'PostList').empty();
-
+                    const postList = $('#PostList');
+                    postList.empty();
                     data.content.forEach(function(post) {
                         const row = $('<tr>').append(
                             $('<td>').text(post.categoryName),
                             $('<td>').append(
-                                $('<a>').attr('href', '/post/' + post.id).text(post.title)
+                                $('<a>')
+                                    .addClass('custom-link')
+                                    .attr('href', '/post/' + post.id)
+                                    .text(post.title)
                             ),
+                            $('<td>').text(post.memberName),
                             $('<td>').text(post.viewCount),
                             $('<td>').text(post.likeCount),
                             $('<td>').text(timeAgo(post.createdDate))
                         );
-                        $('#' + tabId + 'PostList').append(row);
+                        postList.append(row);
                     });
 
                     // Pagination
-                    const pagination = $('#' + tabId + 'Pagination');
+                    const pagination = $('#Pagination');
                     pagination.empty();
 
-                    for (let i = 0; i < data.totalPages; i++) {
+                    for (let i = 0; i<data.totalPages; i++) {
                         let btnClass = i === page ? 'btn-primary' : 'btn-default';
-
                         const btn =$('<button>')
                             .addClass('btn')
                             .addClass(btnClass)
                             .text(i+1)
                             .click(function() { loadPosts(categoryId, tabId, i); });
-
                         pagination.append(btn);
                     }
                 }
             ],
-
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(textStatus, errorThrown);
             }

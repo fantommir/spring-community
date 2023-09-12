@@ -50,4 +50,18 @@ public class NavigationController {
         model.addAttribute("postList", postDtoPage);
         return "posts-by-category";
     }
+
+    @GetMapping("/posts/{postId}")
+    public String post(@PathVariable Long postId, Model model) {
+        PostDto postDto = postService.get(postId);
+        model.addAttribute("post", postDto);
+        return "post-view";
+    }
+
+    @GetMapping("/post/create")
+    public String write(Model model) {
+        List<CategoryDto> dtoList = categoryService.getList();
+        model.addAttribute("categoryList", dtoList);
+        return "post-create";
+    }
 }

@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class PostFormDto {
 
@@ -24,13 +23,5 @@ public class PostFormDto {
         this.content = content;
         this.memberId = memberId;
         this.categoryId = categoryId;
-    }
-
-    public PostFormDto(Post post) {
-        this.id = post.getId();
-        this.title = post.getTitle();
-        this.content = post.getContent();
-        this.memberId = post.getMember().getId();
-        this.categoryId = post.getCategory().getId();
     }
 }
