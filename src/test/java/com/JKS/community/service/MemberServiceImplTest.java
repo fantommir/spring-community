@@ -58,37 +58,6 @@ class MemberServiceImplTest {
     }
 
     @Test
-    void login() {
-        memberService.register(memberFormDto);
-        MemberDto loggedInMember = memberService.login(memberFormDto);
-
-        assertThat(loggedInMember.getLoginId()).isEqualTo(memberFormDto.getLoginId());
-        assertThat(loggedInMember.getName()).isEqualTo(memberFormDto.getName());
-    }
-
-    @Test
-    void loginFailureInvalidLoginId() {
-        MemberFormDto invalidLoginIdMemberFormDto = new MemberFormDto();
-        invalidLoginIdMemberFormDto.setLoginId("invalidLoginId");
-        invalidLoginIdMemberFormDto.setPassword("testPassword");
-
-        assertThatThrownBy(() -> memberService.login(invalidLoginIdMemberFormDto))
-                .isInstanceOf(MemberNotFoundException.class);
-    }
-
-    @Test
-    void loginFailureInvalidPassword() {
-        memberService.register(memberFormDto);
-
-        MemberFormDto invalidPasswordMemberFormDto = new MemberFormDto();
-        invalidPasswordMemberFormDto.setLoginId("testLoginId");
-        invalidPasswordMemberFormDto.setPassword("invalidPassword");
-
-        assertThatThrownBy(() -> memberService.login(invalidPasswordMemberFormDto))
-                .isInstanceOf(InvalidPasswordException.class);
-    }
-
-    @Test
     void getListByName() {
         memberService.register(memberFormDto);
         Pageable pageable = PageRequest.of(0, 10);

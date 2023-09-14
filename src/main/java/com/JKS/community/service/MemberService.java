@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface MemberService {
     MemberDto register(MemberFormDto memberFormDto);
-    MemberDto login(MemberFormDto memberFormDto);
 
     // 회원 검색
     Page<MemberDto> getListByName(String name, Pageable pageable);

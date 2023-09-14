@@ -30,24 +30,6 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredMember);
     }
 
-    @PostMapping("/login")
-    public String login(@Valid @ModelAttribute MemberFormDto memberFormDto, Model model, HttpServletRequest request) {
-        try {
-            MemberDto loggedInMember = memberService.login(memberFormDto);
-            // 세션에 로그인 정보 저장
-            HttpSession session = request.getSession();
-            session.setAttribute("member", loggedInMember);
-
-            return "redirect:/";
-        } catch (InvalidIdException | InvalidPasswordException e) {
-            model.addAttribute("loginId", memberFormDto.getLoginId());
-            model.addAttribute("errorMessage", e.getMessage());
-
-            return "login";
-        }
-    }
-
-
     @GetMapping("/")
     public ResponseEntity<Page<MemberDto>> getList(Pageable pageable) {
         Page<MemberDto> memberPage = memberService.getList(pageable);
