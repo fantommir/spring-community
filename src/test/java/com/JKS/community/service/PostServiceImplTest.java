@@ -34,9 +34,7 @@ class PostServiceImplTest {
     void setUp() {
         // create member
         MemberFormDto memberFormDto = MemberFormDto.builder()
-                .loginId("loginId")
-                .password("password")
-                .name("name").build();
+                .email("email@test.com").name("name").password("password123").build();
         memberDto = memberService.register(memberFormDto);
 
         // create category

@@ -35,9 +35,19 @@ public class NavigationController {
         return "index";
     }
 
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @GetMapping("/myinfo")
+    public String myinfo() {
+        return "myinfo";
     }
 
     @GetMapping("/category/{categoryId}")

@@ -30,14 +30,10 @@ class MemberServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Member member = Member.builder()
-                .loginId("testLoginId")
-                .password("testPassword")
-                .name("testName")
-                .build();
+        Member member = Member.of("testEmail", "testName", "testPassword");
 
         memberFormDto = new MemberFormDto();
-        memberFormDto.setLoginId("testLoginId");
+        memberFormDto.setEmail("testEmail");
         memberFormDto.setPassword("testPassword");
         memberFormDto.setName("testName");
     }
@@ -46,7 +42,7 @@ class MemberServiceImplTest {
     void register() {
         MemberDto registeredMember = memberService.register(memberFormDto);
 
-        assertThat(registeredMember.getLoginId()).isEqualTo(memberFormDto.getLoginId());
+        assertThat(registeredMember.getEmail()).isEqualTo(memberFormDto.getEmail());
         assertThat(registeredMember.getName()).isEqualTo(memberFormDto.getName());
     }
 
@@ -100,7 +96,7 @@ class MemberServiceImplTest {
         MemberDto retrievedMember = memberService.get(registeredMember.getId());
 
         assertThat(retrievedMember.getId()).isEqualTo(registeredMember.getId());
-        assertThat(retrievedMember.getLoginId()).isEqualTo(registeredMember.getLoginId());
+        assertThat(retrievedMember.getEmail()).isEqualTo(registeredMember.getEmail());
         assertThat(retrievedMember.getName()).isEqualTo(registeredMember.getName());
     }
 
@@ -119,7 +115,7 @@ class MemberServiceImplTest {
         MemberDto updatedMember = memberService.update(registeredMember.getId(), updatedMemberFormDto);
 
         assertThat(updatedMember.getId()).isEqualTo(registeredMember.getId());
-        assertThat(updatedMember.getLoginId()).isEqualTo(registeredMember.getLoginId());
+        assertThat(updatedMember.getEmail()).isEqualTo(registeredMember.getEmail());
         assertThat(updatedMember.getName()).isEqualTo(updatedMemberFormDto.getName());
     }
 

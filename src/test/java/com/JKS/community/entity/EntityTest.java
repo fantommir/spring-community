@@ -11,13 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-
-import java.util.Collections;
 
 @SpringBootTest
 @Transactional
-@Rollback(false)
 class EntityTest {
 
     @Autowired
@@ -66,21 +62,16 @@ class EntityTest {
 
         for (int i=0; i<3; i++) {
             Comment comment2 = Comment.of(null, i ,post , member2 ,"한식 두식 세식 ㅋㅋㅋ 웃기네" + i);
-            post.addComment(comment2);
             commentRepository.save(comment2);
         }
-        // 포스트에 달린 댓글들 아이디 확인
+
         Post findPost=postRepository.findByTitle(post.getTitle())
                 .orElseThrow(() -> new IllegalArgumentException ("Invalid post title:" + "한식"));
         Assertions.assertThat(findPost.getComments().size()).isEqualTo(3);
     }
 
     private Member createMember(int num) {
-        Member member = Member.builder()
-                .loginId("testloginid" + num)
-                .password("testpassword" + num)
-                .name("testname" + num)
-                .build();
+        Member member = Member.of("test" + num + "@test.com", "user" + num, "testPassword" + num);
 
         memberRepository.save(member);
         return member;
