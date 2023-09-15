@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 
-        existingPost.disable();
+        postRepository.delete(existingPost);
     }
 
     @Override

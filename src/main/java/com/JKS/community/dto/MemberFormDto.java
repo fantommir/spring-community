@@ -1,6 +1,9 @@
 package com.JKS.community.dto;
 
-import com.JKS.community.entity.Member;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,19 +12,23 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 public class MemberFormDto {
-    private String loginId;
-    private String password;
+
+    @NotNull
+    @Email
+    private String email;
+
+    @NotNull
+    @Size(min = 2, max = 10)
     private String name;
 
-    public MemberFormDto(Member member) {
-        this.loginId = member.getLoginId();
-        this.password = member.getPassword();
-        this.name = member.getName();
-    }
+    @NotNull
+//    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")
+    @Size(min = 8, max = 20)
+    private String password;
 
     @Builder
-    public MemberFormDto(String loginId, String password, String name) {
-        this.loginId = loginId;
+    public MemberFormDto(String email, String password, String name) {
+        this.email = email;
         this.password = password;
         this.name = name;
     }

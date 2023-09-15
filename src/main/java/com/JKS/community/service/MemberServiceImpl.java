@@ -3,8 +3,6 @@ package com.JKS.community.service;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
-import com.JKS.community.exception.InvalidIdException;
-import com.JKS.community.exception.InvalidPasswordException;
 import com.JKS.community.exception.MemberAlreadyExistsException;
 import com.JKS.community.exception.MemberNotFoundException;
 import com.JKS.community.repository.MemberRepository;
@@ -14,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +23,13 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDto register(MemberFormDto memberFormDto) {
-        if (memberRepository.findByLoginId(memberFormDto.getLoginId()).isPresent()) {
+        if (memberRepository.findByEmail(memberFormDto.getEmail()).isPresent()) {
             throw new MemberAlreadyExistsException("이미 존재하는 회원입니다.");
         }
-        Member member = Member.builder()
-                .loginId(memberFormDto.getLoginId())
-                .password(passwordEncoder.encode(memberFormDto.getPassword()))
-                .name(memberFormDto.getName())
-                .build();
+        Member member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
+        System.out.println("memberEmail = " + member.getEmail());
+        System.out.println("memberName = " + member.getName());
+        System.out.println("memberPassword = " + member.getPassword());
         return new MemberDto(memberRepository.save(member));
     }
 

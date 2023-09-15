@@ -10,17 +10,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CategoryFormDto {
 
-    private Long id;
     private String name;
     private Boolean enabled;
     private Long parentId;
-
-    public CategoryFormDto(Category category) {
-        this.id = category.getId();
-        this.name = category.getName();
-        this.enabled = category.getEnabled();
-        this.parentId = category.getParent() != null ? category.getParent().getId() : null;
-    }
 
     @Builder
     public CategoryFormDto(String name, Boolean enabled, Long parentId) {
