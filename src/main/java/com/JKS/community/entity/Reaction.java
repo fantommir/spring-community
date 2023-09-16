@@ -8,6 +8,7 @@ import lombok.Getter;
 public class Reaction {
 
     @Id @GeneratedValue
+    @Column(name = "reaction_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

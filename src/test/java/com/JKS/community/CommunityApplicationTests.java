@@ -75,11 +75,11 @@ class CommunityApplicationTests {
 		List<MemberFormDto> members = new ArrayList<>();
 
 		for (int i = 1; i <= 30; i++) {
-			String loginId = "user" + i;
+			String email = "user" + i + "@example.com";
 			String password = "password" + i;
 			String name = "User " + i;
 
-			members.add(new MemberFormDto(loginId, password, name));
+			members.add(new MemberFormDto(email, password, name));
 		}
 
 		for (MemberFormDto member : members) {

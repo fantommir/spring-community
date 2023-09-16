@@ -1,6 +1,5 @@
 package com.JKS.community.dto;
 
-import com.JKS.community.entity.Category;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

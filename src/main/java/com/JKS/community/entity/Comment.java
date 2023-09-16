@@ -2,6 +2,8 @@ package com.JKS.community.entity;
 
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +17,11 @@ import java.util.List;
 public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue
+    @Column(name = "comment_id")
     private Long id;
 
+    @NotNull
+    @Size(max = 1000)
     private String content;
     private int likeCount = 0;
     private int dislikeCount = 0;
