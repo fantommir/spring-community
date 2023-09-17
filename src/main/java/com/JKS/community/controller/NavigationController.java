@@ -2,6 +2,7 @@ package com.JKS.community.controller;
 
 
 import com.JKS.community.dto.CategoryDto;
+import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.MemberService;
@@ -12,10 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,8 +35,15 @@ public class NavigationController {
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model) {
+        model.addAttribute("memberFormDto", new MemberFormDto());
         return "register";
+    }
+
+    @PostMapping("/register")
+    public String processRegister(@ModelAttribute MemberFormDto memberFormDto) {
+        memberService.register(memberFormDto);
+        return "redirect:/login";
     }
 
     @GetMapping("/login")

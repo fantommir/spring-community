@@ -4,7 +4,6 @@ package com.JKS.community.controller;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.service.MemberService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,10 +20,9 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/register")
-    public ResponseEntity<MemberDto> register(@Valid @RequestBody MemberFormDto memberFormDto, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<MemberDto> register(@Valid @ModelAttribute MemberFormDto memberFormDto) {
         MemberDto registeredMember = memberService.register(memberFormDto);
-        httpServletResponse.setHeader("Location", "/");
-        return ResponseEntity.status(HttpStatus.FOUND).body(registeredMember);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredMember);
     }
 
     @GetMapping("/")
