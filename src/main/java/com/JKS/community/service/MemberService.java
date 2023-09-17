@@ -4,6 +4,7 @@ import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface MemberService {
     MemberDto register(MemberFormDto memberFormDto);

@@ -4,14 +4,19 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
-public class Member {
+public class Member implements UserDetails {
 
     @Id @GeneratedValue
     @Column(name = "member_id")
@@ -25,6 +30,8 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
+    private boolean enabled = true;
 
 
     @OneToMany(mappedBy = "member")
@@ -44,11 +51,48 @@ public class Member {
         return member;
     }
 
-    public void setPassword(String password) {
+    public void update(String name, String password) {
+        this.name = name;
         this.password = password;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // For simplicity, let's assume all users have a single role: "ROLE_USER"
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    // 계정 만료 여부 반환 ( ex. 일정 시간이 지나면 만료되는 평가판 사용자 )
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // true : 만료 X
+    }
+
+    // 계정 잠금 여부 반환 ( ex. 로그인 시도 실패 횟수가 너무 많은 경우 )
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // true : 잠금 X
+    }
+
+    // 패스워드 만료 여부 반환 ( ex. 일정 시간이 지나면 패스워드 변경 )
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // true : 만료 X
+    }
+
+    // 계정 사용 가능 여부 반환
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }

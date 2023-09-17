@@ -56,13 +56,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
-        // 업데이트할 필드가 존재하면 업데이트
-        if (memberFormDto.getName() != null) {
-            member.setName(memberFormDto.getName());
-        }
-        if (memberFormDto.getPassword() != null) {
-            member.setPassword(memberFormDto.getPassword());
-        }
+        member.update(memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
 
         return new MemberDto(member);
     }
