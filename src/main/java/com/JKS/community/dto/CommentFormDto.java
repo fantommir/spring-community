@@ -1,5 +1,7 @@
 package com.JKS.community.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,8 +10,8 @@ import lombok.Setter;
 @Getter @Setter
 @NoArgsConstructor
 public class CommentFormDto {
-
-    private Long id;
+    @NotNull
+    @Size(max = 1000)
     private String content;
     private Long parentId;
     private int level;
@@ -17,8 +19,7 @@ public class CommentFormDto {
     private Long memberId;
 
     @Builder
-    public CommentFormDto(Long id, String content, Long parentId, int level, Long postId, Long memberId) {
-        this.id = id;
+    public CommentFormDto(String content, Long parentId, int level, Long postId, Long memberId) {
         this.content = content;
         this.parentId = parentId;
         this.level = level;

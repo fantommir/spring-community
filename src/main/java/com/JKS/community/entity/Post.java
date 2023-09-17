@@ -3,6 +3,8 @@ package com.JKS.community.entity;
 import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +21,14 @@ public class Post extends BaseTimeEntity {
     @Column(name = "post_id")
     private Long id;
 
+    @NotNull
+    @Size(max = 50)
     private String title;
+
+    @NotNull
+    @Size(max = 65535)
     private String content;
+
     private int viewCount = 0;
     private int likeCount = 0;
     private int dislikeCount = 0;
@@ -55,6 +63,7 @@ public class Post extends BaseTimeEntity {
     public void addComment(Comment comment) {
         this.comments.add(comment);
     }
+
 
     public void update(PostFormDto postFormDto) {
         this.title = postFormDto.getTitle();

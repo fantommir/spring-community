@@ -29,15 +29,12 @@ class CommentServiceImplTest {
     private MemberDto memberDto;
     private PostDto postDto;
     private CommentDto commentDto;
-    private CategoryDto categoryDto;
 
     @BeforeEach
     void setUp() {
         // create member
         MemberFormDto memberFormDto = MemberFormDto.builder()
-                .loginId("loginId")
-                .password("password")
-                .name("name").build();
+                .email("email@test.com").name("name").password("password123").build();
         memberDto = memberService.register(memberFormDto);
 
         // create category
@@ -46,7 +43,7 @@ class CommentServiceImplTest {
         categoryService.create(parentCategoryFormDto);
         CategoryFormDto childCategoryFormDto = CategoryFormDto.builder()
                 .name("name").parentId(parentCategoryFormDto.getParentId()).enabled(true).build();
-        categoryDto = categoryService.create(childCategoryFormDto);
+        CategoryDto categoryDto = categoryService.create(childCategoryFormDto);
 
         // create post
         PostFormDto formDto = PostFormDto.builder()

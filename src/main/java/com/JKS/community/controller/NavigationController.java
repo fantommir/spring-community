@@ -2,6 +2,7 @@ package com.JKS.community.controller;
 
 
 import com.JKS.community.dto.CategoryDto;
+import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.MemberService;
@@ -12,9 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,9 +34,32 @@ public class NavigationController {
         return "index";
     }
 
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("memberFormDto", new MemberFormDto());
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String processRegister(@ModelAttribute MemberFormDto memberFormDto) {
+        memberService.register(memberFormDto);
+        return "redirect:/login";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @PostMapping("/login")
+    public String processLogin() {
+        return "redirect:/";
+    }
+
+
+    @GetMapping("/myinfo")
+    public String myinfo() {
+        return "myinfo";
     }
 
     @GetMapping("/category/{categoryId}")
@@ -49,5 +71,19 @@ public class NavigationController {
         model.addAttribute("category", categoryDto);
         model.addAttribute("postList", postDtoPage);
         return "posts-by-category";
+    }
+
+    @GetMapping("/posts/{postId}")
+    public String post(@PathVariable Long postId, Model model) {
+        PostDto postDto = postService.get(postId);
+        model.addAttribute("post", postDto);
+        return "post-view";
+    }
+
+    @GetMapping("/post/create")
+    public String write(Model model) {
+        List<CategoryDto> dtoList = categoryService.getList();
+        model.addAttribute("categoryList", dtoList);
+        return "post-create";
     }
 }
