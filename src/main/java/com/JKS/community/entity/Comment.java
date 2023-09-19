@@ -25,7 +25,6 @@ public class Comment extends BaseTimeEntity {
     private String content;
     private int likeCount = 0;
     private int dislikeCount = 0;
-    private Long parentId;
     private int level = 0;
     private boolean enabled = true;
 
@@ -37,18 +36,28 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> children = new ArrayList<>();
+
     @OneToMany(mappedBy = "comment")
     private List<Reaction> reactions = new ArrayList<>();
 
-    public static Comment of(Long parentId, int level, Post post, Member member, String content) {
+    public static Comment of(Comment parent, int level, Post post, Member member, String content) {
         Comment comment = new Comment();
-        comment.parentId = parentId;
+        comment.parent = parent;
         comment.level = level;
         comment.post = post;
         comment.member = member;
         comment.content = content;
 
         post.addComment(comment);
+        if (parent != null) {
+            parent.getChildren().add(comment);
+        }
         return comment;
     }
 

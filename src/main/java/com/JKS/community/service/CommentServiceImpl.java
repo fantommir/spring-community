@@ -48,10 +48,9 @@ public class CommentServiceImpl implements CommentService {
             Comment parentComment = commentRepository.findById(commentFormDto.getParentId())
                     .orElseThrow(() -> new CommentNotFoundException("Invalid parent comment Id:" + commentFormDto.getParentId()));
 
-            Long parentId = parentComment.getParentId();
             int newCommentLevel = parentComment.getLevel() + 1;
 
-            Comment createdComment = Comment.of(parentId, newCommentLevel, post, member, commentFormDto.getContent());
+            Comment createdComment = Comment.of(parentComment, newCommentLevel, post, member, commentFormDto.getContent());
             commentRepository.save(createdComment);
             return new CommentDto(createdComment);
         }
@@ -86,7 +85,12 @@ public class CommentServiceImpl implements CommentService {
         postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 
-        return commentRepository.findByPostIdAndEnabledTrue(postId, pageable).map(CommentDto::new);
+        return commentRepository.findByPostId(postId, pageable).map(CommentDto::new);
+    }
+
+    @Override
+    public Page<CommentDto> getListByMember(Long memberId, Pageable pageable) {
+        return commentRepository.findAllByMemberId(memberId, pageable).map(CommentDto::new);
     }
 
     @Override
@@ -122,8 +126,4 @@ public class CommentServiceImpl implements CommentService {
         return new CommentDto(comment);
     }
 
-    @Override
-    public Page<CommentDto> getListByMember(Long memberId, Pageable pageable) {
-        return commentRepository.findAllByMemberIdAndEnabledTrue(memberId, pageable).map(CommentDto::new);
-    }
 }

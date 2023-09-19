@@ -5,15 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter
-@Setter
+@Getter @Setter
 public class CommentDto {
     private Long id;
     private String content;
     private int likeCount;
     private int dislikeCount;
     private Long parentId;
+    private List<CommentDto> children = new ArrayList<>();
     private int level;
     private boolean enabled;
     private LocalDateTime createdDate;
@@ -27,7 +29,7 @@ public class CommentDto {
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
         this.dislikeCount = comment.getDislikeCount();
-        this.parentId = comment.getParentId();
+        this.parentId = comment.getParent() != null ? comment.getParent().getId() : null;
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
         this.createdDate = comment.getCreatedDate();
@@ -38,5 +40,10 @@ public class CommentDto {
             this.memberName = comment.getMember().getName();
         }
 
+        if (comment.getChildren() != null) {
+            for (Comment child : comment.getChildren()) {
+                this.children.add(new CommentDto(child));
+            }
+        }
     }
 }

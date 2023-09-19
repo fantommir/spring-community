@@ -2,6 +2,7 @@ package com.JKS.community.controller;
 
 import com.JKS.community.dto.CommentDto;
 import com.JKS.community.dto.CommentFormDto;
+import com.JKS.community.dto.PageRequestDto;
 import com.JKS.community.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,8 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public ResponseEntity<Page<CommentDto>> getCommentsByPost (@PathVariable Long postId, Pageable pageable) {
+    public ResponseEntity<Page<CommentDto>> getCommentsByPost (@PathVariable Long postId, PageRequestDto pageRequestDto) {
+        Pageable pageable = pageRequestDto.toPageable();
         Page<CommentDto> commentPage = commentService.getList(postId, pageable);
         return new ResponseEntity<>(commentPage ,HttpStatus.OK);
     }

@@ -84,6 +84,37 @@ class CommentServiceImplTest {
     }
 
     @Test
+    void createReply_Success() {
+        // given
+        CommentFormDto formDto = CommentFormDto.builder()
+                .content("reply content").postId(postDto.getId())
+                .memberId(memberDto.getId()).parentId(commentDto.getId()).build();
+
+        // when
+        CommentDto replyDto = commentService.create(formDto);
+
+        // then
+        CommentDto findReplyDto = commentService.get(replyDto.getId());
+        assertThat(findReplyDto.getContent()).isEqualTo(replyDto.getContent());
+        assertThat(findReplyDto.getParentId()).isEqualTo(commentDto.getId());
+    }
+
+    @Test
+    void createReply_Failure() {
+        // given
+        Long invalidParentId = -1L;
+        CommentFormDto formDto = CommentFormDto.builder()
+                .content("reply content").postId(postDto.getId())
+                .memberId(memberDto.getId()).parentId(invalidParentId).build();
+
+        // fail: create reply with invalid parentId.
+        assertThatThrownBy(() -> commentService.create(formDto))
+                .isInstanceOf(CommentNotFoundException.class)
+                .hasMessageContaining(String.valueOf(invalidParentId));
+    }
+
+
+    @Test
     public void update_Success() {
         CommentFormDto formDto = CommentFormDto.builder()
                 .content("content").postId(postDto.getId())
