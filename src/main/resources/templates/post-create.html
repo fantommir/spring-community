@@ -1,10 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
+    <title>Create Post</title>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.2/classic/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.2/classic/translations/ko.js"></script>
 </head>
-<body>
 
+<body>
+<div th:replace="~{fragment/header :: header}"></div>
+
+<div class="container mt-5 justify-content-center">
+    <h3><a th:href="|/category/${category.id}|" class="custom-link" th:text="${category.name}">Category Name</a></h3>
+    <form th:object="${postFormDto}" th:action="@{/post}" method="post">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="subcategory" class="form-label" style="display: none">Subcategory</label>
+                <select id="subcategory" class="form-select">
+                    <option th:each="subCategory : ${category.children}"
+                            th:value="${subCategory.id}"
+                            th:text="${subCategory.name}">Subcategory</option>
+                </select>
+            </div>
+            <div class="col-md-9">
+                <label for="title" class="form-label" style="display: none;">Title</label>
+                <input type="text" th:field="*{title}" id="title" class="form-control"/>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label" style="display: none">Content </label>
+            <textarea id="content" name="content" class="form-control ckeditor" rows="10"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <a onclick="history.back()" class='btn btn-secondary'>뒤로가기</a>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    ClassicEditor
+        .create( document.querySelector( '#content' ), {
+            language: 'ko',
+            height: 500,
+            simpleUpload: {
+                // The URL that the images are uploaded to.
+                uploadUrl: '/api/image',
+
+                // Enable the XMLHttpRequest.withCredentials property.
+                withCredentials: true,
+
+                // Headers sent along with the XMLHttpRequest to the upload server.
+                headers: {
+                    'X-CSRF-TOKEN': 'CSRF-Token',
+                    Authorization: 'Bearer <JSON Web Token>'
+                }
+            }
+        } )
+        .catch( error => {
+            console.error( error );
+        } );
+
+</script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
 </body>
 </html>

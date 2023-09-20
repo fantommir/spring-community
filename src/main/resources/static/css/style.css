@@ -5,3 +5,10 @@
 .custom-link:hover {
     text-decoration: underline;
 }
+
+.ck-editor__editable {
+    min-height: 500px;
+}
+
+.ck-editor__editable p { margin: 0 }
+.ck-content { font-size: 13px; }

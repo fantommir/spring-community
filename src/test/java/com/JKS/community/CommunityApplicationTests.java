@@ -29,6 +29,7 @@ class CommunityApplicationTests {
 		createCategoryDummyData();
 		createMemberDummyData();
 		createPostDummyData();
+		createCommentDummyData();
 	}
 
 	private void createCategoryDummyData() {
@@ -111,6 +112,55 @@ class CommunityApplicationTests {
 				}
 			}
 		}
+	}
+
+	private void createCommentDummyData() {
+		// Assume we have a list of members and categories
+		List<MemberDto> members = memberService.getList(Pageable.unpaged()).getContent();
+		List<PostDto> posts = postService.getList(Pageable.unpaged()).getContent();
+
+
+		// 각 게시글에 댓글을 0개에서 1개 사이의 랜덤한 개수로 생성
+		// "post.getTitle() + "에 작성된 " + member.getName() + "의 댓글" 형식으로 댓글 내용 생성
+		// 대댓글은 10% 확률로 생성
+		// 대대댓글은 10% 확률로 생성
+		// 대댓글, 대대댓글 내용은 "member.getName() + "의 대댓글" 형식으로 생성
+		for (PostDto post : posts) {
+			for (MemberDto memberDto : members) {
+				int randomCommentCount = (int) (Math.random() * 2);
+				for (int i = 0; i < randomCommentCount; i++) {
+					CommentFormDto commentFormDto = CommentFormDto.builder()
+							.content(post.getTitle() + "에 작성된 " + memberDto.getName() + "의 댓글")
+							.postId(post.getId())
+							.memberId(memberDto.getId())
+							.build();
+					CommentDto createdComment = commentService.create(commentFormDto);
+
+					if (Math.random() < 0.1) {
+						CommentFormDto childCommentFormDto = CommentFormDto.builder()
+								.content(memberDto.getName() + "의 대댓글")
+								.postId(post.getId())
+								.memberId(memberDto.getId())
+								.parentId(createdComment.getId())
+								.level(1)
+								.build();
+						CommentDto createdChildComment = commentService.create(childCommentFormDto);
+
+						if (Math.random() < 0.1) {
+							CommentFormDto grandChildCommentFormDto = CommentFormDto.builder()
+									.content(memberDto.getName() + "의 대대댓글")
+									.postId(post.getId())
+									.memberId(memberDto.getId())
+									.parentId(createdChildComment.getId())
+									.level(2)
+									.build();
+							commentService.create(grandChildCommentFormDto);
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 
