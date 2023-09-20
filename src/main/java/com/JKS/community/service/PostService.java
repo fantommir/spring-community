@@ -30,6 +30,8 @@ public interface PostService {
 
     PostDto react(Long memberId, Long postId, Boolean isLike);
 
+    void increaseViewCount(Long postId);
+
     // TODO 특정 회원 글 조회
 
     // TODO 인기 글 조회 (카테고리)

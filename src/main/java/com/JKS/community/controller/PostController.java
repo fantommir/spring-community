@@ -3,6 +3,7 @@ package com.JKS.community.controller;
 import com.JKS.community.dto.PageRequestDto;
 import com.JKS.community.dto.PostDto;
 import com.JKS.community.dto.PostFormDto;
+import com.JKS.community.service.CommentService;
 import com.JKS.community.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,18 +22,13 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
-
-    // 정렬과 페이징 설정을 위한 메서드
-    private Pageable configurePageable(String sortField, String sortOrder, Pageable pageable) {
-        Sort sort = Sort.by(sortField);
-        sort = sortOrder.equals("desc") ? sort.descending() : sort.ascending();
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-    }
+    private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<PostDto> create(@Valid @RequestBody PostFormDto postFormDto) {
+    public String create(@Valid @ModelAttribute PostFormDto postFormDto, RedirectAttributes redirectAttributes) {
         PostDto createdPost = postService.create(postFormDto);
-        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
+        redirectAttributes.addFlashAttribute("message", "Post created successfully!");
+        return "redirect:/posts/" + createdPost.getId();
     }
 
     @PutMapping("/{postId}")
@@ -49,8 +46,8 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostDto> get(@PathVariable Long postId) {
-        PostDto foundPost = postService.get(postId);
-        return new ResponseEntity<>(foundPost, HttpStatus.OK);
+        PostDto postDto = postService.get(postId);
+        return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 
     // 페이지 번호와 페이지 크기를 파라미터로 받아 게시글 목록 조회
@@ -85,12 +82,20 @@ public class PostController {
     }
 
     // 게시물 좋아요/싫어요 반응 생성 및 수정
-    @PostMapping("/{postId}/reactions")
+    @PostMapping("/{postId}/react")
     public ResponseEntity<PostDto> react(
             @RequestParam("member_id") Long memberId,
             @RequestParam("is_like") Boolean isLike,
             @PathVariable Long postId) {
-        PostDto reactedPost = this.postService.react(memberId, postId, isLike);
-        return new ResponseEntity<>(reactedPost, HttpStatus.CREATED);
+        try {
+            PostDto reactedPost = this.postService.react(memberId, postId, isLike);
+            return new ResponseEntity<>(reactedPost, HttpStatus.CREATED);
+        } catch(Exception e){
+            // Print stack trace for any exception thrown.
+            System.out.println("e = " + e.getMessage());
+        }
+
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

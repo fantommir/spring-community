@@ -1,10 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
+    <title>Post View</title>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"/>
 </head>
 <body>
+<input type="hidden" id="_csrf" th:value="${_csrf.token}"/>
 
+<div th:replace="~{fragment/header :: header}"></div>
+
+<div class="container mt-5">
+    <div class="row border-bottom pt-1 pb-1">
+        <div class="col">
+            <a th:href="|/category/${postDto.parentCategoryId}|">
+                <span th:text="${postDto.parentCategoryName}" class="custom-link">카테고리</span>
+            </a>
+            <span>|</span>
+            <a th:href="|/category/${postDto.parentCategoryId}?tab=${postDto.categoryName}|">
+                <span th:text="${postDto.categoryName}" class="custom-link">탭</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row align-items-center bg-light border-bottom pt-1 pb-1">
+        <span th:text="${postDto.title}" class="col-md-6 text-start">제목</span>
+        <span th:text="${postDto.createdDate}" class="col-md-6 text-end">작성일</span>
+    </div>
+
+    <div class="row align-items-center border-bottom pt-1 pb-1">
+        <span th:text="${postDto.memberName}" class="col-md-6 text-start">작성자</span>
+        <div class="col-md-6 text-end">
+            <span class="me-3" th:text="'조회 ' + ${postDto.viewCount}">조회수</span>
+            <span class="me-3" th:text="'추천 ' + ${postDto.likeCount}">추천수</span>
+            <span  th:text="'댓글 ' + ${#lists.size(postDto.comments)}">댓글수</span>
+        </div>
+    </div>
+
+    <div th:text="${postDto.content}" class="mb-3 mt-5" style="height: 500px">내용</div>
+
+    <div class="d-flex justify-content-center pt-3 pb-3">
+            <button type="button" class="btn btn-success btn-sm me-3" onclick="react(true)">
+                <i class="fa fa-thumbs-up"></i> 좋아요
+            </button>
+            <span th:text="${postDto.likeCount}" class="bg-light text-dark mx-2 py-2 px-3 rounded-pill me-3" id="likeCount">좋아요 수</span>
+            <span th:text="${postDto.dislikeCount}" class="bg-light text-dark mx-2 py-2 px-3 rounded-pill me-3" id="dislikeCount">싫어요 수</span>
+            <button type="button" class="btn btn-danger btn-sm" onclick ="react(false)">
+                <i class= "fa fa-thumbs-down"></i> 싫어요
+            </button>
+    </div>
+    <hr/>
+
+    <form method="post" action="/api/posts/${postDto.id}/comments">
+        <label for="commentContent">Enter Comments</label>
+        <textarea id="commentContent" name="content" class="form-control mb-3" rows="3"></textarea>
+        <button type="submit" class="btn btn-primary">Register Comment</button>
+    </form>
+
+    <div id="CommentList"></div>
+
+    <!-- Pagination -->
+    <div id="Pagination" class="btn-group mt-3"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+
+<script th:inline="javascript">
+    const memberId = [[${memberId}]];
+    const postId = [[${postDto.id}]];
+</script>
+<script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('#_csrf').val()
+        }
+    });
+
+    function react(isLike) {
+        console.log("URL: ", "/api/posts/" + postId + "/react"); // Log URL
+        console.log("Data: ", {member_id: memberId, is_like: isLike}); // Log data
+        if (!memberId) {
+            alert('로그인이 필요한 기능입니다.');
+            return;
+        }
+
+        $.ajax({
+            url: "/api/posts/" + postId + "/react",
+            type: "POST",
+            data: {member_id: memberId, is_like: isLike},
+            success: function(response) {
+                document.getElementById("likeCount").innerText = response.likeCount;
+                document.getElementById("dislikeCount").innerText = response.dislikeCount;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+                console.log(jqXHR.responseText); // Log server response text
+            }
+        });
+    }
+
+    function loadComments(postId, page = 0, size = 20, sortField = "createdDate", sortOrder = "desc") {
+        $.ajax({
+            url: "/api/comments/post/" + postId,
+            type: "GET",
+            data: {page: page, size: size, sortField: sortField, sortOrder: sortOrder},
+            success: function (data) {
+                const commentList = $('#CommentList');
+                commentList.empty(); // Clear the comment list
+
+                // Loop through each comment
+                data.content.forEach(function(comment) {
+                    // Create a new card for each comment
+                    let card = $('<div class="card mt-4"></div>');
+                    let cardBody = $('<div class="card-body"></div>');
+                    let cardTitle = $('<h5 class="card-title"></h5>').text(comment.memberName);
+                    let cardText = $('<p class="card-text"></p>').text(comment.content);
+                    let cardDate = $('<p class="card-text"><small class="text-muted"></small></p>').text(comment.createdDate);
+
+                    // Append elements to the card
+                    cardBody.append(cardTitle, cardText, cardDate);
+                    card.append(cardBody);
+
+                    // Indent the car based on the comment level
+                    if (comment.level > 0 && comment.level <= 3) {
+                        car.css('margin-left', comment.level * 20 + 'px');
+                    }
+
+                    // Append the car to the comment list
+                    commenList.append(car);
+                });
+
+                // Pagination
+                const pagination= $('#Pagination');
+                pagination.empty();
+
+                for (let i=0; i<data.totalPages; i++) {
+                    const buttonClass= i === page ? 'btn-primary' : 'btn-default';
+                    const button=$('<button>')
+                        .addClass('btn')
+                        .addClass(buttonClass)
+                        .text(i+1)
+                        .click(function() { loadComments(postId,i); });
+                    pagination.append(button);
+                }
+            }
+        })
+    }
+
+
+    // Load comments when the page loads
+    $(document).ready(function() {
+        loadComments(postId);
+    });
+</script>
 </body>
 </html>

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-<div th:replace="~{fragement/header :: header}"></div>
+<div th:replace="~{fragment/header :: header}"></div>
 <div class="container my-5">
     <h1 th:text="${category.name}">Category Name</h1>
 
@@ -18,11 +18,11 @@
         <button class="nav-item nav-link" id='all-tab' data-bs-toggle='tab'
                 href='#all' role='tab' aria-controls='all'
                 th:onclick="'loadPosts(' + ${category.id} + ', \'all\')'">전체</button>
-        <button class="nav-item nav-link" th:each="subCategory : ${category.children}"
-                th:id="|${subCategory.name}-tab|" data-bs-toggle="tab"
-                th:href="'#' + ${subCategory.name}" role="tab"
-                th:aria-controls="${subCategory.name}" th:text="${subCategory.name}"
-                th:data-catid="${subCategory.id}"
+        <button class="nav-item nav-link" th:each="tab : ${category.children}"
+                th:id="|${tab.name}-tab|" data-bs-toggle="tab"
+                th:href="'#' + ${tab.name}" role="tab"
+                th:aria-controls="${tab.name}" th:text="${tab.name}"
+                th:data-catid="${tab.id}"
                 onclick="loadPosts(this.getAttribute('data-catid'), this.getAttribute('href').substring(1))">
         </button>
     </div>
@@ -34,9 +34,9 @@
             <th scope="col">탭</th>
             <th scope="col">제목</th>
             <th scope="col">글쓴이</th>
-            <th scope="col">추천</th>
-            <th scope="col">조회</th>
             <th scope="col">날짜</th>
+            <th scope="col">조회</th>
+            <th scope="col">추천</th>
         </tr>
         </thead>
 
@@ -48,7 +48,7 @@
         <span class="input-group-text border-0" id="search-addon">
             <i class="fas fa-search"></i>
          </span>
-        <a type='button' th:href="@{/post/create}" class='btn btn-primary'>글쓰기</a>
+        <a type='button' th:href="|/${category.getId()}/post-create|" class='btn btn-primary'>글쓰기</a>
     </div>
     <div id='Pagination' class="btn-group mt-3"></div>
 </div>
@@ -82,9 +82,9 @@
                                     .text(post.title)
                             ),
                             $('<td>').text(post.memberName),
+                            $('<td>').text(timeAgo(post.createdDate)),
                             $('<td>').text(post.viewCount),
-                            $('<td>').text(post.likeCount),
-                            $('<td>').text(timeAgo(post.createdDate))
+                            $('<td>').text(post.likeCount)
                         );
                         postList.append(row);
                     });
@@ -111,11 +111,18 @@
     }
 
     $(document).ready(function() {
-        const categoryId = [[${category.id}]];
-        loadPosts(categoryId, 'all');
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
 
-        $('#all-tab').trigger('click');
+        if (activeTab) {
+            $('#' + activeTab + '-tab').trigger('click');
+        } else {
+            const categoryId = [[${category.id}]];
+            loadPosts(categoryId, 'all');
+            $('#all-tab').trigger('click');
+        }
     });
+
 
 
     function timeAgo(dateString) {

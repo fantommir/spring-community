@@ -69,8 +69,6 @@ public class PostServiceImpl implements PostService {
     public PostDto get(Long postId) {
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
-        existingPost.increaseViewCount();
-
         return new PostDto(existingPost);
     }
 
@@ -98,9 +96,6 @@ public class PostServiceImpl implements PostService {
 
         return postRepository.findAllByCategoryIdIn(childCategoryIds, pageable).map(PostDto::new);
     }
-
-
-
 
     @Override
     public Page<PostDto> searchListByKeyword(String keyword, Pageable pageable) {
@@ -139,5 +134,11 @@ public class PostServiceImpl implements PostService {
         return new PostDto(post);
     }
 
-
+    // 게시물 조회수 증가
+    @Override
+    public void increaseViewCount(Long postId) {
+        Post existingPost = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
+        existingPost.increaseViewCount();
+    }
 }

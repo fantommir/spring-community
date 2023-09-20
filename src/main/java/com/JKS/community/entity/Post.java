@@ -45,7 +45,7 @@ public class Post extends BaseTimeEntity {
     private Category category;
 
     // comment
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post")
@@ -64,14 +64,9 @@ public class Post extends BaseTimeEntity {
         this.comments.add(comment);
     }
 
-
     public void update(PostFormDto postFormDto) {
         this.title = postFormDto.getTitle();
         this.content = postFormDto.getContent();
-    }
-
-    public void increaseViewCount() {
-        this.viewCount++;
     }
 
     public void setLikeCount(int likeCount) {
@@ -82,11 +77,7 @@ public class Post extends BaseTimeEntity {
         this.dislikeCount = dislikeCount;
     }
 
-    public void enable() {
-        this.enabled = true;
-    }
-
-    public void disable() {
-        this.enabled = false;
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 }

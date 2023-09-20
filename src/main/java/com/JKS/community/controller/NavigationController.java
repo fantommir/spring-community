@@ -4,17 +4,26 @@ package com.JKS.community.controller;
 import com.JKS.community.dto.CategoryDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.PostFormDto;
+import com.JKS.community.security.CustomUserDetails;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.MemberService;
 import com.JKS.community.service.PostService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,34 +65,57 @@ public class NavigationController {
         return "redirect:/";
     }
 
-
-    @GetMapping("/myinfo")
-    public String myinfo() {
-        return "myinfo";
+    @GetMapping("/info")
+    public String info() {
+        return "info";
     }
 
     @GetMapping("/category/{categoryId}")
-    public String category(@PathVariable Long categoryId, Model model) {
+    public String postsByCategory(@PathVariable Long categoryId, Model model) {
         Pageable pageable = PageRequest.of(0, 20);
         CategoryDto categoryDto = categoryService.get(categoryId);
         Page<PostDto> postDtoPage = postService.getListByParentCategory(categoryId, pageable);
-        model.addAttribute("tabs", Arrays.asList("all", "잡담", "정보", "사진", "공지"));
         model.addAttribute("category", categoryDto);
         model.addAttribute("postList", postDtoPage);
         return "posts-by-category";
     }
 
-    @GetMapping("/posts/{postId}")
-    public String post(@PathVariable Long postId, Model model) {
+    // 게시물 조회 컨트롤러
+    @GetMapping("/post/{postId}")
+    public String postView(@PathVariable Long postId, Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request, HttpServletResponse response) {
         PostDto postDto = postService.get(postId);
-        model.addAttribute("post", postDto);
+        model.addAttribute("postDto", postDto);
+        if (userDetails != null) {
+            model.addAttribute("memberId", userDetails.getId());
+        }
+        // 쿠키 확인
+        Cookie[] cookies = request.getCookies();
+        boolean isVisited = false;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("post" + postId)) {
+                    isVisited = true;
+                    break;
+                }
+            }
+        }
+        // 쿠키가 없으면 생성하고 조회수 증가
+        if (!isVisited) {
+            Cookie cookie = new Cookie("post" + postId, "true");
+            cookie.setMaxAge(60 * 60); // 만료 시간 1시간
+            cookie.setPath("/");
+            response.addCookie(cookie);
+            postService.increaseViewCount(postId);
+        }
         return "post-view";
     }
 
-    @GetMapping("/post/create")
-    public String write(Model model) {
-        List<CategoryDto> dtoList = categoryService.getList();
-        model.addAttribute("categoryList", dtoList);
+    @GetMapping("/{categoryId}/post-create")
+    public String createPost(@PathVariable String categoryId, Model model) {
+        CategoryDto categoryDto = categoryService.get(Long.valueOf(categoryId));
+        model.addAttribute("category", categoryDto);
+        model.addAttribute("postFormDto", new PostFormDto());
         return "post-create";
     }
 }

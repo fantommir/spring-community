@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +19,15 @@ public class CommentDto {
     private List<CommentDto> children = new ArrayList<>();
     private int level;
     private boolean enabled;
-    private LocalDateTime createdDate;
-    private LocalDateTime modifiedDate;
+    private String createdDate;
+    private String modifiedDate;
 
     private Long memberId;
     private String memberName;
 
     public CommentDto(Comment comment) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
         this.id = comment.getId();
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
@@ -32,8 +35,8 @@ public class CommentDto {
         this.parentId = comment.getParent() != null ? comment.getParent().getId() : null;
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
-        this.createdDate = comment.getCreatedDate();
-        this.modifiedDate = comment.getLastModifiedDate();
+        this.createdDate = comment.getCreatedDate().format(formatter);
+        this.modifiedDate = comment.getLastModifiedDate().format(formatter);
 
         if (comment.getMember() != null) {
             this.memberId = comment.getMember().getId();
