@@ -4,21 +4,21 @@ Community Project for Spring Boot Study
 
 ---
 
-### 프로젝트를 진행하며 문제가 생겼던 부분들
+# 프로젝트를 진행하며 문제가 생겼던 부분들
 <br>
 
-#### spring.io에서 Dependency Versions 확인
+## spring.io에서 Dependency Versions 확인
 https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Reference Doc. -> Dependency Versions
 <br> <br>
 
-#### H2 DB 버전 오류
+## H2 DB 버전 오류
 
     Spring 3.12 버전을 사용하려면 H2 2.1. 이상 버전을 사용해야 함
     BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource
 ![image](https://github.com/JeongKiSeong/springboot-community/assets/80134129/b2eeaf71-8bc4-459c-bb10-5378bffdfa82)
 <br> <br>
 
-#### 예약어, 식별자 오류
+## 예약어, 식별자 오류
 *엔티티던 필드던 예약어, 식별자는 절대 안 됨!!!*   
 [https://www.h2database.com/html/advanced.html?highlight=identifier&search=identifier#keywords](https://www.h2database.com/html/advanced.html?highlight=Keywords%2C%2C%2CReserved%2CWords&search=Keywords%20%2F%20Reserved%20Words#keywords)
 
@@ -30,7 +30,7 @@ https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Refer
     친절하게 expected "identifier"가 있던 걸 3시간만에 발견.
 <br> <br>
 
-#### @Transacional과 @Rollback(value = false)
+## @Transacional과 @Rollback(value = false)
 *트랜잭션의 전파와 Rollback Flow에 대해 공부하기!!!*
 
     학습용 프로젝트라 Test 실행 후 H2 DB에서 값을 확인하려고 @Rollback(value = false) 어노테이션 사용
@@ -39,3 +39,16 @@ https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Refer
     롤백하려니 Test의 트랜잭션이 전파돼서 @Rollback(value = false)도 전파
     
     org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+<br><br>
+
+## Spring Security
+<br>
+
+### CSRF
+<br>
+
+### UserDetails
+<br>
+
+### 조회수 중복 방지(Cookie)
+<br>
