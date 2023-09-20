@@ -23,7 +23,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/myinfo"), new AntPathRequestMatcher("/write")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/info"), new AntPathRequestMatcher("/write")).authenticated()
                         .anyRequest().permitAll())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
