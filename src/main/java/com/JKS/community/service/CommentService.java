@@ -19,7 +19,7 @@ public interface CommentService {
     CommentDto get(Long commentId);
 
     // 댓글 목록 조회
-    Page<CommentDto> getList(Long postId, Pageable pageable);
+    Page<CommentDto> getListByPost(Long postId, Pageable pageable);
 
     // 댓글 반응 (좋아요/싫어요)
     CommentDto react(Long memberId, Long commentId, Boolean isLike);

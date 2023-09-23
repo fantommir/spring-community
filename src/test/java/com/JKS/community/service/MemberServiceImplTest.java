@@ -7,6 +7,7 @@ import com.JKS.community.entity.Member;
 import com.JKS.community.exception.InvalidPasswordException;
 import com.JKS.community.exception.MemberAlreadyExistsException;
 import com.JKS.community.exception.MemberNotFoundException;
+import com.JKS.community.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,6 +27,12 @@ class MemberServiceImplTest {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private MemberFormDto memberFormDto;
 
@@ -111,13 +119,21 @@ class MemberServiceImplTest {
         MemberDto registeredMember = memberService.register(memberFormDto);
 
         MemberFormDto updatedMemberFormDto = new MemberFormDto();
-        updatedMemberFormDto.setName("updatedName");
-        MemberDto updatedMember = memberService.update(registeredMember.getId(), updatedMemberFormDto);
+        updatedMemberFormDto.setName(registeredMember.getName());
+        updatedMemberFormDto.setPassword("updatedPassword");
 
-        assertThat(updatedMember.getId()).isEqualTo(registeredMember.getId());
-        assertThat(updatedMember.getEmail()).isEqualTo(registeredMember.getEmail());
-        assertThat(updatedMember.getName()).isEqualTo(updatedMemberFormDto.getName());
+        memberService.update(registeredMember.getId(), updatedMemberFormDto);
+
+        Member updatedEntity = memberRepository.findById(registeredMember.getId())
+                .orElseThrow(() -> new MemberNotFoundException("Invalid member Id:" + registeredMember.getId()));
+
+        assertThat(updatedEntity.getId()).isEqualTo(registeredMember.getId());
+        assertThat(updatedEntity.getEmail()).isEqualTo(registeredMember.getEmail());
+        assertThat(updatedEntity.getName()).isEqualTo(updatedMemberFormDto.getName());
+
+        assertThat(passwordEncoder.matches("updatedPassword", updatedEntity.getPassword())).isTrue();
     }
+
 
     @Test
     void updateFailure() {

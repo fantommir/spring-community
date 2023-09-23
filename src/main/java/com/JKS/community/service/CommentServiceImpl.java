@@ -81,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentDto> getList(Long postId, Pageable pageable) {
+    public Page<CommentDto> getListByPost(Long postId, Pageable pageable) {
         postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 

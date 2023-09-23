@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class CommentController {
     @PostMapping("/")
     public ResponseEntity<CommentDto> create(@Valid @RequestBody CommentFormDto commentFormDto) {
         CommentDto createdComment = commentService.create(commentFormDto);
+        System.out.println("createdComment = " + createdComment.toString());
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
 
@@ -40,7 +42,7 @@ public class CommentController {
     @GetMapping("/post/{postId}")
     public ResponseEntity<Page<CommentDto>> getCommentsByPost (@PathVariable Long postId, PageRequestDto pageRequestDto) {
         Pageable pageable = pageRequestDto.toPageable();
-        Page<CommentDto> commentPage = commentService.getList(postId, pageable);
+        Page<CommentDto> commentPage = commentService.getListByPost(postId, pageable);
         return new ResponseEntity<>(commentPage ,HttpStatus.OK);
     }
 

@@ -22,7 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class PostController {
 
     private final PostService postService;
-    private final CommentService commentService;
 
     @PostMapping
     public String create(@Valid @ModelAttribute PostFormDto postFormDto, RedirectAttributes redirectAttributes) {

@@ -58,18 +58,12 @@ public class Member implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // For simplicity, let's assume all users have a single role: "ROLE_USER"
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getUsername() {
         return this.email;
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
     }
 
     // 계정 만료 여부 반환 ( ex. 일정 시간이 지나면 만료되는 평가판 사용자 )

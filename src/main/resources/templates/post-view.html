@@ -41,27 +41,42 @@
         </div>
     </div>
 
-    <div th:text="${postDto.content}" class="mb-3 mt-5" style="height: 500px">내용</div>
+    <div th:utext="${postDto.content}" class="mb-3 mt-5" style="height: 500px">내용</div>
 
     <div class="d-flex justify-content-center pt-3 pb-3">
-            <button type="button" class="btn btn-success btn-sm me-3" onclick="react(true)">
+            <button type="button" class="btn btn-success btn-sm me-3" onclick="react('like')">
                 <i class="fa fa-thumbs-up"></i> 좋아요
             </button>
             <span th:text="${postDto.likeCount}" class="bg-light text-dark mx-2 py-2 px-3 rounded-pill me-3" id="likeCount">좋아요 수</span>
             <span th:text="${postDto.dislikeCount}" class="bg-light text-dark mx-2 py-2 px-3 rounded-pill me-3" id="dislikeCount">싫어요 수</span>
-            <button type="button" class="btn btn-danger btn-sm" onclick ="react(false)">
+            <button type="button" class="btn btn-danger btn-sm" onclick ="react('dislike')">
                 <i class= "fa fa-thumbs-down"></i> 싫어요
             </button>
     </div>
     <hr/>
 
-    <form method="post" action="/api/posts/${postDto.id}/comments">
-        <label for="commentContent">Enter Comments</label>
-        <textarea id="commentContent" name="content" class="form-control mb-3" rows="3"></textarea>
-        <button type="submit" class="btn btn-primary">Register Comment</button>
+    <form id="commentForm" method="post" action="/api/comments/">
+        <input type="hidden" name="postId" th:value="${postDto.id}">
+        <input type="hidden" name="memberId" th:value="${memberId}">
+        <label for="commentContent">댓글 쓰기</label>
+        <div class="row mb-3 align-items-stretch">
+            <div class="col">
+            <textarea id="commentContent"
+                      name="content"
+                      class="form-control"
+                      rows="3"
+                      oninput="
+                        this.style.height = '';
+                        this.style.height = this.scrollHeight + 'px'
+                      "></textarea>
+            </div>
+            <div class="col-auto d-flex">
+                <button type='submit' class='btn btn-primary align-self-stretch' style='height: 100%;'>등록</button>
+            </div>
+        </div>
     </form>
 
-    <div id="CommentList"></div>
+    <div id="commentList"></div>
 
     <!-- Pagination -->
     <div id="Pagination" class="btn-group mt-3"></div>
@@ -69,13 +84,15 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js></script>
-<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script src=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/time.js}"></script>
 
 <script th:inline="javascript">
     const memberId = [[${memberId}]];
     const postId = [[${postDto.id}]];
+    const content = [[${postDto.content}]];
 </script>
 <script>
     $.ajaxSetup({
@@ -84,13 +101,11 @@
         }
     });
 
-    function react(isLike) {
-        console.log("URL: ", "/api/posts/" + postId + "/react"); // Log URL
-        console.log("Data: ", {member_id: memberId, is_like: isLike}); // Log data
-        if (!memberId) {
-            alert('로그인이 필요한 기능입니다.');
-            return;
-        }
+    function react(reaction) {
+        if (!isLogin()) return;
+        const isLike = reaction === 'like';
+        console.log("URL: ", "/api/posts/" + postId + "/react");
+        console.log("Data: ", {member_id: memberId, is_like: isLike});
 
         $.ajax({
             url: "/api/posts/" + postId + "/react",
@@ -102,64 +117,189 @@
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(textStatus, errorThrown);
-                console.log(jqXHR.responseText); // Log server response text
+                console.log(jqXHR.responseText);
+                alert('요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.');
             }
         });
     }
 
     function loadComments(postId, page = 0, size = 20, sortField = "createdDate", sortOrder = "desc") {
         $.ajax({
-            url: "/api/comments/post/" + postId,
-            type: "GET",
             data: {page: page, size: size, sortField: sortField, sortOrder: sortOrder},
             success: function (data) {
-                const commentList = $('#CommentList');
-                commentList.empty(); // Clear the comment list
+                const commentList = $('#commentList');
+                commentList.empty();
 
-                // Loop through each comment
-                data.content.forEach(function(comment) {
-                    // Create a new card for each comment
-                    let card = $('<div class="card mt-4"></div>');
-                    let cardBody = $('<div class="card-body"></div>');
-                    let cardTitle = $('<h5 class="card-title"></h5>').text(comment.memberName);
-                    let cardText = $('<p class="card-text"></p>').text(comment.content);
-                    let cardDate = $('<p class="card-text"><small class="text-muted"></small></p>').text(comment.createdDate);
+                data.content.forEach(function (comment) {
+                    let rowDiv = $('<div class="row border-bottom pt-3 pb-3"></div>');
+                    let colDiv = $('<div class="col"></div>');
 
-                    // Append elements to the card
-                    cardBody.append(cardTitle, cardText, cardDate);
-                    card.append(cardBody);
+                    let dFlexDiv1 = $('<div class="d-flex flex-start"></div>');
+                    let imgTag = $('<img>').addClass('rounded-circle shadow-1-strong me-3')
+                        .attr('src', 'https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp')
+                        .attr('alt', 'avatar').attr('width', '65').attr('height', '65');
 
-                    // Indent the car based on the comment level
+                    let flexGrowDiv = $('<div>').addClass('flex-grow-1 flex-shrink-1');
+
+                    let dFlexDiv2 = $('<div>').addClass('d-flex justify-content-between align-items-center');
+
+                    let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName +
+                        " - " + timeAgo(comment.createdDate));
+
+                    let replyLink = $('<a>')
+                        .attr('href', '#!')
+                        .addClass('reply-link')
+                        .data('comment-id', comment.id)
+                        .append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
+
+                    dFlexDiv2.append(pTag1, replyLink);
+
+                    let pTag2 = $('<p>').addClass("small mb-0").text(comment.content);
+                    flexGrowDiv.append(dFlexDiv2, pTag2);
+
+                    dFlexDiv1.append(imgTag, flexGrowDiv);
+
+                    colDiv.append(dFlexDiv1);
+
+                    rowDiv.append(colDiv);
+
                     if (comment.level > 0 && comment.level <= 3) {
-                        car.css('margin-left', comment.level * 20 + 'px');
+                        rowDiv.css('margin-left', comment.level * 20 + 'px');
                     }
 
-                    // Append the car to the comment list
-                    commenList.append(car);
+                    commentList.append(rowDiv);
+                });
+
+                $(document).on('click', '.reply-link', function(e) {
+                    e.preventDefault();
+                    $('.reply-form').remove();
+                    const parentId = $(this).data('comment-id');
+
+                    const replyForm = $('<form>')
+                        .addClass('reply-form pt-2')
+                        .attr('method', 'post')
+                        .attr('action', '/api/comments/')
+                        .append(
+                            $('<input>').attr('type', 'hidden').attr('name', 'postId').val(postId),
+                            $('<input>').attr('type', 'hidden').attr('name', 'memberId').val(memberId),
+                            $('<input>').attr('type', 'hidden').attr('name', 'parentId').val(parentId),
+                            $('<label>').text("댓글 쓰기"),
+                            $('<div>')
+                                .addClass("row mb-3 align-items-stretch")
+                                .append(
+                                    $('<div>')
+                                        .addClass("col")
+                                        .append(
+                                            $('<textarea>')
+                                                .addClass("form-control")
+                                                .attr({ name: "content", rows: "3" })
+                                                .on("input", function() {
+                                                    this.style.height = '';
+                                                    this.style.height = this.scrollHeight + 'px';
+                                                })
+                                        ),
+                                    $('<div>')
+                                        .addClass("col-auto d-flex")
+                                        .append(
+                                            $('<button>')
+                                                .addClass("btn btn-primary align-self-stretch")
+                                                .text("등록")
+                                        )
+                                )
+                        );
+                    $(this).closest('.row.border-bottom.pt-3.pb-3').after(replyForm);
+                    $('.reply-form textarea[name=content]').focus();
+                });
+
+                $(document).on('submit','.reply-form' ,function(e) {
+                    e.preventDefault();
+                    if (!isLogin()) return;
+                    let content = $(this).find('textarea[name=content]').val().trim();
+                    if (content.length === 0) return;
+
+                    let formData = {
+                        content: content,
+                        postId: postId,
+                        memberId: memberId,
+                        parentId: $(this).find('[name=parentId]').val()
+                    };
+
+                    $.ajax({
+                        url: '/api/comments/',
+                        type: 'POST',
+                        data: JSON.stringify(formData),
+                        contentType: "application/json",
+                        processData: false,
+                        success: function (response) {
+                            console.log(response);
+                            loadComments(postId);
+                            $('#commentContent').val('');
+                            $('.reply-form').remove();
+                        },
+                    });
                 });
 
                 // Pagination
-                const pagination= $('#Pagination');
+                const pagination = $('#Pagination');
                 pagination.empty();
 
-                for (let i=0; i<data.totalPages; i++) {
-                    const buttonClass= i === page ? 'btn-primary' : 'btn-default';
-                    const button=$('<button>')
+                for (let i = 0; i < data.totalPages; i++) {
+                    const buttonClass = i === page ? 'btn-primary' : 'btn-default';
+                    const button = $('<button>')
                         .addClass('btn')
                         .addClass(buttonClass)
-                        .text(i+1)
-                        .click(function() { loadComments(postId,i); });
+                        .text(i + 1)
+                        .click(function () {
+                            loadComments(postId, i);
+                        });
                     pagination.append(button);
                 }
-            }
+            },
+            type: "GET",
+            url: "/api/comments/post/" + postId
         })
     }
 
 
-    // Load comments when the page loads
     $(document).ready(function() {
         loadComments(postId);
     });
+
+    $('#commentForm').on('submit', function(e) {
+        e.preventDefault();
+
+        if (!isLogin()) return;
+
+        let content = $('#commentContent').val().trim();
+        if (content.length === 0) return;
+
+        let formData = {
+            content: content,
+            postId: postId,
+            memberId: memberId
+        };
+
+        $.ajax({
+            url: '/api/comments/',
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            processData: false,
+            success: function(response) {
+                console.log(response);
+                loadComments(postId);
+                $('#commentContent').val('');
+            },
+        });
+    });
+
+    function isLogin() {
+        if (!memberId) {
+            alert('로그인이 필요한 기능입니다.');
+            return false;
+        }
+        return true;
+    }
 </script>
 </body>
 </html>

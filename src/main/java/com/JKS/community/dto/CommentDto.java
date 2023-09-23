@@ -3,6 +3,7 @@ package com.JKS.community.dto;
 import com.JKS.community.entity.Comment;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter
+@ToString
 public class CommentDto {
     private Long id;
     private String content;

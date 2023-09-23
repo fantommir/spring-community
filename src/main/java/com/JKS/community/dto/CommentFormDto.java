@@ -14,15 +14,15 @@ public class CommentFormDto {
     @Size(max = 1000)
     private String content;
     private Long parentId;
-    private int level;
+    @NotNull
     private Long postId;
+    @NotNull
     private Long memberId;
 
     @Builder
-    public CommentFormDto(String content, Long parentId, int level, Long postId, Long memberId) {
+    public CommentFormDto(String content, Long parentId, Long postId, Long memberId) {
         this.content = content;
         this.parentId = parentId;
-        this.level = level;
         this.postId = postId;
         this.memberId = memberId;
     }

@@ -3,19 +3,16 @@ package com.JKS.community.service;
 import com.JKS.community.dto.*;
 import com.JKS.community.exception.CommentNotFoundException;
 import com.JKS.community.exception.MemberNotFoundException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -183,7 +180,7 @@ class CommentServiceImplTest {
             commentService.create(formDto);
         }
 
-        List<CommentDto> comments = commentService.getList(postDto.getId(), PageRequest.of(0, 10)).getContent();
+        List<CommentDto> comments = commentService.getListByPost(postDto.getId(), PageRequest.of(0, 10)).getContent();
         assertThat(comments.size()).isEqualTo(10);
     }
 

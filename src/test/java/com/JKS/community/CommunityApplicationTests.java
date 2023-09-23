@@ -8,6 +8,7 @@ import com.JKS.community.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +36,9 @@ class CommunityApplicationTests {
 	private void createCategoryDummyData() {
 		// Main Categories
 		Map<String, List<String>> categoriesMap = new HashMap<>();
-		categoriesMap.put("국가", Arrays.asList("중국", "미국", "일본", "한국"));
+		categoriesMap.put("국가", Arrays.asList("중국", "일본", "한국"));
 		categoriesMap.put("음식", Arrays.asList("한식", "중식", "일식", "양식"));
-		categoriesMap.put("게임", Arrays.asList("FPS","RPG","MMO"));
-		categoriesMap.put("스포츠" ,Arrays.asList("축구","야구","농구"));
+		categoriesMap.put("스포츠" , List.of("축구"));
 
 		List<String> tabs = Arrays.asList("잡담","정보","사진","공지");
 
@@ -92,22 +92,21 @@ class CommunityApplicationTests {
 		// Assume we have a list of members and categories
 		List<MemberDto> members = memberService.getList(Pageable.unpaged()).getContent();
 		List<CategoryDto> categories = categoryService.getList();
-
 		for (CategoryDto category : categories) {
-			for (CategoryDto childCategory : category.getChildren()) {
-				for (CategoryDto tab : childCategory.getChildren()) {
-					for (MemberDto memberDto : members) {
-						// 0개에서 3개 사이의 랜덤한 게시글을 생성
-						int randomPostCount = (int) (Math.random() * 3);
-						for (int i = 0; i < randomPostCount; i++) {
-							PostFormDto postFormDto = PostFormDto.builder()
-									.title(category.getName()+"/"+childCategory.getName()+"/"+tab.getName())
-									.content("This is a dummy post.")
-									.categoryId(tab.getId())
-									.memberId(memberDto.getId())
-									.build();
-							postService.create(postFormDto);
-						}
+			for (CategoryDto subcategory : category.getChildren()) {
+				for (CategoryDto tab : subcategory.getChildren()) {
+					// 각 tab에 11개의 post를 생성한다. (작성자는 랜덤)
+					for (int i = 1; i <= 11; i++) {
+						MemberDto memberDto = members.get(new Random().nextInt(members.size()));
+						PostFormDto postFormDto = PostFormDto.builder()
+								.title(category.getName()+"/"+subcategory.getName()+"/"+tab.getName())
+								.content(memberDto.getName() + "의 게시글\n" +
+										"카테고리: " + category.getName() + "/" + subcategory.getName() + "/" + tab.getName()
+										+ "\n" + "게시글 제목: " + category.getName()+"/"+subcategory.getName()+"/"+tab.getName())
+								.categoryId(tab.getId())
+								.memberId(memberDto.getId())
+								.build();
+						postService.create(postFormDto);
 					}
 				}
 			}
@@ -115,53 +114,55 @@ class CommunityApplicationTests {
 	}
 
 	private void createCommentDummyData() {
-		// Assume we have a list of members and categories
+		List<CategoryDto> categories = categoryService.getList();
 		List<MemberDto> members = memberService.getList(Pageable.unpaged()).getContent();
-		List<PostDto> posts = postService.getList(Pageable.unpaged()).getContent();
 
-
-		// 각 게시글에 댓글을 0개에서 1개 사이의 랜덤한 개수로 생성
-		// "post.getTitle() + "에 작성된 " + member.getName() + "의 댓글" 형식으로 댓글 내용 생성
-		// 대댓글은 10% 확률로 생성
-		// 대대댓글은 10% 확률로 생성
-		// 대댓글, 대대댓글 내용은 "member.getName() + "의 대댓글" 형식으로 생성
-		for (PostDto post : posts) {
-			for (MemberDto memberDto : members) {
-				int randomCommentCount = (int) (Math.random() * 2);
-				for (int i = 0; i < randomCommentCount; i++) {
-					CommentFormDto commentFormDto = CommentFormDto.builder()
-							.content(post.getTitle() + "에 작성된 " + memberDto.getName() + "의 댓글")
-							.postId(post.getId())
-							.memberId(memberDto.getId())
-							.build();
-					CommentDto createdComment = commentService.create(commentFormDto);
-
-					if (Math.random() < 0.1) {
-						CommentFormDto childCommentFormDto = CommentFormDto.builder()
-								.content(memberDto.getName() + "의 대댓글")
-								.postId(post.getId())
-								.memberId(memberDto.getId())
-								.parentId(createdComment.getId())
-								.level(1)
-								.build();
-						CommentDto createdChildComment = commentService.create(childCommentFormDto);
-
-						if (Math.random() < 0.1) {
-							CommentFormDto grandChildCommentFormDto = CommentFormDto.builder()
-									.content(memberDto.getName() + "의 대대댓글")
-									.postId(post.getId())
+		// 탭에 있는 포스트에 0개부터 11개까지 댓글을 작성한다 (작성자는 랜덤)
+		// 댓글에는 20% 확률로 3 개의 대댓글이 달려있고, 일부 대댓글에는 50% 확률로 1 개의 대대댓글이 달려있다.
+		for (CategoryDto category : categories) {
+			for (CategoryDto subCategory : category.getChildren()) {
+				for (CategoryDto tab : subCategory.getChildren()) {
+					Page<PostDto> postsByCategory = postService.getListByCategory(tab.getId(), Pageable.unpaged());
+					for (PostDto postDto : postsByCategory) {
+						// 11개의 댓글
+						for (int i = 1; i <= 11; i++) {
+							MemberDto memberDto = members.get(new Random().nextInt(members.size()));
+							CommentFormDto commentFormDto = CommentFormDto.builder()
+									.postId(postDto.getId())
 									.memberId(memberDto.getId())
-									.parentId(createdChildComment.getId())
-									.level(2)
+									.parentId(null)
+									.content(memberDto.getName() + "의 댓글\n")
 									.build();
-							commentService.create(grandChildCommentFormDto);
+							CommentDto commentDto = commentService.create(commentFormDto);
+
+							if (new Random().nextInt(100) < 20) {
+								CommentFormDto replyFormDto = CommentFormDto.builder()
+										.postId(postDto.getId())
+										.memberId(members.get(new Random().nextInt(members.size())).getId())
+										.parentId(commentDto.getId())
+										.content(memberDto.getName() + "의 대댓글\n")
+										.build();
+								CommentDto replyDto = commentService.create(replyFormDto);
+
+								if (new Random().nextInt(100) < 50) {
+									CommentFormDto replyReplyFormDto = CommentFormDto.builder()
+											.postId(postDto.getId())
+											.memberId(members.get(new Random().nextInt(members.size())).getId())
+											.parentId(replyDto.getId())
+											.content(memberDto.getName() + "의 대대댓글\n")
+											.build();
+									commentService.create(replyReplyFormDto);
+								}
+							}
+
+
 						}
+
+
 					}
 				}
 			}
 		}
 
 	}
-
-
 }
