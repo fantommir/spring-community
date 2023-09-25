@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,6 @@ public class CommentDto {
     private int likeCount;
     private int dislikeCount;
     private Long parentId;
-    private List<CommentDto> children = new ArrayList<>();
     private int level;
     private boolean enabled;
     private String createdDate;
@@ -26,6 +24,7 @@ public class CommentDto {
 
     private Long memberId;
     private String memberName;
+    private int childrenSize;
 
     public CommentDto(Comment comment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
@@ -34,21 +33,14 @@ public class CommentDto {
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
         this.dislikeCount = comment.getDislikeCount();
-        this.parentId = comment.getParent() != null ? comment.getParent().getId() : null;
+        this.parentId = comment.getParent() == null ? null : comment.getParent().getId();
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
         this.createdDate = comment.getCreatedDate().format(formatter);
         this.modifiedDate = comment.getLastModifiedDate().format(formatter);
 
-        if (comment.getMember() != null) {
-            this.memberId = comment.getMember().getId();
-            this.memberName = comment.getMember().getName();
-        }
-
-        if (comment.getChildren() != null) {
-            for (Comment child : comment.getChildren()) {
-                this.children.add(new CommentDto(child));
-            }
-        }
+        this.memberId = comment.getMember().getId();
+        this.memberName = comment.getMember().getName();
+        this.childrenSize = comment.getChildren().size();
     }
 }

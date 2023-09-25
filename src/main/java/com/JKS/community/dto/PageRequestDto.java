@@ -25,7 +25,10 @@ public class PageRequestDto {
     public Pageable toPageable() {
         Sort sort = Sort.by(sortField);
         sort = sortOrder.equals("desc") ? sort.descending() : sort.ascending();
+        Sort secondarySort = Sort.by("id").ascending();
+        sort = sort.and(secondarySort);
         int pageNumber = (page != null) ? page : 0;
         return PageRequest.of(pageNumber, size, sort);
     }
+
 }

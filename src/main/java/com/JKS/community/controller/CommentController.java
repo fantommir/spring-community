@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,9 +39,16 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public ResponseEntity<Page<CommentDto>> getCommentsByPost (@PathVariable Long postId, PageRequestDto pageRequestDto) {
+    public ResponseEntity<Page<CommentDto>> getRootCommentsByPost (@PathVariable Long postId, PageRequestDto pageRequestDto) {
         Pageable pageable = pageRequestDto.toPageable();
-        Page<CommentDto> commentPage = commentService.getListByPost(postId, pageable);
+        Page<CommentDto> commentPage = commentService.getRootCommentsByPost(postId, pageable);
+        return new ResponseEntity<>(commentPage ,HttpStatus.OK);
+    }
+
+    @GetMapping("/{commentId}/replies")
+    public ResponseEntity<Page<CommentDto>> getCommentByParent (@PathVariable Long commentId, PageRequestDto pageRequestDto) {
+        Pageable pageable = pageRequestDto.toPageable();
+        Page<CommentDto> commentPage = commentService.getCommentByParent(commentId, pageable);
         return new ResponseEntity<>(commentPage ,HttpStatus.OK);
     }
 
