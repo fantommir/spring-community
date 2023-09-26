@@ -131,6 +131,29 @@ function loadComments(postId, page = 0, size = 10, sortField = "createdDate", so
     });
 }
 
+function getTotalPages(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc",callback) {
+    const url = `/api/comments/post/${postId}/totalPages`;
+    const data = {page, size, sortField, sortOrder};
+    $.ajax({
+        url,
+        type: 'GET',
+        data,
+        success: (totalPages) => {
+            callback(totalPages);
+        },
+        error: (jqXHR) => {
+            console.error('Error:', jqXHR.responseText);
+            alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+        },
+    });
+}
+
+function loadLastPageComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
+    getTotalPages(postId, page, size, sortField, sortOrder, (totalPages) => {
+        loadComments(postId, totalPages - 1);
+    });
+}
+
 function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
     const url = `/api/comments/${parentId}/replies`;
     const data = {page, size, sortField, sortOrder};
@@ -155,7 +178,8 @@ function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField =
 }
 
 $(document).ready(function () {
-    loadComments(postId);
+    loadLastPageComments(postId);
+
     $(document).on('click', '.more-replies', function (e) {
         e.preventDefault();
         let moreRepliesLink = $(this);

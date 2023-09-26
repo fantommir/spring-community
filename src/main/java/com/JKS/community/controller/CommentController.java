@@ -45,6 +45,13 @@ public class CommentController {
         return new ResponseEntity<>(commentPage ,HttpStatus.OK);
     }
 
+    @GetMapping("/post/{postId}/totalPages")
+    public ResponseEntity<Integer> getTotalPagesByPost (@PathVariable Long postId, PageRequestDto pageRequestDto) {
+        Pageable pageable = pageRequestDto.toPageable();
+        Page<CommentDto> commentPage = commentService.getRootCommentsByPost(postId, pageable);
+        return new ResponseEntity<>(commentPage.getTotalPages() ,HttpStatus.OK);
+    }
+
     @GetMapping("/{commentId}/replies")
     public ResponseEntity<Page<CommentDto>> getCommentByParent (@PathVariable Long commentId, PageRequestDto pageRequestDto) {
         Pageable pageable = pageRequestDto.toPageable();
