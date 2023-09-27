@@ -204,6 +204,7 @@ $(document).ready(function () {
             $('.reply-form').remove();
         });
     });
+
     $(document).on('click', '.reply-link', function (e) {
         e.preventDefault();
         $('.reply-form').remove();
@@ -215,9 +216,10 @@ $(document).ready(function () {
             $(this).css('height', 'auto');
             $(this).css('height', this.scrollHeight + 'px');
         })), $('<div>').addClass("col-auto d-flex").append($('<button>').addClass("btn btn-primary align-self-stretch").text("등록"))));
-        $(this).closest('.row.pt-3.pb-3').after(replyForm);
+        $(this).closest('.row').append(replyForm);
         $('.reply-form textarea[name=content]').focus();
     });
+
     $('#commentForm').on('submit', function (e) {
         e.preventDefault();
         if (!isLogin()) return;
@@ -225,7 +227,7 @@ $(document).ready(function () {
         if (content.length === 0) return;
         let formData = {content: content, postId: postId, memberId: memberId};
         sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
-            loadComments(postId);
+            loadLastPageComments(postId);
             $('#commentContent').val('');
         });
     });
