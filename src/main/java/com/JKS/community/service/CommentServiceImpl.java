@@ -48,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
             Comment parentComment = commentRepository.findById(commentFormDto.getParentId())
                     .orElseThrow(() -> new CommentNotFoundException("Invalid parent comment Id:" + commentFormDto.getParentId()));
 
-            int newCommentLevel = Math.min(parentComment.getLevel() + 1, 2);
+            int newCommentLevel = parentComment.getLevel() + 1;
 
             Comment createdComment = Comment.of(parentComment, newCommentLevel, post, member, commentFormDto.getContent());
             commentRepository.save(createdComment);

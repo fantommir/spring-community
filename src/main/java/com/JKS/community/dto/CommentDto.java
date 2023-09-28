@@ -25,6 +25,7 @@ public class CommentDto {
     private Long memberId;
     private String memberName;
     private int childrenSize;
+    private String parentName;
 
     public CommentDto(Comment comment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
@@ -42,5 +43,6 @@ public class CommentDto {
         this.memberId = comment.getMember().getId();
         this.memberName = comment.getMember().getName();
         this.childrenSize = comment.getChildren().size();
+        this.parentName = comment.getParent() == null ? null : comment.getParent().getMember().getName();
     }
 }

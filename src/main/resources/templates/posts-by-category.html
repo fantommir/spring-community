@@ -82,7 +82,7 @@
                                     .text(post.title)
                             ),
                             $('<td>').text(post.memberName),
-                            $('<td>').text(timeAgo(post.createdDate)),
+                            $('<td>').text(moment(post.createdDate, "YYYY.MM.DD HH:mm").fromNow()),
                             $('<td>').text(post.viewCount),
                             $('<td>').text(post.likeCount)
                         );
@@ -123,7 +123,8 @@
         }
     });
 </script>
-<script th:src="@{/js/time.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ko.min.js"></script>
 </body>
 </html>

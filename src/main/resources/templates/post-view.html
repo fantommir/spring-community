@@ -76,8 +76,9 @@
 <script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js></script>
 <script src=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ko.min.js"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/js/time.js}"></script>
 <script th:inline="javascript"> const memberId = [[${memberId}]];
 const postId = [[${postDto.id}]];
 const content = [[${postDto.content}]]; </script>
@@ -191,15 +192,16 @@ $(document).ready(function () {
         if (!isLogin()) return;
         let content = $(this).find('textarea[name=content]').val().trim();
         if (content.length === 0) return;
+        let parentId = $(this).find('[name=parentId]').val();
         let formData = {
             content: content,
             postId: postId,
             memberId: memberId,
-            parentId: $(this).find('[name=parentId]').val()
+            parentId: parentId
         };
         sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
-            console.log(response);
-            loadComments(postId);
+            let moreRepliesLink = $(this).find('.more-replies');
+            loadReplies(parentId, moreRepliesLink);
             $('#commentContent').val('');
             $('.reply-form').remove();
         });
@@ -208,7 +210,8 @@ $(document).ready(function () {
     $(document).on('click', '.reply-link', function (e) {
         e.preventDefault();
         $('.reply-form').remove();
-        const parentId = $(this).data('comment-id');
+        let parentId = $(this).data('comment-id');
+        let replyList = $('#replyList' + parentId);
         const replyForm = $('<form>').addClass('reply-form pt-2').attr('method', 'post').attr('action', '/api/comments/').append($('<input>').attr('type', 'hidden').attr('name', 'postId').val(postId), $('<input>').attr('type', 'hidden').attr('name', 'memberId').val(memberId), $('<input>').attr('type', 'hidden').attr('name', 'parentId').val(parentId), $('<label>').text("댓글 쓰기"), $('<div>').addClass("row mb-3 align-items-stretch").append($('<div>').addClass("col").append($('<textarea>').addClass("form-control").attr({
             name: "content",
             rows: "3"
@@ -216,7 +219,7 @@ $(document).ready(function () {
             $(this).css('height', 'auto');
             $(this).css('height', this.scrollHeight + 'px');
         })), $('<div>').addClass("col-auto d-flex").append($('<button>').addClass("btn btn-primary align-self-stretch").text("등록"))));
-        $(this).closest('.row').append(replyForm);
+        replyList.before(replyForm);
         $('.reply-form textarea[name=content]').focus();
     });
 
@@ -240,19 +243,23 @@ function createCommentElement(comment) {
     let imgTag = $('<img>').addClass('rounded-circle shadow-1-strong me-3').attr('src', 'https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp').attr('alt', 'avatar').attr('width', '65').attr('height', '65');
     let flexGrowDiv = $('<div>').addClass('flex-grow-1 flex-shrink-1');
     let dFlexDiv2 = $('<div>').addClass('d-flex justify-content-between align-items-center');
-    let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName + " - " + timeAgo(comment.createdDate));
+    let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName + " - " + moment(comment.createdDate, "YYYY.MM.DD HH:mm").fromNow());
     let replyLink = $('<a>').attr('href', '#!').addClass('reply-link').data('comment-id', comment.id).append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
     dFlexDiv2.append(pTag1, replyLink);
-    let pTag2 = $('<p>').addClass("small mb-0").text(comment.content);
+    let pTag2 = $('<p>').addClass("small mb-0");
+    if (comment.parentName) {
+        let mention = $('<a>').attr('href', '#!').text('@' + comment.parentName);
+        pTag2.append(mention, ' ');
+    }
+    pTag2.append(document.createTextNode(comment.content));
     flexGrowDiv.append(dFlexDiv2, pTag2);
     dFlexDiv1.append(imgTag, flexGrowDiv);
     colDiv.append(dFlexDiv1);
     rowDiv.append(colDiv);
-    if (comment.level <= 3) {
+    if (comment.level < 3) {
         rowDiv.css('margin-left', comment.level * 20 + 'px');
-    } else {
-        rowDiv.css('margin-left', '60px');
     }
+
     if (comment.childrenSize > 0) {
         let moreRepliesLink = $('<a>').attr('href', '#').css('color', 'gray').data('comment-id', comment.id).addClass('custom-link more-replies mt-1').text(comment.childrenSize + ' more replies')
         rowDiv.append(moreRepliesLink);
@@ -279,7 +286,7 @@ function sendAjaxRequest(url, type, dataObj, successCallback) {
         contentType: "application/json",
         processData: false,
         success: function (response) {
-            console.log(response);
+            // console.log(response);
             if (successCallback) {
                 successCallback(response);
             }
