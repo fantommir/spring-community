@@ -17,14 +17,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -112,10 +108,13 @@ public class NavigationController {
     }
 
     @GetMapping("/{categoryId}/post-create")
-    public String createPost(@PathVariable String categoryId, Model model) {
+    public String createPost(@PathVariable String categoryId, Model model,
+                             @AuthenticationPrincipal CustomUserDetails userDetails) {
         CategoryDto categoryDto = categoryService.get(Long.valueOf(categoryId));
         model.addAttribute("category", categoryDto);
         model.addAttribute("postFormDto", new PostFormDto());
+        if (userDetails != null) model.addAttribute("memberId", userDetails.getId());
+
         return "post-create";
     }
 }

@@ -39,8 +39,10 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID"))
                 .rememberMe(rememberMe -> rememberMe
                         .key("uniqueAndSecret")
+                        .rememberMeParameter("remember-me")
                         .tokenValiditySeconds(86400)
-                        .rememberMeParameter("_spring_security_remember_me"));
+                        .alwaysRemember(false)
+                        .userDetailsService(userDetailsService));
         return http.build();
     }
 
