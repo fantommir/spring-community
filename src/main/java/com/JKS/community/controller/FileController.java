@@ -1,9 +1,10 @@
 package com.JKS.community.controller;
 
-import com.JKS.community.entity.File;
-import com.JKS.community.repository.FileRepository;
-import com.JKS.community.service.FileStorageService;
-import lombok.RequiredArgsConstructor;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,23 +13,38 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
+import java.io.InputStream;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/image")
-@RequiredArgsConstructor
+@RequestMapping("/api/files")
 public class FileController {
-    private final FileRepository fileRepository;
-    private final FileStorageService fileStorageService;
 
-    @PostMapping
-    public ResponseEntity<?> uploadFile(@RequestParam("upload") MultipartFile multipartFile) {
+    @Value("${AZURE_STORAGE_CONNECTION_STRING}")
+    private String connectionString;
+
+    @Value("${AZURE_STORAGE_CONTAINER_NAME}")
+    private String containerName;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> upload(@RequestParam("upload") MultipartFile file) {
         try {
-            File file = fileStorageService.storeFile(multipartFile);
-            fileRepository.save(file);
-            return ResponseEntity.ok().body(Collections.singletonMap("url", "/files/" + file.getId()));
+            BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
+
+            BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+            String fileName = file.getOriginalFilename() + ":" + UUID.randomUUID();
+            BlobClient blob = blobContainerClient.getBlobClient(fileName);
+
+            InputStream inputStream = file.getInputStream();
+            blob.upload(inputStream, file.getSize(), true);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("{\"url\": \"" + blob.getBlobUrl() + "\"}");
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
+
