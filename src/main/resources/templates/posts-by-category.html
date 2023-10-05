@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+<input type="hidden" id="isAuthenticated" th:value="${#authorization.expression('isAuthenticated()')}"/>
+
 <div th:replace="~{fragment/header :: header}"></div>
 <div class="container my-5">
     <h1 th:text="${category.name}">Category Name</h1>
@@ -48,7 +50,7 @@
         <span class="input-group-text border-0" id="search-addon">
             <i class="fas fa-search"></i>
          </span>
-        <a type='button' th:href="|/${category.getId()}/post-create|" class='btn btn-primary'>글쓰기</a>
+        <a type='button' th:href="|/${category.getId()}/post-create|" class='btn btn-primary requires-auth'>글쓰기</a>
     </div>
     <div id='Pagination' class="btn-group mt-3"></div>
 </div>
@@ -121,6 +123,14 @@
             loadPosts(categoryId, 'all');
             $('#all-tab').trigger('click');
         }
+
+        $('.requires-auth').click(function (e) {
+            const isAuthenticated = $('#isAuthenticated').val() === 'true';
+            if (!isAuthenticated) {
+                e.preventDefault();
+                alert("로그인이 필요한 기능입니다.");
+            }
+        });
     });
 </script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>

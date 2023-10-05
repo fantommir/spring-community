@@ -21,10 +21,9 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public String create(@Valid @ModelAttribute PostFormDto postFormDto, RedirectAttributes redirectAttributes) {
+    public ResponseEntity<PostDto> create(@Valid @ModelAttribute PostFormDto postFormDto) {
         PostDto createdPost = postService.create(postFormDto);
-        redirectAttributes.addFlashAttribute("message", "Post created successfully!");
-        return "redirect:/posts/" + createdPost.getId();
+        return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
     @PutMapping("/{postId}")
