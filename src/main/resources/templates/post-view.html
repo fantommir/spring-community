@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <div th:utext="${postDto.content}" class="mb-3 mt-5" style="height: 500px">내용</div>
+    <div th:utext="${postDto.content}" class="mb-3 mt-5">내용</div>
 
     <div class="d-flex justify-content-center pt-3 pb-3">
         <button type="button" class="btn btn-success btn-sm me-3" onclick="react('like')">
@@ -150,10 +150,15 @@ function getTotalPages(postId, page = 0, size = 10, sortField = "createdDate", s
 }
 
 function loadLastPageComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
-    getTotalPages(postId, page, size, sortField, sortOrder, (totalPages) => {
-        loadComments(postId, totalPages - 1);
+    getTotalPages(postId, page ,size ,sortField ,sortOrder ,(totalPages) => {
+        if (totalPages <= 0) {
+            loadComments(postId);
+        } else {
+            loadComments(postId, totalPages - 1);
+        }
     });
 }
+
 
 function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
     const url = `/api/comments/${parentId}/replies`;
