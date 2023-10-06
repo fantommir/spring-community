@@ -107,14 +107,26 @@ public class NavigationController {
         return "post-view";
     }
 
-    @GetMapping("/{categoryId}/post-create")
+    @GetMapping("/post/{postId}/edit")
+    public String editPost(@PathVariable Long postId, Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PostDto postDto = postService.get(postId);
+        CategoryDto categoryDto = categoryService.get(postDto.getCategoryId());
+        model.addAttribute("postDto", postDto);
+        model.addAttribute("category", categoryDto);
+        if (userDetails != null) model.addAttribute("memberId", userDetails.getId());
+
+        return "post-form";
+    }
+
+    @GetMapping("/{categoryId}/create")
     public String createPost(@PathVariable String categoryId, Model model,
                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         CategoryDto categoryDto = categoryService.get(Long.valueOf(categoryId));
+        model.addAttribute("postDto", new PostDto());
         model.addAttribute("category", categoryDto);
-        model.addAttribute("postFormDto", new PostFormDto());
         if (userDetails != null) model.addAttribute("memberId", userDetails.getId());
 
-        return "post-create";
+        return "post-form";
     }
 }

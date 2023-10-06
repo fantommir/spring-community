@@ -3,6 +3,7 @@ package com.JKS.community.dto;
 import com.JKS.community.entity.Comment;
 import com.JKS.community.entity.Post;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.format.DateTimeFormatter;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter
+@NoArgsConstructor
 public class PostDto {
 
     private Long id;

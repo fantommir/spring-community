@@ -30,8 +30,10 @@
             <span th:text="'댓글 ' + ${#lists.size(postDto.comments)}">댓글수</span>
         </div>
     </div>
-
-    <div th:utext="${postDto.content}" class="mb-3 mt-5">내용</div>
+    <div class="text-end">
+        <a th:if="${memberId == postDto.memberId}" th:href="@{|/post/${postDto.id}/edit|}" class="custom-link">수정</a>
+    </div>
+    <div th:utext="${postDto.content}" class="mb-3 mt-3">내용</div>
 
     <div class="d-flex justify-content-center pt-3 pb-3">
         <button type="button" class="btn btn-success btn-sm me-3" onclick="react('like')">
