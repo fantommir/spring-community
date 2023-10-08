@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -42,7 +44,15 @@ public class SecurityConfig {
                         .rememberMeParameter("remember-me")
                         .tokenValiditySeconds(86400)
                         .alwaysRemember(false)
-                        .userDetailsService(userDetailsService));
+                        .userDetailsService(userDetailsService))
+                .cors(cors -> cors
+                        .configurationSource(request -> {
+                            var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
+                            corsConfiguration.setAllowedOrigins(List.of("*"));
+                            corsConfiguration.setAllowedMethods(List.of("*"));
+                            corsConfiguration.setAllowedHeaders(List.of("*"));
+                            return corsConfiguration.applyPermitDefaultValues();
+                        }));
         return http.build();
     }
 

@@ -33,7 +33,12 @@
     <div class="text-end">
         <a th:if="${memberId == postDto.memberId}" th:href="@{|/post/${postDto.id}/edit|}" class="custom-link">수정</a>
     </div>
-    <div th:utext="${postDto.content}" class="mb-3 mt-3">내용</div>
+
+    <div class="mb-3 mt-3">
+        <label for="content" class="form-label" style="display: none"></label>
+        <textarea id="content" name="content" class="form-control ckeditor" rows="10"></textarea>
+    </div>
+
 
     <div class="d-flex justify-content-center pt-3 pb-3">
         <button type="button" class="btn btn-success btn-sm me-3" onclick="react('like')">
@@ -81,224 +86,241 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ko.min.js"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-<script th:inline="javascript"> const memberId = [[${memberId}]];
-const postId = [[${postDto.id}]];
-const content = [[${postDto.content}]]; </script>
-<script> $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('#_csrf').val()}});
+<script th:src="@{/js/ckeditor.js}"></script>
+<script th:src="@{/js/editor.js}" type="module"></script>
 
-function react(reaction) {
-    if (!isLogin()) {
-        return;
-    }
-    const isLike = reaction === 'like';
-    const url = `/api/posts/${postId}/react`;
-    const data = {member_id: memberId, is_like: isLike};
-    $.ajax({
-        url, type: 'POST', data, success: (response) => {
-            updateReactionCounts(response);
-        }, error: (jqXHR) => {
-            console.error('Error:', jqXHR.responseText);
-            alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-        },
+<script th:inline="javascript">
+    const memberId = [[${memberId}]];
+    const postId = [[${postDto.id}]];
+    const content = [[${postDto.content}]];
+</script>
+<script type="module">
+    import makeEditor from '/js/editor.js';
+
+    $(document).ready(function () {
+        makeEditor("#content").then(editor => {
+            editor.enableReadOnlyMode(" 'my-feature-id' ");
+            editor.setData(content);
+        });
     });
-}
+</script>
 
-function updateReactionCounts(response) {
-    document.getElementById('likeCount').innerText = response.likeCount;
-    document.getElementById('dislikeCount').innerText = response.dislikeCount;
-}
+<script>
+    $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('#_csrf').val()}});
 
-function loadComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
-    const url = `/api/comments/post/${postId}`;
-    const data = {page, size, sortField, sortOrder};
-    $.ajax({
-        url, type: 'GET', data, success: (data) => {
-            const commentList = $('#commentList');
-            commentList.empty();
-            data.content.forEach((comment) => {
-                commentList.append(createCommentElement(comment));
-            });
-            const pagination = $('#Pagination');
-            pagination.empty();
-            for (let i = 0; i < data.totalPages; i++) {
-                const buttonClass = i === page ? 'btn-primary' : 'btn-default';
-                const button = $(`<button>`).addClass('btn').addClass(buttonClass).text(i + 1).click(() => {
-                    loadComments(postId, i);
+    function react(reaction) {
+        if (!isLogin()) {
+            return;
+        }
+        const isLike = reaction === 'like';
+        const url = `/api/posts/${postId}/react`;
+        const data = {member_id: memberId, is_like: isLike};
+        $.ajax({
+            url, type: 'POST', data, success: (response) => {
+                updateReactionCounts(response);
+            }, error: (jqXHR) => {
+                console.error('Error:', jqXHR.responseText);
+                alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+            },
+        });
+    }
+
+    function updateReactionCounts(response) {
+        document.getElementById('likeCount').innerText = response.likeCount;
+        document.getElementById('dislikeCount').innerText = response.dislikeCount;
+    }
+
+    function loadComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
+        const url = `/api/comments/post/${postId}`;
+        const data = {page, size, sortField, sortOrder};
+        $.ajax({
+            url, type: 'GET', data, success: (data) => {
+                const commentList = $('#commentList');
+                commentList.empty();
+                data.content.forEach((comment) => {
+                    commentList.append(createCommentElement(comment));
                 });
-                pagination.append(button);
-            }
-        }, error: (jqXHR) => {
-            console.error('Error:', jqXHR.responseText);
-            alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-        },
-    });
-}
+                const pagination = $('#Pagination');
+                pagination.empty();
+                for (let i = 0; i < data.totalPages; i++) {
+                    const buttonClass = i === page ? 'btn-primary' : 'btn-default';
+                    const button = $(`<button>`).addClass('btn').addClass(buttonClass).text(i + 1).click(() => {
+                        loadComments(postId, i);
+                    });
+                    pagination.append(button);
+                }
+            }, error: (jqXHR) => {
+                console.error('Error:', jqXHR.responseText);
+                alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+            },
+        });
+    }
 
-function getTotalPages(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc",callback) {
-    const url = `/api/comments/post/${postId}/totalPages`;
-    const data = {page, size, sortField, sortOrder};
-    $.ajax({
-        url,
-        type: 'GET',
-        data,
-        success: (totalPages) => {
-            callback(totalPages);
-        },
-        error: (jqXHR) => {
-            console.error('Error:', jqXHR.responseText);
-            alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
-        },
-    });
-}
+    function getTotalPages(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc", callback) {
+        const url = `/api/comments/post/${postId}/totalPages`;
+        const data = {page, size, sortField, sortOrder};
+        $.ajax({
+            url,
+            type: 'GET',
+            data,
+            success: (totalPages) => {
+                callback(totalPages);
+            },
+            error: (jqXHR) => {
+                console.error('Error:', jqXHR.responseText);
+                alert("요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.");
+            },
+        });
+    }
 
-function loadLastPageComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
-    getTotalPages(postId, page ,size ,sortField ,sortOrder ,(totalPages) => {
-        if (totalPages <= 0) {
-            loadComments(postId);
-        } else {
-            loadComments(postId, totalPages - 1);
-        }
-    });
-}
-
-
-function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
-    const url = `/api/comments/${parentId}/replies`;
-    const data = {page, size, sortField, sortOrder};
-    $.ajax({
-        url, type: 'GET', data, success: function (response) {
-            let remainingRepliesCount = moreRepliesLink.text().split(' ')[0] - response.content.length;
-            response.content.forEach(function (reply) {
-                let replyElement = createCommentElement(reply);
-                $('#replyList' + parentId).append(replyElement);
-            });
-            if (remainingRepliesCount > 0) {
-                moreRepliesLink.text(remainingRepliesCount + ' more replies');
+    function loadLastPageComments(postId, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
+        getTotalPages(postId, page, size, sortField, sortOrder, (totalPages) => {
+            if (totalPages <= 0) {
+                loadComments(postId);
             } else {
-                moreRepliesLink.remove();
+                loadComments(postId, totalPages - 1);
             }
-        }, error: function (jqXHR, textStatus, errorThrown) {
-            console.log(textStatus, errorThrown);
-            console.log(jqXHR.responseText);
-            alert('요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.');
-        }
-    });
-}
+        });
+    }
 
-$(document).ready(function () {
-    loadLastPageComments(postId);
 
-    $(document).on('click', '.more-replies', function (e) {
-        e.preventDefault();
-        let moreRepliesLink = $(this);
-        let commentId = moreRepliesLink.data('comment-id');
-        loadReplies(commentId, moreRepliesLink);
-    });
-    $(document).on('submit', '.reply-form', function (e) {
-        e.preventDefault();
-        if (!isLogin()) return;
-        let content = $(this).find('textarea[name=content]').val().trim();
-        if (content.length === 0) return;
-        let parentId = $(this).find('[name=parentId]').val();
-        let formData = {
-            content: content,
-            postId: postId,
-            memberId: memberId,
-            parentId: parentId
-        };
-        sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
-            let moreRepliesLink = $(this).find('.more-replies');
-            loadReplies(parentId, moreRepliesLink);
-            $('#commentContent').val('');
+    function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
+        const url = `/api/comments/${parentId}/replies`;
+        const data = {page, size, sortField, sortOrder};
+        $.ajax({
+            url, type: 'GET', data, success: function (response) {
+                let remainingRepliesCount = moreRepliesLink.text().split(' ')[0] - response.content.length;
+                response.content.forEach(function (reply) {
+                    let replyElement = createCommentElement(reply);
+                    $('#replyList' + parentId).append(replyElement);
+                });
+                if (remainingRepliesCount > 0) {
+                    moreRepliesLink.text(remainingRepliesCount + ' more replies');
+                } else {
+                    moreRepliesLink.remove();
+                }
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+                console.log(jqXHR.responseText);
+                alert('요청을 처리하는 도중 오류가 발생했습니다. 다시 시도해 주세요.');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        loadLastPageComments(postId);
+
+        $(document).on('click', '.more-replies', function (e) {
+            e.preventDefault();
+            let moreRepliesLink = $(this);
+            let commentId = moreRepliesLink.data('comment-id');
+            loadReplies(commentId, moreRepliesLink);
+        });
+        $(document).on('submit', '.reply-form', function (e) {
+            e.preventDefault();
+            if (!isLogin()) return;
+            let content = $(this).find('textarea[name=content]').val().trim();
+            if (content.length === 0) return;
+            let parentId = $(this).find('[name=parentId]').val();
+            let formData = {
+                content: content,
+                postId: postId,
+                memberId: memberId,
+                parentId: parentId
+            };
+            sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
+                let moreRepliesLink = $(this).find('.more-replies');
+                loadReplies(parentId, moreRepliesLink);
+                $('#commentContent').val('');
+                $('.reply-form').remove();
+            });
+        });
+
+        $(document).on('click', '.reply-link', function (e) {
+            e.preventDefault();
             $('.reply-form').remove();
+            let parentId = $(this).data('comment-id');
+            let replyList = $('#replyList' + parentId);
+            const replyForm = $('<form>').addClass('reply-form pt-2').attr('method', 'post').attr('action', '/api/comments/').append($('<input>').attr('type', 'hidden').attr('name', 'postId').val(postId), $('<input>').attr('type', 'hidden').attr('name', 'memberId').val(memberId), $('<input>').attr('type', 'hidden').attr('name', 'parentId').val(parentId), $('<label>').text("댓글 쓰기"), $('<div>').addClass("row mb-3 align-items-stretch").append($('<div>').addClass("col").append($('<textarea>').addClass("form-control").attr({
+                name: "content",
+                rows: "3"
+            }).on("input", function () {
+                $(this).css('height', 'auto');
+                $(this).css('height', this.scrollHeight + 'px');
+            })), $('<div>').addClass("col-auto d-flex").append($('<button>').addClass("btn btn-primary align-self-stretch").text("등록"))));
+            replyList.before(replyForm);
+            $('.reply-form textarea[name=content]').focus();
+        });
+
+        $('#commentForm').on('submit', function (e) {
+            e.preventDefault();
+            if (!isLogin()) return;
+            let content = $('#commentContent').val().trim();
+            if (content.length === 0) return;
+            let formData = {content: content, postId: postId, memberId: memberId};
+            sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
+                loadLastPageComments(postId);
+                $('#commentContent').val('');
+            });
         });
     });
 
-    $(document).on('click', '.reply-link', function (e) {
-        e.preventDefault();
-        $('.reply-form').remove();
-        let parentId = $(this).data('comment-id');
-        let replyList = $('#replyList' + parentId);
-        const replyForm = $('<form>').addClass('reply-form pt-2').attr('method', 'post').attr('action', '/api/comments/').append($('<input>').attr('type', 'hidden').attr('name', 'postId').val(postId), $('<input>').attr('type', 'hidden').attr('name', 'memberId').val(memberId), $('<input>').attr('type', 'hidden').attr('name', 'parentId').val(parentId), $('<label>').text("댓글 쓰기"), $('<div>').addClass("row mb-3 align-items-stretch").append($('<div>').addClass("col").append($('<textarea>').addClass("form-control").attr({
-            name: "content",
-            rows: "3"
-        }).on("input", function () {
-            $(this).css('height', 'auto');
-            $(this).css('height', this.scrollHeight + 'px');
-        })), $('<div>').addClass("col-auto d-flex").append($('<button>').addClass("btn btn-primary align-self-stretch").text("등록"))));
-        replyList.before(replyForm);
-        $('.reply-form textarea[name=content]').focus();
-    });
+    function createCommentElement(comment) {
+        let rowDiv = $('<div class="row"></div>');
+        let colDiv = $('<div class="col"></div>');
+        let dFlexDiv1 = $('<div class="d-flex flex-start"></div>');
+        let imgTag = $('<img>').addClass('rounded-circle shadow-1-strong me-3').attr('src', 'https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp').attr('alt', 'avatar').attr('width', '65').attr('height', '65');
+        let flexGrowDiv = $('<div>').addClass('flex-grow-1 flex-shrink-1');
+        let dFlexDiv2 = $('<div>').addClass('d-flex justify-content-between align-items-center');
+        let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName + " - " + moment(comment.createdDate, "YYYY.MM.DD HH:mm").fromNow());
+        let replyLink = $('<a>').attr('href', '#!').addClass('reply-link').data('comment-id', comment.id).append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
+        dFlexDiv2.append(pTag1, replyLink);
+        let pTag2 = $('<p>').addClass("small mb-0");
+        if (comment.parentName) {
+            let mention = $('<a>').attr('href', '#!').text('@' + comment.parentName);
+            pTag2.append(mention, ' ');
+        }
+        pTag2.append(document.createTextNode(comment.content));
+        flexGrowDiv.append(dFlexDiv2, pTag2);
+        dFlexDiv1.append(imgTag, flexGrowDiv);
+        colDiv.append(dFlexDiv1);
+        rowDiv.append(colDiv);
+        if (comment.level < 3) {
+            rowDiv.css('margin-left', comment.level * 20 + 'px');
+        }
 
-    $('#commentForm').on('submit', function (e) {
-        e.preventDefault();
-        if (!isLogin()) return;
-        let content = $('#commentContent').val().trim();
-        if (content.length === 0) return;
-        let formData = {content: content, postId: postId, memberId: memberId};
-        sendAjaxRequest('/api/comments/', 'POST', formData, function (response) {
-            loadLastPageComments(postId);
-            $('#commentContent').val('');
+        if (comment.childrenSize > 0) {
+            let moreRepliesLink = $('<a>').attr('href', '#').css('color', 'gray').data('comment-id', comment.id).addClass('custom-link more-replies mt-1').text(comment.childrenSize + ' more replies')
+            rowDiv.append(moreRepliesLink);
+        }
+        rowDiv.append($('<hr/>').addClass('mt-3'));
+        let replyList = $('<div>').attr('id', 'replyList' + comment.id);
+        rowDiv.append(replyList);
+        return rowDiv;
+    }
+
+    function isLogin() {
+        if (!memberId) {
+            alert('로그인이 필요한 기능입니다.');
+            return false;
+        }
+        return true;
+    }
+
+    function sendAjaxRequest(url, type, dataObj, successCallback) {
+        $.ajax({
+            url: url,
+            type: type,
+            data: JSON.stringify(dataObj),
+            contentType: "application/json",
+            processData: false,
+            success: function (response) {
+                // console.log(response);
+                if (successCallback) {
+                    successCallback(response);
+                }
+            },
         });
-    });
-});
-
-function createCommentElement(comment) {
-    let rowDiv = $('<div class="row"></div>');
-    let colDiv = $('<div class="col"></div>');
-    let dFlexDiv1 = $('<div class="d-flex flex-start"></div>');
-    let imgTag = $('<img>').addClass('rounded-circle shadow-1-strong me-3').attr('src', 'https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp').attr('alt', 'avatar').attr('width', '65').attr('height', '65');
-    let flexGrowDiv = $('<div>').addClass('flex-grow-1 flex-shrink-1');
-    let dFlexDiv2 = $('<div>').addClass('d-flex justify-content-between align-items-center');
-    let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName + " - " + moment(comment.createdDate, "YYYY.MM.DD HH:mm").fromNow());
-    let replyLink = $('<a>').attr('href', '#!').addClass('reply-link').data('comment-id', comment.id).append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
-    dFlexDiv2.append(pTag1, replyLink);
-    let pTag2 = $('<p>').addClass("small mb-0");
-    if (comment.parentName) {
-        let mention = $('<a>').attr('href', '#!').text('@' + comment.parentName);
-        pTag2.append(mention, ' ');
-    }
-    pTag2.append(document.createTextNode(comment.content));
-    flexGrowDiv.append(dFlexDiv2, pTag2);
-    dFlexDiv1.append(imgTag, flexGrowDiv);
-    colDiv.append(dFlexDiv1);
-    rowDiv.append(colDiv);
-    if (comment.level < 3) {
-        rowDiv.css('margin-left', comment.level * 20 + 'px');
-    }
-
-    if (comment.childrenSize > 0) {
-        let moreRepliesLink = $('<a>').attr('href', '#').css('color', 'gray').data('comment-id', comment.id).addClass('custom-link more-replies mt-1').text(comment.childrenSize + ' more replies')
-        rowDiv.append(moreRepliesLink);
-    }
-    rowDiv.append($('<hr/>').addClass('mt-3'));
-    let replyList = $('<div>').attr('id', 'replyList' + comment.id);
-    rowDiv.append(replyList);
-    return rowDiv;
-}
-
-function isLogin() {
-    if (!memberId) {
-        alert('로그인이 필요한 기능입니다.');
-        return false;
-    }
-    return true;
-}
-
-function sendAjaxRequest(url, type, dataObj, successCallback) {
-    $.ajax({
-        url: url,
-        type: type,
-        data: JSON.stringify(dataObj),
-        contentType: "application/json",
-        processData: false,
-        success: function (response) {
-            // console.log(response);
-            if (successCallback) {
-                successCallback(response);
-            }
-        },
-    });
-} </script>
+    } </script>
 </body>
 </html>
