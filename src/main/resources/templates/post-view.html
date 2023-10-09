@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"/>
 </head>
@@ -31,7 +30,7 @@
         </div>
     </div>
     <div class="text-end">
-        <a th:if="${memberId == postDto.memberId}" th:href="@{|/post/${postDto.id}/edit|}" class="custom-link">수정</a>
+        <a th:if="${memberId == postDto.memberId}" th:href="@{|/post/${postDto.id}/edit|}">수정</a>
     </div>
 
     <div class="mb-3 mt-3">
@@ -97,16 +96,11 @@
 <script type="module">
     import makeEditor from '/js/editor.js';
 
-    $(document).ready(function () {
-        makeEditor("#content").then(editor => {
-            editor.enableReadOnlyMode(" 'my-feature-id' ");
-            editor.setData(content);
-        });
+    makeEditor("#content").then(editor => {
+        editor.enableReadOnlyMode(" 'my-feature-id' ");
+        editor.setData(content);
     });
-</script>
-
-<script>
-    $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('#_csrf').val()}});
+    loadLastPageComments(postId);
 
     function react(reaction) {
         if (!isLogin()) {
@@ -208,8 +202,7 @@
     }
 
     $(document).ready(function () {
-        loadLastPageComments(postId);
-
+        $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('#_csrf').val()}});
         $(document).on('click', '.more-replies', function (e) {
             e.preventDefault();
             let moreRepliesLink = $(this);

@@ -19,7 +19,10 @@ public class PostFormDto {
     @Size(max = 65535)
     private String content;
 
+    @NotNull
     private Long memberId;
+
+    @NotNull
     private Long categoryId;
 
 

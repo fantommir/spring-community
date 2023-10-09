@@ -17,8 +17,9 @@
 
     <form id="postForm"
           th:action="${#strings.isEmpty(postDto.id) ? '/api/posts' : '/api/posts/' + postDto.id}"
-          th:method="${#strings.isEmpty(postDto.id) ? 'POST' : 'PUT'}">
+          method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" name="_method" th:value="${#strings.isEmpty(postDto.id) ? 'post' : 'put'}"/>
         <input type="hidden" name="memberId" th:value="${memberId}">
         <div class="row mb-3">
             <div class="col-md-3">
@@ -38,7 +39,7 @@
 
         <div class="mb-3">
             <label for="content" class="form-label" style="display: none"></label>
-            <textarea id="content" name="content" class="form-control ckeditor" rows="10" th:text="${postDto.content}"></textarea>
+            <textarea id="content" name="content" class="form-control ckeditor" rows="10"></textarea>
         </div>
 
         <div class="mb-3">
@@ -54,18 +55,20 @@
 <script th:src="@{/js/editor.js}" type="module"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+<script th:inline="javascript">
+    postContent = [[${postDto.content}]];
+    </script>
 <script type="module">
     import makeEditor from '/js/editor.js';
 
+    let editorInstance = null;
+
+    makeEditor("#content").then(editor => {
+        editorInstance = editor;
+        editorInstance.setData(postContent);
+    });
+
     $(document).ready(function() {
-        let editorInstance = null;
-
-        makeEditor("#content").then(editor => {
-            // Additional setup...
-            editorInstance = editor;
-        });
-
         const postForm = $('#postForm');
         postForm.on('submit', function(e) {
             e.preventDefault();
@@ -76,19 +79,21 @@
                 return;
             }
 
-            // Update ckeditor data to textarea
-            if (editorInstance) {
-                $('#content').val(editorInstance.getData());
-            }
-
-            const formData = new FormData(this);
+            const postData = {
+                title: $('#title').val(),
+                content: editorInstance.getData(),
+                memberId: $('input[name="memberId"]').val(),
+                categoryId: $('#subcategory').val()
+            };
 
             $.ajax({
                 url: postForm.attr('action'),
-                type: postForm.attr('method'),
-                data: formData,
-                processData: false,
-                contentType: false,
+                type: $('input[name="_method"]').val(),
+                data: JSON.stringify(postData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_csrf"]').val()
+                },
                 success: function(response) {
                     window.location.href = "/post/" + response.id;
                 },

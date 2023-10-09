@@ -21,14 +21,14 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostDto> create(@Valid @ModelAttribute PostFormDto postFormDto) {
+    public ResponseEntity<PostDto> create(@Valid @RequestBody PostFormDto postFormDto) {
         PostDto createdPost = postService.create(postFormDto);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
     @PutMapping("/{postId}")
     public ResponseEntity<PostDto> update(@PathVariable Long postId,
-                                          @Valid @ModelAttribute PostFormDto postFormDto) {
+                                          @Valid @RequestBody PostFormDto postFormDto) {
         PostDto updatedPost = postService.update(postId, postFormDto);
         return new ResponseEntity<>(updatedPost, HttpStatus.OK);
     }

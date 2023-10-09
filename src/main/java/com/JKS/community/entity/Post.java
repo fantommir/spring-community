@@ -64,9 +64,10 @@ public class Post extends BaseTimeEntity {
         this.comments.add(comment);
     }
 
-    public void update(PostFormDto postFormDto) {
-        this.title = postFormDto.getTitle();
-        this.content = postFormDto.getContent();
+    public void update(String title, String content, Category category) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
     }
 
     public void setLikeCount(int likeCount) {

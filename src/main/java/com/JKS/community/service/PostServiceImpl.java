@@ -51,7 +51,14 @@ public class PostServiceImpl implements PostService {
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
 
-        existingPost.update(postFormDto);
+        if (!existingPost.getMember().getId().equals(postFormDto.getMemberId())) {
+            throw new PostNotFoundException("게시글은 작성자 본인만 수정할 수 있습니다.");
+        }
+
+        Category category = categoryRepository.findById(postFormDto.getCategoryId())
+                .orElseThrow(() -> new CategoryNotFoundException("Invalid categoryId:" + postFormDto.getCategoryId()));
+
+        existingPost.update(postFormDto.getTitle(), postFormDto.getContent(), category);
 
         postRepository.save(existingPost);
         return new PostDto(existingPost);
