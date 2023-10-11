@@ -43,6 +43,7 @@ class MemberServiceImplTest {
         memberFormDto = new MemberFormDto();
         memberFormDto.setEmail("testEmail");
         memberFormDto.setPassword("testPassword");
+        memberFormDto.setConfirm_password("testPassword");
         memberFormDto.setName("testName");
     }
 

@@ -27,9 +27,6 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberAlreadyExistsException("이미 존재하는 회원입니다.");
         }
         Member member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
-        System.out.println("memberEmail = " + member.getEmail());
-        System.out.println("memberName = " + member.getName());
-        System.out.println("memberPassword = " + member.getPassword());
         return new MemberDto(memberRepository.save(member));
     }
 
@@ -56,8 +53,19 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
-        member.update(memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
+        if (!member.getEmail().equals(memberFormDto.getEmail())) {
+            throw new IllegalArgumentException("본인의 정보만 수정할 수 있습니다.");
+        }
 
+        if (!memberFormDto.getPassword().equals(memberFormDto.getConfirm_password())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (passwordEncoder.matches(memberFormDto.getPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("동일한 비밀번호로 변경할 수 없습니다.");
+        }
+
+        member.update(memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
         return new MemberDto(member);
     }
 

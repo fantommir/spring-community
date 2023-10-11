@@ -2,6 +2,7 @@ package com.JKS.community.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,14 +22,17 @@ public class MemberFormDto {
     private String name;
 
     @NotNull
-//    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")
-    @Size(min = 8, max = 20)
+    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$")
     private String password;
 
+    @NotNull
+    private String confirm_password;
+
     @Builder
-    public MemberFormDto(String email, String password, String name) {
+    public MemberFormDto(String email, String password, String confirm_password, String name) {
         this.email = email;
         this.password = password;
+        this.confirm_password = confirm_password;
         this.name = name;
     }
 }

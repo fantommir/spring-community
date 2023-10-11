@@ -78,9 +78,10 @@ class CommunityApplicationTests {
 		for (int i = 1; i <= 30; i++) {
 			String email = "user" + i + "@example.com";
 			String password = "password" + i;
+			String confirm_password = "password" + i;
 			String name = "User " + i;
 
-			members.add(new MemberFormDto(email, password, name));
+			members.add(new MemberFormDto(email, password, confirm_password, name));
 		}
 
 		for (MemberFormDto member : members) {
