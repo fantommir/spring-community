@@ -3,12 +3,20 @@
 <head>
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <title>Title</title>
+    <title>info</title>
 </head>
 <body>
-<div class="container">
+<div th:replace="~{fragment/header :: header}"></div>
+<div class="container mt-5">
+    <h2>회원 정보</h2>
 
+    <table class='table table-bordered'>
+        <tr><th>이메일</th><td th:text="${memberDto.email}"></td></tr>
+        <tr><th>이름</th><td th:text="${memberDto.name}"></td></tr>
+        <tr><th>가입일</th><td th:text="${#temporals.format(memberDto.createdDate, 'yyyy-MM-dd HH:mm')}"></td></tr>
+    </table>
 
+    <a th:href="|/info/${memberDto.id}|" class='btn btn-primary'>정보 수정</a>
 </div>
 
 

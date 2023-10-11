@@ -1,10 +1,7 @@
 package com.JKS.community.controller;
 
 
-import com.JKS.community.dto.CategoryDto;
-import com.JKS.community.dto.MemberFormDto;
-import com.JKS.community.dto.PostDto;
-import com.JKS.community.dto.PostFormDto;
+import com.JKS.community.dto.*;
 import com.JKS.community.security.CustomUserDetails;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.MemberService;
@@ -62,7 +59,25 @@ public class NavigationController {
     }
 
     @GetMapping("/info")
-    public String info() {
+    public String myInfo(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        MemberDto memberDto = memberService.get(userDetails.getId());
+        model.addAttribute("memberDto", memberDto);
+        return "info";
+    }
+
+    @GetMapping("/info/{memberId}")
+    public String info(@PathVariable Long memberId, Model model) {
+        MemberDto memberDto = memberService.get(memberId);
+        model.addAttribute("memberDto", memberDto);
+        return "info-form";
+    }
+
+    @GetMapping("/info/{memberId}/edit")
+    public String editInfo(@PathVariable Long memberId, Model model,
+                           @ModelAttribute MemberFormDto memberFormDto) {
+        MemberDto updatedMemberDto = memberService.update(memberId, memberFormDto);
+        model.addAttribute("memberDto", updatedMemberDto);
         return "info";
     }
 

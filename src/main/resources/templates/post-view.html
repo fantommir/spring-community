@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"/>
 </head>
-<body><input type="hidden" id="_csrf" th:value="${_csrf.token}"/>
+<body>
+<input type="hidden" id="_csrf" th:value="${_csrf.token}"/>
 <div th:replace="~{fragment/header :: header}"></div>
 <div class="container mt-5">
     <div class="row border-bottom pt-1 pb-1">
@@ -82,8 +83,8 @@
 <script type=text/javascript src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js></script>
 <script src=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ko.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/ko.min.js"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/ckeditor.js}"></script>
 <script th:src="@{/js/editor.js}" type="module"></script>
@@ -100,6 +101,8 @@
         editor.enableReadOnlyMode(" 'my-feature-id' ");
         editor.setData(content);
     });
+</script>
+<script>
     loadLastPageComments(postId);
 
     function react(reaction) {
@@ -176,7 +179,6 @@
             }
         });
     }
-
 
     function loadReplies(parentId, moreRepliesLink, page = 0, size = 10, sortField = "createdDate", sortOrder = "asc") {
         const url = `/api/comments/${parentId}/replies`;

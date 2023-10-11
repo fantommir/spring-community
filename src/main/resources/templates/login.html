@@ -13,7 +13,7 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
-            Invalid email or password.
+            잘못된 아이디 또는 비밀번호입니다.
         </div>
 
         <div class="form-outline mb-4">
@@ -30,20 +30,20 @@
             <div class="col d-flex justify-content-center">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me" />
-                    <label class="form-check-label" for="remember-me"> Remember me </label>
+                    <label class="form-check-label" for="remember-me"> 기억하기 </label>
                 </div>
             </div>
 
             <div class="col">
-                <a href="/forgot-password">Forgot password?</a>
+                <a href="/forgot-password">비밀번호를 잊으셨나요?</a>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
+        <button type="submit" class="btn btn-primary btn-block mb-4">로그인</button>
 
         <div class="text-center">
-            <p>Not a member? <a href="/register">Register</a></p>
-            <p>or sign up with:</p>
+            <p>회원이 아니신가요? <a href="/register">회원가입</a></p>
+            <p>소셜 로그인</p>
             <button type="button" class="btn btn-link btn-floating mx-1">
                 <i class="fab fa-facebook-f"></i>
             </button>
