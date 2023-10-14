@@ -85,10 +85,24 @@ https://spring.io/ -> Projects -> Spring Boot -> Learn -> 사용 버전의 Refer
 <br>
 
 ### Custom Upload Adapter
-    https://jjong-factory.tistory.com/85
-    처음엔 CKFinder Upload Adapter나 Ssimple Upload Adapter를 사용하려고 했으나, 삽입된 이미지를 움직이는 등의 동작을 하면 403 (Forbidden) 에러 발생.
+https://jjong-factory.tistory.com/85
+
+    처음엔 CKFinder Upload Adapter나 Ssimple Upload Adapter를 사용하려고 했으나, 삽입된 이미지를 움직이는 등의 동작을 하면 403 (Forbidden) 에러 발생.  
     CSRF 토큰을 헤더에도 추가해봤으나 여전히 안돼서 Custom Upload Adapter를 사용해야겠다고 판단.
     
     위 블로그를 참고하여 Custom Upload Adapter 구현 후 403 (Forbidden) 에러 해결.
     409 (Public access is not permitted on this storage account.) 에러가 발생하였으나 Azure Blob Storage와 Container의 액세스 레벨 조정 후 해결.
 <br>
+
+### ES Module
+https://zubetcha.tistory.com/entry/Javascript-ES-Module  
+https://github.com/mdn/js-examples/tree/main/module-examples  
+
+    ES Module : ES6에 도입된 모듈 시스템.
+    import, export를 사용해 분리된 자바스크립트 파일끼리 서로 접근할 수 있다.
+
+    <script type="module"> 
+    모듈은 defer되어 문서 파싱 후 실행
+    모듈은 전역 스코프가 아니라 자신의 스코프를 가지므로, import한 기능에만 접근
+    
+    이 태그 안에 함수를 정의했다가 전역 스코프가 아니라 에러가 발생한 적 있음.
