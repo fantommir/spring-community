@@ -67,8 +67,11 @@ public class NavigationController {
     }
 
     @GetMapping("/info/{memberId}")
-    public String info(@PathVariable Long memberId, Model model) {
+    public String info(@PathVariable Long memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         MemberDto memberDto = memberService.get(memberId);
+        if (!userDetails.getId().equals(memberId)) {
+            memberDto.setEmail(null);
+        }
         model.addAttribute("memberDto", memberDto);
         return "info-form";
     }
