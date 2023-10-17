@@ -35,4 +35,6 @@ public interface PostService {
     // TODO 특정 회원 글 조회
 
     // TODO 인기 글 조회 (카테고리)
+
+    long countPostsByMember(Long memberId);
 }

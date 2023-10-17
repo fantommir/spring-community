@@ -4,6 +4,7 @@ package com.JKS.community.controller;
 import com.JKS.community.dto.*;
 import com.JKS.community.security.CustomUserDetails;
 import com.JKS.community.service.CategoryService;
+import com.JKS.community.service.CommentService;
 import com.JKS.community.service.MemberService;
 import com.JKS.community.service.PostService;
 import jakarta.servlet.http.Cookie;
@@ -19,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/")
@@ -28,6 +30,7 @@ public class NavigationController {
     private final MemberService memberService;
     private final PostService postService;
     private final CategoryService categoryService;
+    private final CommentService commentService;
 
     @GetMapping
     public String home(Model model) {
@@ -58,24 +61,30 @@ public class NavigationController {
         return "redirect:/";
     }
 
-    @GetMapping("/info")
-    public String myInfo(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) return "redirect:/login";
-        MemberDto memberDto = memberService.get(userDetails.getId());
+    @GetMapping({"/info", "/info/{memberId}"})
+    public String info(@PathVariable Optional<Long> memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long id;
+        if (memberId.isPresent()) {
+            id = memberId.get();
+        } else {
+            if (userDetails == null) return "redirect:/login";
+            id = userDetails.getId();
+        }
+        return generateInfo(id, model, userDetails);
+    }
+
+    private String generateInfo(Long id, Model model, CustomUserDetails userDetails) {
+        MemberDto memberDto = memberService.get(id);
+        if (userDetails == null || !userDetails.getId().equals(id)) {
+            memberDto.setEmail(null);
+        }
+        model.addAttribute("countPosts", postService.countPostsByMember(id));
+        model.addAttribute("countComments", commentService.countCommentsByMember(id));
         model.addAttribute("memberDto", memberDto);
         return "info";
     }
 
-    @GetMapping("/info/{memberId}")
-    public String info(@PathVariable Long memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberDto memberDto = memberService.get(memberId);
-        if (!userDetails.getId().equals(memberId)) {
-            memberDto.setEmail(null);
-        }
-        model.addAttribute("memberDto", memberDto);
-        return "info-form";
-    }
-
+    // 회원 정보 수정
     @GetMapping("/info/{memberId}/edit")
     public String editInfo(@PathVariable Long memberId, Model model,
                            @ModelAttribute MemberFormDto memberFormDto) {

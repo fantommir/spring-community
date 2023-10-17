@@ -148,4 +148,11 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new PostNotFoundException("Invalid post Id:" + postId));
         existingPost.increaseViewCount();
     }
+
+    @Override
+    public long countPostsByMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+        return memberRepository.countPostsByMember(member);
+    }
 }

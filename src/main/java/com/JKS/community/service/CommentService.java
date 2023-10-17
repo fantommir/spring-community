@@ -34,4 +34,6 @@ public interface CommentService {
 
 //    TODO: 상위 5개 댓글 조회
 //    Page<CommentDto> getTop5(Long postId);
+
+    long countCommentsByMember(Long memberId);
 }

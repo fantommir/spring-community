@@ -14,9 +14,11 @@
         <tr th:if="${memberDto.email != null}"><th>이메일</th><td th:text="${memberDto.email}"></td></tr>
         <tr><th>이름</th><td th:text="${memberDto.name}"></td></tr>
         <tr><th>가입일</th><td th:text="${#temporals.format(memberDto.createdDate, 'yyyy-MM-dd HH:mm')}"></td></tr>
+        <tr><th>게시글 수</th><td th:text="${countPosts}"></td></tr>
+        <tr><th>댓글 수</th><td th:text="${countComments}"></td></tr>
     </table>
 
-    <a th:href="|/info/${memberDto.id}|" class='btn btn-primary'>정보 수정</a>
+    <a th:href="|/info/${memberDto.id}/edit|" class='btn btn-primary'>정보 수정</a>
 </div>
 
 

@@ -143,4 +143,10 @@ public class CommentServiceImpl implements CommentService {
         return new CommentDto(comment);
     }
 
+    @Override
+    public long countCommentsByMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+        return memberRepository.countCommentsByMember(member);
+    }
 }
