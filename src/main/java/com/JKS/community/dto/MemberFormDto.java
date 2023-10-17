@@ -21,11 +21,8 @@ public class MemberFormDto {
     @Size(min = 2, max = 10)
     private String name;
 
-    @NotNull
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$")
     private String password;
 
-    @NotNull
     private String confirm_password;
 
     @Builder

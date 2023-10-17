@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,6 +47,7 @@ public class MemberController {
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberDto> update(@PathVariable Long memberId, @Valid @RequestBody MemberFormDto memberFormDto) {
         MemberDto updatedMember = memberService.update(memberId, memberFormDto);
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok(updatedMember);
     }
 

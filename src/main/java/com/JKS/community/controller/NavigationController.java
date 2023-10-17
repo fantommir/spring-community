@@ -86,11 +86,10 @@ public class NavigationController {
 
     // 회원 정보 수정
     @GetMapping("/info/{memberId}/edit")
-    public String editInfo(@PathVariable Long memberId, Model model,
-                           @ModelAttribute MemberFormDto memberFormDto) {
-        MemberDto updatedMemberDto = memberService.update(memberId, memberFormDto);
-        model.addAttribute("memberDto", updatedMemberDto);
-        return "info";
+    public String editInfo(@PathVariable Long memberId, Model model) {
+        MemberDto memberDto = memberService.get(memberId);
+        model.addAttribute("memberDto", memberDto);
+        return "info-form";
     }
 
     @GetMapping("/category/{categoryId}")

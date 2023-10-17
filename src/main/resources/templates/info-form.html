@@ -27,7 +27,6 @@
         <div class='mb-3'>
             <label for='password' class='form-label'>비밀번호</label>
             <input type ='password' id ='password'
-                   required
                    minlength ='8'
                    maxlength ='20'
                    pattern = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$"
@@ -37,7 +36,7 @@
         <div class='mb-3'>
             <label for='confirm_password' class='form-label'>비밀번호 확인</label>
             <input type='password' id='confirm_password' name='confirm_password'
-                   class='form-control' required />
+                   class='form-control' />
         </div>
 
         <button type="submit" class='btn btn-primary'>수정</button>
@@ -51,7 +50,13 @@
     // 비밀번호 일치 검사 함수
     function validatePassword() {
         let confirmPassword = $('#confirm_password');
-        if ($('#password').val() !== confirmPassword.val()) {
+        let password = $('#password');
+        // password와 confirmPassword 모두 비어있다면 통과
+        if (password.val() === '' && confirmPassword.val() === '') {
+            confirmPassword[0].setCustomValidity('');
+            return;
+        }
+        if (password.val() !== confirmPassword.val()) {
             confirmPassword[0].setCustomValidity('비밀번호가 일치하지 않습니다.');
         } else {
             confirmPassword[0].setCustomValidity('');
@@ -80,7 +85,7 @@
                 },
                 success: function (response) {
                     alert('회원 정보가 수정됐습니다.');
-                    window.location.href = '/info';
+                    window.location.href = '/login';
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     if (jqXHR.responseJSON) {
