@@ -105,6 +105,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Page<PostDto> getListByMember(Long memberId, Pageable pageable) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("Invalid member ID: " + memberId));
+        return postRepository.findAllByMemberId(member.getId(), pageable).map(PostDto::new);
+    }
+
+    @Override
     public Page<PostDto> searchListByKeyword(String keyword, Pageable pageable) {
         return postRepository.searchActivePostsByKeyword(keyword, pageable).map(PostDto::new);
     }

@@ -1,7 +1,10 @@
 package com.JKS.community.controller;
 
 
-import com.JKS.community.dto.*;
+import com.JKS.community.dto.CategoryDto;
+import com.JKS.community.dto.MemberDto;
+import com.JKS.community.dto.MemberFormDto;
+import com.JKS.community.dto.PostDto;
 import com.JKS.community.security.CustomUserDetails;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.CommentService;
@@ -70,20 +73,13 @@ public class NavigationController {
             if (userDetails == null) return "redirect:/login";
             id = userDetails.getId();
         }
-        return generateInfo(id, model, userDetails);
-    }
-
-    private String generateInfo(Long id, Model model, CustomUserDetails userDetails) {
         MemberDto memberDto = memberService.get(id);
-        if (userDetails == null || !userDetails.getId().equals(id)) {
-            memberDto.setEmail(null);
-        }
+        if (!userDetails.getId().equals(id)) memberDto.setEmail(null);
         model.addAttribute("countPosts", postService.countPostsByMember(id));
         model.addAttribute("countComments", commentService.countCommentsByMember(id));
         model.addAttribute("memberDto", memberDto);
         return "info";
     }
-
     // 회원 정보 수정
     @GetMapping("/info/{memberId}/edit")
     public String editInfo(@PathVariable Long memberId, Model model) {
@@ -100,6 +96,24 @@ public class NavigationController {
         model.addAttribute("category", categoryDto);
         model.addAttribute("postList", postDtoPage);
         return "posts-by-category";
+    }
+
+    @GetMapping({"post/member", "/post/member/{memberId}"})
+    public String postsByMember(@PathVariable Optional<Long> memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // memberId가 없으면 내 게시글 목록 조회
+        Long id;
+        if (memberId.isPresent()) {
+            id = memberId.get();
+        } else {
+            if (userDetails == null) return "redirect:/login";
+            id = userDetails.getId();
+        }
+        MemberDto memberDto = memberService.get(id);
+        model.addAttribute("memberDto", memberDto);
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<PostDto> postDtoPage = postService.getListByMember(id, pageable);
+        model.addAttribute("postList", postDtoPage);
+        return "posts-by-member";
     }
 
     // 게시물 조회 컨트롤러

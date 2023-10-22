@@ -25,6 +25,8 @@ public interface PostService {
 
     Page<PostDto> getListByParentCategory(Long parentCategoryId, Pageable pageable);
 
+    Page<PostDto> getListByMember(Long memberId, Pageable pageable);
+
     // 글 검색
     Page<PostDto> searchListByKeyword(String keyword, Pageable pageable);
 

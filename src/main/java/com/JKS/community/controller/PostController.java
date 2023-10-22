@@ -69,6 +69,12 @@ public class PostController {
         return postService.getListByParentCategory(categoryId, pageable);
     }
 
+    // 특정 회원의 게시글 목록 조회
+    @GetMapping("/member/{memberId}")
+    public Page<PostDto> getListByMember(@PathVariable Long memberId, PageRequestDto pageRequest) {
+        Pageable pageable = pageRequest.toPageable();
+        return postService.getListByMember(memberId, pageable);
+    }
 
     // 검색어를 포함하는 게시글 목록 조회
     @GetMapping("/search")
