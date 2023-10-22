@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 @ToString
 public class CommentDto {
     private Long id;
+    private Long postId;
     private String content;
     private int likeCount;
     private int dislikeCount;
@@ -29,6 +30,7 @@ public class CommentDto {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
         this.id = comment.getId();
+        this.postId = comment.getPost().getId();
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
         this.dislikeCount = comment.getDislikeCount();

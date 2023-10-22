@@ -53,14 +53,14 @@ public class CommentController {
     }
 
     @GetMapping("/{commentId}/replies")
-    public ResponseEntity<Page<CommentDto>> getCommentByParent (@PathVariable Long commentId, PageRequestDto pageRequestDto) {
+    public ResponseEntity<Page<CommentDto>> getListByParent (@PathVariable Long commentId, PageRequestDto pageRequestDto) {
         Pageable pageable = pageRequestDto.toPageable();
         Page<CommentDto> commentPage = commentService.getCommentByParent(commentId, pageable);
         return new ResponseEntity<>(commentPage ,HttpStatus.OK);
     }
 
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<Page<CommentDto>> getCommentsByMember (@PathVariable Long memberId, Pageable pageable) {
+    public ResponseEntity<Page<CommentDto>> getListByMember (@PathVariable Long memberId, Pageable pageable) {
         Page<CommentDto> commentPage = commentService.getListByMember(memberId ,pageable);
         return new ResponseEntity<>(commentPage, HttpStatus.OK);
     }

@@ -1,10 +1,7 @@
 package com.JKS.community.controller;
 
 
-import com.JKS.community.dto.CategoryDto;
-import com.JKS.community.dto.MemberDto;
-import com.JKS.community.dto.MemberFormDto;
-import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.*;
 import com.JKS.community.security.CustomUserDetails;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.CommentService;
@@ -170,5 +167,23 @@ public class NavigationController {
         if (userDetails != null) model.addAttribute("memberId", userDetails.getId());
 
         return "post-form";
+    }
+
+    @GetMapping({"/comment/member", "comment/member/{memberId}"})
+    public String commentsByMember(@PathVariable Optional<Long> memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // memberId가 없으면 내 댓글 목록 조회
+        Long id;
+        if (memberId.isPresent()) {
+            id = memberId.get();
+        } else {
+            if (userDetails == null) return "redirect:/login";
+            id = userDetails.getId();
+        }
+        MemberDto memberDto = memberService.get(id);
+        model.addAttribute("memberDto", memberDto);
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<CommentDto> commentDtoPage = commentService.getListByMember(id, pageable);
+        model.addAttribute("commentList", commentDtoPage);
+        return "comments-by-member";
     }
 }
