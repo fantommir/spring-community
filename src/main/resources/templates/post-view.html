@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"/>
 </head>
@@ -267,12 +268,14 @@
         let imgTag = $('<img>').addClass('rounded-circle shadow-1-strong me-3').attr('src', 'https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp').attr('alt', 'avatar').attr('width', '65').attr('height', '65');
         let flexGrowDiv = $('<div>').addClass('flex-grow-1 flex-shrink-1');
         let dFlexDiv2 = $('<div>').addClass('d-flex justify-content-between align-items-center');
-        let pTag1 = $('<p>').addClass("mb-1").text(comment.memberName + " - " + moment(comment.createdDate, "YYYY.MM.DD HH:mm").fromNow());
+        let memberNameLink = $('<a>').attr('href', '/info/' + comment.memberId).addClass('custom-link').text(comment.memberName);
+        let pTag1 = $('<p>').addClass("mb-1").append(memberNameLink, " - " + moment(comment.createdDate, "YYYY.MM.DD HH:mm").fromNow());
         let replyLink = $('<a>').attr('href', '#!').addClass('reply-link').data('comment-id', comment.id).append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
         dFlexDiv2.append(pTag1, replyLink);
         let pTag2 = $('<p>').addClass("small mb-0");
-        if (comment.parentName) {
-            let mention = $('<a>').attr('href', '#!').text('@' + comment.parentName);
+        console.log(comment.parentMemberId + ' ' + comment.parentMemberName);
+        if (comment.parentMemberId) {
+            let mention = $('<a>').attr('href', '/info/' + comment.parentMemberId).text('@' + comment.parentMemberName);
             pTag2.append(mention, ' ');
         }
         pTag2.append(document.createTextNode(comment.content));
