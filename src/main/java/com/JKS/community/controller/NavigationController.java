@@ -63,20 +63,17 @@ public class NavigationController {
 
     @GetMapping({"/info", "/info/{memberId}"})
     public String info(@PathVariable Optional<Long> memberId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long id;
-        if (memberId.isPresent()) {
-            id = memberId.get();
-        } else {
-            if (userDetails == null) return "redirect:/login";
-            id = userDetails.getId();
-        }
+        if (userDetails == null && memberId.isEmpty()) return "redirect:/login";
+        Long id = (memberId.isPresent()) ? memberId.get() : userDetails.getId();
+        boolean isMyInfo = (userDetails != null && id.equals(userDetails.getId()));
         MemberDto memberDto = memberService.get(id);
-        if (!userDetails.getId().equals(id)) memberDto.setEmail(null);
+        if (!isMyInfo) memberDto.setEmail(null);
         model.addAttribute("countPosts", postService.countPostsByMember(id));
         model.addAttribute("countComments", commentService.countCommentsByMember(id));
         model.addAttribute("memberDto", memberDto);
         return "info";
     }
+
     // 회원 정보 수정
     @GetMapping("/info/{memberId}/edit")
     public String editInfo(@PathVariable Long memberId, Model model) {
