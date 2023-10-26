@@ -23,8 +23,9 @@ public class CommentDto {
 
     private Long memberId;
     private String memberName;
+    private Long parentMemberId;
+    private String parentMemberName;
     private int childrenSize;
-    private String parentName;
 
     public CommentDto(Comment comment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
@@ -34,7 +35,7 @@ public class CommentDto {
         this.content = comment.getContent();
         this.likeCount = comment.getLikeCount();
         this.dislikeCount = comment.getDislikeCount();
-        this.parentId = comment.getParent() == null ? null : comment.getParent().getId();
+        this.parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
         this.createdDate = comment.getCreatedDate().format(formatter);
@@ -43,6 +44,10 @@ public class CommentDto {
         this.memberId = comment.getMember().getId();
         this.memberName = comment.getMember().getName();
         this.childrenSize = comment.getChildren().size();
-        this.parentName = comment.getParent() == null ? null : comment.getParent().getMember().getName();
+
+        if (comment.getParent() != null) {
+            this.parentMemberId = comment.getParent().getMember().getId();
+            this.parentMemberName = comment.getParent().getMember().getName();
+        }
     }
 }
