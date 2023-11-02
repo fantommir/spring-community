@@ -1,6 +1,5 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.dto.PostFormDto;
 import com.JKS.community.entity.Base.BaseTimeEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE post SET enabled = false WHERE post_id = ?")
+@Where(clause = "enabled = true")
 public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue
