@@ -29,7 +29,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (!memberFormDto.getPassword().equals(memberFormDto.getConfirm_password())) {
-            throw new DuplicatePasswordException("비밀번호가 일치하지 않습니다.");
+            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
         }
 
         Member member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
