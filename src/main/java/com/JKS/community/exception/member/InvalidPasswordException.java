@@ -1,6 +1,6 @@
-package com.JKS.community.exception;
+package com.JKS.community.exception.member;
 
-public class InvalidPasswordException extends RuntimeException {
+public class InvalidPasswordException extends MemberException {
 
     public InvalidPasswordException() {
         super();

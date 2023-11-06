@@ -1,6 +1,6 @@
-package com.JKS.community.exception;
+package com.JKS.community.exception.member;
 
-public class MemberNotFoundException extends RuntimeException {
+public class MemberNotFoundException extends MemberException {
 
     public MemberNotFoundException() {
         super();

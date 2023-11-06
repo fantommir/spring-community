@@ -1,6 +1,6 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.entity.Base.BaseTimeEntity;
+import com.JKS.community.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

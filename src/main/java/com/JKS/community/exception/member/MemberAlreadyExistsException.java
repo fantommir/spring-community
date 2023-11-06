@@ -1,6 +1,6 @@
-package com.JKS.community.exception;
+package com.JKS.community.exception.member;
 
-public class MemberAlreadyExistsException extends RuntimeException {
+public class MemberAlreadyExistsException extends MemberException {
 
     public MemberAlreadyExistsException() {
         super();
@@ -13,5 +13,4 @@ public class MemberAlreadyExistsException extends RuntimeException {
     public MemberAlreadyExistsException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }

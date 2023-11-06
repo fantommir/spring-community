@@ -1,6 +1,6 @@
 package com.JKS.community.entity;
 
-import com.JKS.community.entity.Base.BaseTimeEntity;
+import com.JKS.community.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -7,7 +7,7 @@ import com.JKS.community.entity.Member;
 import com.JKS.community.entity.Post;
 import com.JKS.community.entity.Reaction;
 import com.JKS.community.exception.CommentNotFoundException;
-import com.JKS.community.exception.MemberNotFoundException;
+import com.JKS.community.exception.member.MemberNotFoundException;
 import com.JKS.community.exception.PostNotFoundException;
 import com.JKS.community.repository.CommentRepository;
 import com.JKS.community.repository.MemberRepository;

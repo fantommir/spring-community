@@ -3,8 +3,7 @@ package com.JKS.community.service;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
-import com.JKS.community.exception.MemberAlreadyExistsException;
-import com.JKS.community.exception.MemberNotFoundException;
+import com.JKS.community.exception.member.*;
 import com.JKS.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +27,11 @@ public class MemberServiceImpl implements MemberService {
         if (memberRepository.findByEmail(memberFormDto.getEmail()).isPresent()) {
             throw new MemberAlreadyExistsException("이미 존재하는 회원입니다.");
         }
+
+        if (!memberFormDto.getPassword().equals(memberFormDto.getConfirm_password())) {
+            throw new DuplicatePasswordException("비밀번호가 일치하지 않습니다.");
+        }
+
         Member member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
         return new MemberDto(memberRepository.save(member));
     }
@@ -62,18 +66,15 @@ public class MemberServiceImpl implements MemberService {
         String confirmPassword = memberFormDto.getConfirm_password();
         if (newPassword != null && !newPassword.isEmpty()) {
             if (!newPassword.equals(confirmPassword)) {
-                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
             }
             if (passwordEncoder.matches(newPassword, member.getPassword())) {
-                throw new IllegalArgumentException("동일한 비밀번호로 변경할 수 없습니다.");
-            }
-            if (passwordEncoder.matches(newPassword, member.getPassword())) {
-                throw new IllegalArgumentException("동일한 비밀번호로 변경할 수 없습니다.");
+                throw new DuplicatePasswordException("동일한 비밀번호로 변경할 수 없습니다.");
             }
 
             Pattern pattern = Pattern.compile("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$");
             if (!pattern.matcher(newPassword).matches()) {
-                throw new IllegalArgumentException("비밀번호는 알파벳과 숫자를 포함한 8~20자리여야 합니다.");
+                throw new InvalidPasswordException("비밀번호는 알파벳과 숫자를 포함한 8~20자리여야 합니다.");
             }
             newPassword = passwordEncoder.encode(newPassword);
         } else {

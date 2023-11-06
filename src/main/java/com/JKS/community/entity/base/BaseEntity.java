@@ -1,4 +1,4 @@
-package com.JKS.community.entity.Base;
+package com.JKS.community.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
