@@ -5,6 +5,9 @@ import com.JKS.community.entity.Category;
 import com.JKS.community.entity.Comment;
 import com.JKS.community.entity.Member;
 import com.JKS.community.entity.Post;
+import com.JKS.community.exception.CommentNotFoundException;
+import com.JKS.community.exception.PostNotFoundException;
+import com.JKS.community.exception.member.MemberNotFoundException;
 import com.JKS.community.repository.CategoryRepository;
 import com.JKS.community.repository.CommentRepository;
 import com.JKS.community.repository.MemberRepository;
@@ -16,11 +19,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -123,8 +133,8 @@ class CommentServiceImplTest {
     }
 
     @Test
-    @DisplayName("댓글 생성 - 성공")
-    public void create() {
+    @DisplayName("댓글, 대댓글 생성 - 성공")
+    public void create_success() {
         // given
         when(postRepository.findById(1L)).thenReturn(Optional.of(post)); // 게시글
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member)); // 회원 1
@@ -154,4 +164,130 @@ class CommentServiceImplTest {
         verify(memberRepository, times(2)).findById(anyLong());
         verify(commentRepository, times(2)).save(any(Comment.class));
     }
+
+    @Test
+    @DisplayName("댓글, 대댓글 생성 - 실패: 부모 댓글이 없는 경우")
+    public void create_postNotFound() {
+        // given
+        when(postRepository.findById(post.getId())).thenReturn(Optional.empty()); // 게시글
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.create(parentCommentFormDto))
+                .isInstanceOf(PostNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("댓글, 대댓글 생성 - 실패: 회원이 없는 경우")
+    public void create_memberNotFound() {
+        // given
+        when(postRepository.findById(post.getId())).thenReturn(Optional.of(post)); // 게시글
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.empty()); // 회원 1
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.create(parentCommentFormDto))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("댓글, 대댓글 생성 - 실패: 부모 댓글이 잘못된 경우")
+    public void create_parentCommentNotFound() {
+        // given
+        parentCommentFormDto.setParentId(-1L); // 잘못된 부모 댓글 Id
+        ReflectionTestUtils.setField(parentComment, "id", -1L);
+
+        when(postRepository.findById(post.getId())).thenReturn(Optional.of(post)); // 게시글
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member)); // 회원 1
+        when(memberRepository.findById(anotherMember.getId())).thenReturn(Optional.of(anotherMember)); // 회원 2
+        when(commentRepository.findById(-1L)).thenReturn(Optional.of(parentComment)); // 댓글
+
+        // when
+        commentService.create(parentCommentFormDto);
+
+        // then
+        assertThatThrownBy(() -> commentService.create(childCommentFormDto))
+                .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("댓글 수정 - 성공")
+    public void update_success() {
+        // given
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+        String updatedContent = "updated content";
+
+        // when
+        CommentDto updatedCommentDto = commentService.update(parentComment.getId(), updatedContent);
+
+        // then
+        assertThat(updatedCommentDto).isNotNull();
+        assertThat(updatedCommentDto.getContent()).isEqualTo(updatedContent);
+        assertThat(updatedCommentDto.getMemberId()).isEqualTo(member.getId());
+        assertThat(updatedCommentDto.getPostId()).isEqualTo(post.getId());
+        assertThat(updatedCommentDto.getParentId()).isEqualTo(parentCommentFormDto.getParentId());
+    }
+
+    @Test
+    @DisplayName("댓글 수정 - 실패: 댓글이 없는 경우")
+    public void update_commentNotFound() {
+        // given
+        when(commentRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.update(-1L, "updated content"))
+                .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 성공")
+    public void delete_success() {
+        // given
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+
+        // when
+        commentService.delete(parentComment.getId());
+
+        // then
+        verify(commentRepository, times(1)).delete(any(Comment.class));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 실패: 댓글이 없는 경우")
+    public void delete_commentNotFound() {
+        // given
+        when(commentRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.delete(-1L))
+                .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("게시글로 댓글 조회")
+    public void getListByPost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Comment> comments = Collections.singletonList(parentComment);
+        Page<Comment> commentPage = new PageImpl<>(comments, pageable, comments.size());
+
+        // 스텁 설정
+        when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+        when(commentRepository.findAllByPostId(post.getId(), pageable)).thenReturn(commentPage);
+
+        // when
+        Page<CommentDto> commentDtoPage = commentService.getListByPost(post.getId(), pageable);
+
+        // then
+        assertThat(commentDtoPage).isNotNull();
+        assertThat(commentDtoPage.getTotalElements()).isEqualTo(comments.size());
+        assertThat(commentDtoPage.getContent().get(0)).isInstanceOf(CommentDto.class);
+
+        // 검증
+        verify(postRepository).findById(post.getId());
+        verify(commentRepository).findAllByPostId(post.getId(), pageable);
+    }
+
 }
