@@ -38,8 +38,8 @@ public class CommentDto {
         this.parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
         this.level = comment.getLevel();
         this.enabled = comment.isEnabled();
-        this.createdDate = comment.getCreatedDate().format(formatter);
-        this.modifiedDate = comment.getLastModifiedDate().format(formatter);
+        this.createdDate = (comment.getCreatedDate() != null) ? comment.getCreatedDate().format(formatter) : null;
+        this.modifiedDate = (comment.getLastModifiedDate() != null) ? comment.getLastModifiedDate().format(formatter) : null;
 
         this.memberId = comment.getMember().getId();
         this.memberName = comment.getMember().getName();

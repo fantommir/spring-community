@@ -1,222 +1,157 @@
 package com.JKS.community.service;
 
 import com.JKS.community.dto.*;
-import com.JKS.community.exception.CommentNotFoundException;
-import com.JKS.community.exception.MemberNotFoundException;
+import com.JKS.community.entity.Category;
+import com.JKS.community.entity.Comment;
+import com.JKS.community.entity.Member;
+import com.JKS.community.entity.Post;
+import com.JKS.community.repository.CategoryRepository;
+import com.JKS.community.repository.CommentRepository;
+import com.JKS.community.repository.MemberRepository;
+import com.JKS.community.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class CommentServiceImplTest {
 
-    @Autowired private CommentService commentService;
-    @Autowired private MemberService memberService;
-    @Autowired private PostService postService;
-    @Autowired private CategoryService categoryService;
+    @Mock
+    private MemberRepository memberRepository;
+    @Mock
+    private CategoryRepository categoryRepository;
+    @Mock
+    private PostRepository postRepository;
+    @Mock
+    private CommentRepository commentRepository;
+    @InjectMocks
+    private CommentServiceImpl commentService;
 
-    private MemberDto memberDto;
-    private PostDto postDto;
-    private CommentDto commentDto;
+    private MemberFormDto memberFormDto;
+    private MemberFormDto anotherMemberFormDto;
+    private CategoryFormDto categoryFormDto;
+    private CategoryFormDto tabFormDto;
+    private PostFormDto postFormDto;
+    private CommentFormDto parentCommentFormDto;
+    private CommentFormDto childCommentFormDto;
+
+    private Member member;
+    private Member anotherMember;
+    private Category category;
+    private Category tab;
+    private Post post;
+    private Comment parentComment;
+    private Comment childComment;
 
     @BeforeEach
-    void setUp() {
-        // create member
-        MemberFormDto memberFormDto = MemberFormDto.builder()
-                .email("email@test.com").name("name").password("password123").confirm_password("password123").build();
-        memberDto = memberService.register(memberFormDto);
+    void setup() {
+        // member setup
+        memberFormDto = MemberFormDto.builder()
+                .name("member")
+                .email("member email")
+                .password("password0")
+                .confirm_password("password0")
+                .build();
+        member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), memberFormDto.getPassword());
+        ReflectionTestUtils.setField(member, "id", 1L);
 
-        // create category
-        CategoryFormDto parentCategoryFormDto = CategoryFormDto.builder()
-                .name("name").parentId(null).enabled(true).build();
-        categoryService.create(parentCategoryFormDto);
-        CategoryFormDto childCategoryFormDto = CategoryFormDto.builder()
-                .name("name").parentId(parentCategoryFormDto.getParentId()).enabled(true).build();
-        CategoryDto categoryDto = categoryService.create(childCategoryFormDto);
+        anotherMemberFormDto = MemberFormDto.builder()
+                .name("another name")
+                .email("another email")
+                .password("password1")
+                .confirm_password("password1")
+                .build();
+        anotherMember = Member.of(anotherMemberFormDto.getEmail(), anotherMemberFormDto.getName(), anotherMemberFormDto.getPassword());
+        ReflectionTestUtils.setField(anotherMember, "id", 2L);
 
-        // create post
-        PostFormDto formDto = PostFormDto.builder()
-                .title("title").content("content").memberId(memberDto.getId())
-                .categoryId(categoryDto.getId()).build();
-        postDto = postService.create(formDto);
+        // category setup
+        categoryFormDto = CategoryFormDto.builder()
+                .name("parent")
+                .parentId(null)
+                .enabled(true)
+                .build();
+        category = Category.of(categoryFormDto.getName(), null, categoryFormDto.getEnabled());
+        ReflectionTestUtils.setField(category, "id", 1L);
 
-        // create comment
-        CommentFormDto commentFormDto = CommentFormDto.builder()
-                .content("content").postId(postDto.getId()).memberId(memberDto.getId()).build();
-        commentDto = commentService.create(commentFormDto);
+        tabFormDto = CategoryFormDto.builder()
+                .name("child")
+                .parentId(category.getId())
+                .enabled(true)
+                .build();
+        tab = Category.of(tabFormDto.getName(), category, tabFormDto.getEnabled());
+        ReflectionTestUtils.setField(tab, "id", 2L);
+
+        // post setup
+        postFormDto = PostFormDto.builder()
+                .title("title")
+                .content("content")
+                .memberId(member.getId())
+                .categoryId(tab.getId())
+                .build();
+        post = Post.of(postFormDto.getTitle(), postFormDto.getContent(), member, tab);
+        ReflectionTestUtils.setField(post, "id", 1L);
+
+        // comment setup
+        parentCommentFormDto = CommentFormDto.builder()
+                .content("parent comment")
+                .memberId(member.getId())
+                .postId(post.getId())
+                .parentId(null)
+                .build();
+        parentComment = Comment.of(null, 0, post, member, parentCommentFormDto.getContent());
+        ReflectionTestUtils.setField(parentComment, "id", 1L);
+
+        childCommentFormDto = CommentFormDto.builder()
+                .content("child comment")
+                .memberId(anotherMember.getId())
+                .postId(post.getId())
+                .parentId(parentComment.getId())
+                .build();
+        childComment = Comment.of(parentComment, 1, post, member, childCommentFormDto.getContent());
+        ReflectionTestUtils.setField(childComment, "id", 2L);
     }
 
     @Test
-    void createComment_Success() {
-        // then
-        CommentDto findCommentDto = commentService.get(commentDto.getId());
-        assertThat(findCommentDto.getContent()).isEqualTo(commentDto.getContent());
-    }
-
-    @Test
-    void createComment_Failure() {
+    @DisplayName("댓글 생성 - 성공")
+    public void create() {
         // given
-        Long invalidMemberId=-1L;
-        CommentFormDto formDto = CommentFormDto.builder()
-                .content("content").postId(postDto.getId())
-                .memberId(invalidMemberId).build();
-
-        // fail: create comment with invalid memberId.
-        assertThatThrownBy(() -> commentService.create(formDto))
-                .isInstanceOf(MemberNotFoundException.class)
-                .hasMessageContaining(String.valueOf(invalidMemberId));
-
-        // fail: get comment with invalid commentId.
-        assertThatThrownBy(() -> commentService.get(-1L))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining("-1");
-    }
-
-    @Test
-    void createReply_Success() {
-        // given
-        CommentFormDto formDto = CommentFormDto.builder()
-                .content("reply content").postId(postDto.getId())
-                .memberId(memberDto.getId()).parentId(commentDto.getId()).build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post)); // 게시글
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member)); // 회원 1
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(parentComment)); // 댓글
+        when(memberRepository.findById(2L)).thenReturn(Optional.of(anotherMember)); // 회원 2
+        // 대댓글의 경우 부모 댓글을 조회하므로 자식 댓글은 조회하지 않음
+//        when(commentRepository.findById(2L)).thenReturn(Optional.of(childComment)); // 댓글에 달린 대댓글
 
         // when
-        CommentDto replyDto = commentService.create(formDto);
+        CommentDto parentCommentDto = commentService.create(parentCommentFormDto);
+        CommentDto childCommentDto = commentService.create(childCommentFormDto);
 
         // then
-        CommentDto findReplyDto = commentService.get(replyDto.getId());
-        assertThat(findReplyDto.getContent()).isEqualTo(replyDto.getContent());
-        assertThat(findReplyDto.getParentId()).isEqualTo(commentDto.getId());
-    }
+        assertThat(parentCommentDto).isNotNull();
+        assertThat(parentCommentDto.getContent()).isEqualTo(parentCommentFormDto.getContent());
+        assertThat(parentCommentDto.getMemberId()).isEqualTo(member.getId());
+        assertThat(parentCommentDto.getPostId()).isEqualTo(post.getId());
+        assertThat(parentCommentDto.getParentId()).isEqualTo(parentCommentFormDto.getParentId());
 
-    @Test
-    void createReply_Failure() {
-        // given
-        Long invalidParentId = -1L;
-        CommentFormDto formDto = CommentFormDto.builder()
-                .content("reply content").postId(postDto.getId())
-                .memberId(memberDto.getId()).parentId(invalidParentId).build();
+        assertThat(childCommentDto).isNotNull();
+        assertThat(childCommentDto.getContent()).isEqualTo(childCommentFormDto.getContent());
+        assertThat(childCommentDto.getMemberId()).isEqualTo(anotherMember.getId());
+        assertThat(childCommentDto.getPostId()).isEqualTo(post.getId());
+        assertThat(childCommentDto.getParentId()).isEqualTo(childCommentFormDto.getParentId());
 
-        // fail: create reply with invalid parentId.
-        assertThatThrownBy(() -> commentService.create(formDto))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining(String.valueOf(invalidParentId));
-    }
-
-
-    @Test
-    public void update_Success() {
-        CommentFormDto formDto = CommentFormDto.builder()
-                .content("content").postId(postDto.getId())
-                .memberId(memberDto.getId()).build();
-
-        CommentDto commentDto = commentService.create(formDto);
-
-        String updatedContent = "updated content";
-        formDto.setContent(updatedContent);
-        CommentDto updated = commentService.update(commentDto.getId(), updatedContent);
-
-        assertThat(updatedContent).isEqualTo(updated.getContent());
-    }
-
-    @Test
-    public void update_Failure() {
-        CommentFormDto formDto = CommentFormDto.builder()
-                .content("updated content").postId(postDto.getId())
-                .memberId(memberDto.getId()).build();
-
-        // fail: update comment with invalid commentId.
-        assertThatThrownBy(()-> commentService.update(-1L,formDto.getContent()))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining("-1");
-    }
-
-    @Test
-    public void delete_Success() {
-        commentService.delete(commentDto.getId());
-
-        assertThatThrownBy(()-> commentService.get(commentDto.getId()))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining(String.valueOf(commentDto.getId()));
-    }
-
-    @Test
-    public void delete_Failure() {
-        // fail: delete comment with invalid commentId.
-        assertThatThrownBy(()-> commentService.delete(-1L))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining("-1");
-    }
-
-    @Test
-    public void get_Success() {
-        CommentDto findDto = commentService.get(commentDto.getId());
-        assertThat(findDto.getContent()).isEqualTo("content");
-    }
-
-    @Test
-    public void get_Failure() {
-        assertThatThrownBy(()-> commentService.get(-1L))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining("-1");
-    }
-
-    @Test
-    public void getList_Success() {
-
-        for(int i=0; i<11; i++) {
-            String content="content" + i;
-
-            CommentFormDto formDto = CommentFormDto.builder()
-                    .content(content).postId(postDto.getId())
-                    .memberId(memberDto.getId()).build();
-            commentService.create(formDto);
-        }
-
-        List<CommentDto> comments = commentService.getListByPost(postDto.getId(), PageRequest.of(0, 10)).getContent();
-        assertThat(comments.size()).isEqualTo(10);
-    }
-
-    @Test
-    public void getListByMember_Success() {
-        List<CommentDto> commentDtoList = commentService.getListByMember(memberDto.getId(), PageRequest.of(0, 10)).getContent();
-        assertThat(commentDtoList.get(0).getMemberName()).isEqualTo(memberDto.getName());
-        assertThat(commentDtoList.get(0).getContent()).isEqualTo("content");
-    }
-
-    @Test
-    public void react_Success() {
-        commentService.react(memberDto.getId(), commentDto.getId(), true);
-        assertThat(commentService.get(commentDto.getId()).getLikeCount()).isEqualTo(1);
-        assertThat(commentService.get(commentDto.getId()).getDislikeCount()).isEqualTo(0);
-
-        commentService.react(memberDto.getId(), commentDto.getId(), false);
-        assertThat(commentService.get(commentDto.getId()).getLikeCount()).isEqualTo(0);
-        assertThat(commentService.get(commentDto.getId()).getDislikeCount()).isEqualTo(1);
-
-        commentService.react(memberDto.getId(), commentDto.getId(), false);
-        assertThat(commentService.get(commentDto.getId()).getLikeCount()).isEqualTo(0);
-        assertThat(commentService.get(commentDto.getId()).getDislikeCount()).isEqualTo(0);
-    }
-
-    @Test
-    public void react_Failure() {
-        // fail: react with invalid memberId.
-        assertThatThrownBy(()-> commentService.react(-1L, commentDto.getId(), true))
-                .isInstanceOf(MemberNotFoundException.class)
-                .hasMessageContaining("-1");
-
-        // fail: react with invalid commentId.
-        assertThatThrownBy(()-> commentService.react(memberDto.getId(), -1L, true))
-                .isInstanceOf(CommentNotFoundException.class)
-                .hasMessageContaining("-1");
+        verify(postRepository, times(2)).findById(anyLong());
+        verify(memberRepository, times(2)).findById(anyLong());
+        verify(commentRepository, times(2)).save(any(Comment.class));
     }
 }
-

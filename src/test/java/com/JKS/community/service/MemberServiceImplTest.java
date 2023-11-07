@@ -47,8 +47,8 @@ class MemberServiceImplTest {
         memberFormDto = MemberFormDto.builder()
                 .name("name")
                 .email("email")
-                .password("password")
-                .confirm_password("password")
+                .password("password0")
+                .confirm_password("password0")
                 .build();
 
         member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), memberFormDto.getPassword());
