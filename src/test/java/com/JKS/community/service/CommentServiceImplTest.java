@@ -1,17 +1,11 @@
 package com.JKS.community.service;
 
 import com.JKS.community.dto.*;
-import com.JKS.community.entity.Category;
-import com.JKS.community.entity.Comment;
-import com.JKS.community.entity.Member;
-import com.JKS.community.entity.Post;
+import com.JKS.community.entity.*;
 import com.JKS.community.exception.CommentNotFoundException;
 import com.JKS.community.exception.PostNotFoundException;
 import com.JKS.community.exception.member.MemberNotFoundException;
-import com.JKS.community.repository.CategoryRepository;
-import com.JKS.community.repository.CommentRepository;
-import com.JKS.community.repository.MemberRepository;
-import com.JKS.community.repository.PostRepository;
+import com.JKS.community.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,16 +31,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CommentServiceImplTest {
 
-    @Mock
-    private MemberRepository memberRepository;
-    @Mock
-    private CategoryRepository categoryRepository;
-    @Mock
-    private PostRepository postRepository;
-    @Mock
-    private CommentRepository commentRepository;
-    @InjectMocks
-    private CommentServiceImpl commentService;
+    @Mock private MemberRepository memberRepository;
+    @Mock private CategoryRepository categoryRepository;
+    @Mock private PostRepository postRepository;
+    @Mock private CommentRepository commentRepository;
+    @Mock private ReactionRepository reactionRepository;
+    @InjectMocks private CommentServiceImpl commentService;
 
     private MemberFormDto memberFormDto;
     private MemberFormDto anotherMemberFormDto;
@@ -63,6 +53,8 @@ class CommentServiceImplTest {
     private Post post;
     private Comment parentComment;
     private Comment childComment;
+    private Reaction likeReaction;
+    private Reaction dislikeReaction;
 
     @BeforeEach
     void setup() {
@@ -130,6 +122,12 @@ class CommentServiceImplTest {
                 .build();
         childComment = Comment.of(parentComment, 1, post, member, childCommentFormDto.getContent());
         ReflectionTestUtils.setField(childComment, "id", 2L);
+
+        // reaction setup
+        likeReaction = Reaction.of(member, parentComment, true);
+        ReflectionTestUtils.setField(likeReaction, "id", 1L);
+        dislikeReaction = Reaction.of(anotherMember, childComment, false);
+        ReflectionTestUtils.setField(dislikeReaction, "id", 2L);
     }
 
     @Test
@@ -226,6 +224,8 @@ class CommentServiceImplTest {
         assertThat(updatedCommentDto.getMemberId()).isEqualTo(member.getId());
         assertThat(updatedCommentDto.getPostId()).isEqualTo(post.getId());
         assertThat(updatedCommentDto.getParentId()).isEqualTo(parentCommentFormDto.getParentId());
+
+        verify(commentRepository, times(1)).findById(parentComment.getId());
     }
 
     @Test
@@ -266,14 +266,13 @@ class CommentServiceImplTest {
     }
 
     @Test
-    @DisplayName("게시글로 댓글 조회")
+    @DisplayName("게시글로 댓글 조회 - 성공")
     public void getListByPost() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         List<Comment> comments = Collections.singletonList(parentComment);
         Page<Comment> commentPage = new PageImpl<>(comments, pageable, comments.size());
 
-        // 스텁 설정
         when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
         when(commentRepository.findAllByPostId(post.getId(), pageable)).thenReturn(commentPage);
 
@@ -285,9 +284,243 @@ class CommentServiceImplTest {
         assertThat(commentDtoPage.getTotalElements()).isEqualTo(comments.size());
         assertThat(commentDtoPage.getContent().get(0)).isInstanceOf(CommentDto.class);
 
-        // 검증
-        verify(postRepository).findById(post.getId());
-        verify(commentRepository).findAllByPostId(post.getId(), pageable);
+        verify(postRepository, times(1)).findById(post.getId());
+        verify(commentRepository, times(1)).findAllByPostId(post.getId(), pageable);
     }
 
+    @Test
+    @DisplayName("게시글로 댓글 조회 - 실패: 게시글이 없는 경우")
+    public void getListByPost_postNotFound() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(postRepository.findById(post.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.getListByPost(post.getId(), pageable))
+                .isInstanceOf(PostNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("회원으로 댓글 조회")
+    public void getListByMember() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Comment> comments = Collections.singletonList(parentComment);
+        Page<Comment> commentPage = new PageImpl<>(comments, pageable, comments.size());
+
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(commentRepository.findAllByMemberId(member.getId(), pageable)).thenReturn(commentPage);
+
+        // when
+        Page<CommentDto> commentDtoPage = commentService.getListByMember(member.getId(), pageable);
+
+        // then
+        assertThat(commentDtoPage).isNotNull();
+        assertThat(commentDtoPage.getTotalElements()).isEqualTo(comments.size());
+        assertThat(commentDtoPage.getContent().get(0)).isInstanceOf(CommentDto.class);
+
+        verify(memberRepository, times(1)).findById(member.getId());
+        verify(commentRepository, times(1)).findAllByMemberId(member.getId(), pageable);
+    }
+
+    @Test
+    @DisplayName("회원으로 댓글 조회 - 실패: 회원이 없는 경우")
+    public void getListByMember_memberNotFound() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.getListByMember(member.getId(), pageable))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("게시글에서 루트 댓글 조회")
+    public void getRootCommentsByPost() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Comment> comments = Collections.singletonList(parentComment);
+        Page<Comment> commentPage = new PageImpl<>(comments, pageable, comments.size());
+
+        when(postRepository.existsById(post.getId())).thenReturn(true);
+        when(commentRepository.findAllByPostIdAndLevel(post.getId(), 0, pageable)).thenReturn(commentPage);
+
+        // when
+        Page<CommentDto> commentDtoPage = commentService.getRootCommentsByPost(post.getId(), pageable);
+
+        // then
+        assertThat(commentDtoPage).isNotNull();
+        assertThat(commentDtoPage.getTotalElements()).isEqualTo(comments.size());
+        assertThat(commentDtoPage.getContent().get(0)).isInstanceOf(CommentDto.class);
+
+        verify(postRepository, times(1)).existsById(post.getId());
+        verify(commentRepository, times(1)).findAllByPostIdAndLevel(post.getId(), 0, pageable);
+    }
+
+    @Test
+    @DisplayName("게시글에서 루트 댓글 조회 - 실패: 게시글이 없는 경우")
+    public void getRootCommentsByPost_postNotFound() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(postRepository.existsById(post.getId())).thenReturn(false);
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.getRootCommentsByPost(post.getId(), pageable))
+                .isInstanceOf(PostNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("부모 댓글로 대댓글 조회 - 성공")
+    public void getCommentByParent() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Comment> comments = Collections.singletonList(childComment);
+        Page<Comment> commentPage = new PageImpl<>(comments, pageable, comments.size());
+
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+        when(commentRepository.findAllByParentId(parentComment.getId(), pageable)).thenReturn(commentPage);
+
+        // when
+        Page<CommentDto> commentDtoPage = commentService.getCommentByParent(parentComment.getId(), pageable);
+
+        // then
+        assertThat(commentDtoPage).isNotNull();
+        assertThat(commentDtoPage.getTotalElements()).isEqualTo(comments.size());
+        assertThat(commentDtoPage.getContent().get(0)).isInstanceOf(CommentDto.class);
+
+        verify(commentRepository, times(1)).findById(parentComment.getId());
+        verify(commentRepository, times(1)).findAllByParentId(parentComment.getId(), pageable);
+    }
+
+    @Test
+    @DisplayName("부모 댓글로 대댓글 조회 - 실패: 부모 댓글이 없는 경우")
+    public void getCommentByParent_commentNotFound() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.getCommentByParent(parentComment.getId(), pageable))
+                .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("반응(좋아요 2번 눌러서 취소) - 성공")
+    public void react_cancelReaction() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+        when(reactionRepository.findByMemberIdAndCommentId(member.getId(), parentComment.getId())).thenReturn(Optional.empty()); // 첫 반응
+
+        // when
+        CommentDto commentDto1 = commentService.react(member.getId(), parentComment.getId(), true);
+        when(reactionRepository.findByMemberIdAndCommentId(member.getId(), parentComment.getId())).thenReturn(Optional.of(likeReaction)); // 동일한 반응 눌러서 취소
+        CommentDto commentDto2 = commentService.react(member.getId(), parentComment.getId(), true);
+
+        // then
+        // 첫 번째 호출 후에는 좋아요 수가 1 증가했어야 함
+        assertThat(commentDto1).isNotNull();
+        assertThat(commentDto1.getLikeCount()).isEqualTo(1);
+        assertThat(commentDto1.getDislikeCount()).isEqualTo(0);
+
+        // 두 번째 호출 후에는 좋아요 수가 1 감소했어야 함
+        assertThat(commentDto2).isNotNull();
+        assertThat(commentDto2.getLikeCount()).isEqualTo(0);
+        assertThat(commentDto2.getDislikeCount()).isEqualTo(0);
+
+        // 검증
+        verify(memberRepository, times(2)).findById(anyLong());
+        verify(commentRepository, times(2)).findById(anyLong());
+        verify(reactionRepository, times(2)).findByMemberIdAndCommentId(anyLong(), anyLong());
+        verify(reactionRepository).delete(any(Reaction.class));
+    }
+    
+    @Test
+    @DisplayName("반응(좋아요 -> 싫어요) - 성공")
+    public void react_changeReaction() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.of(parentComment));
+        when(reactionRepository.findByMemberIdAndCommentId(member.getId(), parentComment.getId())).thenReturn(Optional.empty()); // 첫 반응
+        
+        // when
+        CommentDto commentDto1 = commentService.react(member.getId(), parentComment.getId(), true);
+        when(reactionRepository.findByMemberIdAndCommentId(member.getId(), parentComment.getId())).thenReturn(Optional.of(likeReaction)); // 다른 반응 눌러서 변경
+        CommentDto commentDto2 = commentService.react(member.getId(), parentComment.getId(), false);
+
+        // then
+        // 첫 번째 호출 후에는 좋아요 수가 1 증가했어야 함
+        assertThat(commentDto1).isNotNull();
+        assertThat(commentDto1.getLikeCount()).isEqualTo(1);
+        assertThat(commentDto1.getDislikeCount()).isEqualTo(0);
+
+        // 두 번째 호출 후에는 좋아요 수가 1 감소했어야 함
+        assertThat(commentDto2).isNotNull();
+        assertThat(commentDto2.getLikeCount()).isEqualTo(0);
+        assertThat(commentDto2.getDislikeCount()).isEqualTo(1);
+
+        // 검증
+        verify(memberRepository, times(2)).findById(anyLong());
+        verify(commentRepository, times(2)).findById(anyLong());
+        verify(reactionRepository, times(2)).findByMemberIdAndCommentId(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("반응 - 실패: 회원이 없는 경우")
+    public void react_memberNotFound() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.react(member.getId(), parentComment.getId(), true))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("반응 - 실패: 댓글이 없는 경우")
+    public void react_commentNotFound() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(commentRepository.findById(parentComment.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.react(member.getId(), parentComment.getId(), true))
+                .isInstanceOf(CommentNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("회원 댓글 수 조회 - 성공")
+    public void countCommentsByMember() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+        when(memberRepository.countCommentsByMember(member)).thenReturn(4L);
+
+        // when
+        Long count = commentService.countCommentsByMember(member.getId());
+
+        // then
+        assertThat(count).isEqualTo(4L);
+
+        verify(memberRepository, times(1)).findById(member.getId());
+        verify(memberRepository, times(1)).countCommentsByMember(member);
+    }
+
+    @Test
+    @DisplayName("회원 댓글 수 조회 - 실패: 회원이 없는 경우")
+    public void countCommentsByMember_memberNotFound() {
+        // given
+        when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> commentService.countCommentsByMember(member.getId()))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
 }

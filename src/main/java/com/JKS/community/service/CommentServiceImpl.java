@@ -90,6 +90,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Page<CommentDto> getListByMember(Long memberId, Pageable pageable) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("Invalid member Id:" + memberId));
         return commentRepository.findAllByMemberId(memberId, pageable).map(CommentDto::new);
     }
 
