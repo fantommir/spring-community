@@ -32,24 +32,16 @@ import static org.mockito.Mockito.*;
 class CommentServiceImplTest {
 
     @Mock private MemberRepository memberRepository;
-    @Mock private CategoryRepository categoryRepository;
     @Mock private PostRepository postRepository;
     @Mock private CommentRepository commentRepository;
     @Mock private ReactionRepository reactionRepository;
     @InjectMocks private CommentServiceImpl commentService;
 
-    private MemberFormDto memberFormDto;
-    private MemberFormDto anotherMemberFormDto;
-    private CategoryFormDto categoryFormDto;
-    private CategoryFormDto tabFormDto;
-    private PostFormDto postFormDto;
     private CommentFormDto parentCommentFormDto;
     private CommentFormDto childCommentFormDto;
 
     private Member member;
     private Member anotherMember;
-    private Category category;
-    private Category tab;
     private Post post;
     private Comment parentComment;
     private Comment childComment;
@@ -59,7 +51,7 @@ class CommentServiceImplTest {
     @BeforeEach
     void setup() {
         // member setup
-        memberFormDto = MemberFormDto.builder()
+        MemberFormDto memberFormDto = MemberFormDto.builder()
                 .name("member")
                 .email("member email")
                 .password("password0")
@@ -68,7 +60,7 @@ class CommentServiceImplTest {
         member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), memberFormDto.getPassword());
         ReflectionTestUtils.setField(member, "id", 1L);
 
-        anotherMemberFormDto = MemberFormDto.builder()
+        MemberFormDto anotherMemberFormDto = MemberFormDto.builder()
                 .name("another name")
                 .email("another email")
                 .password("password1")
@@ -78,24 +70,24 @@ class CommentServiceImplTest {
         ReflectionTestUtils.setField(anotherMember, "id", 2L);
 
         // category setup
-        categoryFormDto = CategoryFormDto.builder()
+        CategoryFormDto categoryFormDto = CategoryFormDto.builder()
                 .name("parent")
                 .parentId(null)
                 .enabled(true)
                 .build();
-        category = Category.of(categoryFormDto.getName(), null, categoryFormDto.getEnabled());
+        Category category = Category.of(categoryFormDto.getName(), null, categoryFormDto.getEnabled());
         ReflectionTestUtils.setField(category, "id", 1L);
 
-        tabFormDto = CategoryFormDto.builder()
+        CategoryFormDto tabFormDto = CategoryFormDto.builder()
                 .name("child")
                 .parentId(category.getId())
                 .enabled(true)
                 .build();
-        tab = Category.of(tabFormDto.getName(), category, tabFormDto.getEnabled());
+        Category tab = Category.of(tabFormDto.getName(), category, tabFormDto.getEnabled());
         ReflectionTestUtils.setField(tab, "id", 2L);
 
         // post setup
-        postFormDto = PostFormDto.builder()
+        PostFormDto postFormDto = PostFormDto.builder()
                 .title("title")
                 .content("content")
                 .memberId(member.getId())
