@@ -113,7 +113,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostDto> searchListByKeyword(String keyword, Pageable pageable) {
-        return postRepository.searchActivePostsByKeyword(keyword, pageable).map(PostDto::new);
+        return postRepository.searchByKeyword(keyword, pageable).map(PostDto::new);
     }
 
     @Override

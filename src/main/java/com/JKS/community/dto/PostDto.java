@@ -46,8 +46,8 @@ public class PostDto {
         this.memberName = post.getMember().getName();
         this.categoryId = post.getCategory().getId();
         this.categoryName = post.getCategory().getName();
-        this.createdDate = post.getCreatedDate().format(formatter);
-        this.modifiedDate = post.getLastModifiedDate().format(formatter);
+        this.createdDate = (post.getCreatedDate() != null) ? post.getCreatedDate().format(formatter) : null;
+        this.modifiedDate = (post.getLastModifiedDate() != null) ? post.getLastModifiedDate().format(formatter) : null;
 
         this.parentCategoryId = post.getCategory().getParent() != null ? post.getCategory().getParent().getId() : null;
         this.parentCategoryName = post.getCategory().getParent() != null ? post.getCategory().getParent().getName() : null;

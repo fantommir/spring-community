@@ -15,8 +15,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByTitle(String title);
 
     // 제목이나 내용에 키워드가 포함되면서 동시에 활성화된 게시글 목록을 조회하는 메서드
-    @Query("SELECT p FROM Post p WHERE p.enabled = true AND (p.title LIKE %:keyword% OR p.content LIKE %:keyword%)")
-    Page<Post> searchActivePostsByKeyword(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% OR p.content LIKE %:keyword%")
+    Page<Post> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Post> findAllByCategoryId(Long categoryId, Pageable pageable);
 
