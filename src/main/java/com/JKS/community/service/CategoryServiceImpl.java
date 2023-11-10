@@ -5,7 +5,6 @@ import com.JKS.community.dto.CategoryFormDto;
 import com.JKS.community.entity.Category;
 import com.JKS.community.exception.CategoryNotFoundException;
 import com.JKS.community.repository.CategoryRepository;
-import com.JKS.community.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,6 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final PostRepository postRepository;
 
     @Override
     public CategoryDto create(CategoryFormDto categoryFormDto) {
@@ -35,8 +33,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getList() {
-        List<Category> categoryList = categoryRepository.findAllByDepth(0);
+    public List<CategoryDto> getListByDepth(int depth) {
+        List<Category> categoryList = categoryRepository.findAllByDepth(depth);
         return categoryList.stream().map(CategoryDto::new).toList();
     }
 
@@ -49,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void update(Long id, CategoryFormDto categoryFormDto) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotFoundException("Invalid category Id:" + id));
-        Category parent = categoryRepository.findById(categoryFormDto.getParentId()).orElse(null);
+        Category parent = categoryRepository.findById(categoryFormDto.getParentId()).orElseThrow(() -> new CategoryNotFoundException("Invalid category Id:" + id));
         category.update(categoryFormDto, parent);
     }
 

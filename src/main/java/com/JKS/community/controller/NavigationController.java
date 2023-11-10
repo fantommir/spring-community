@@ -34,7 +34,7 @@ public class NavigationController {
 
     @GetMapping
     public String home(Model model) {
-        List<CategoryDto> dtoList = categoryService.getList();
+        List<CategoryDto> dtoList = categoryService.getListByDepth(0);
         model.addAttribute("categoryList", dtoList);
         return "index";
     }

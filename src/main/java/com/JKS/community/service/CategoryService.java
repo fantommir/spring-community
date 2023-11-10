@@ -9,8 +9,7 @@ public interface CategoryService {
     // 카테고리 생성
     CategoryDto create(CategoryFormDto categoryFormDto);
 
-    // 모든 카테고리 목록 조회
-    List<CategoryDto> getList();
+    List<CategoryDto> getListByDepth(int depth);
 
     // 특정 카테고리 조회
     CategoryDto get(Long id);

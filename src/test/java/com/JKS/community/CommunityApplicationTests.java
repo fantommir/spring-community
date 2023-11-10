@@ -92,7 +92,7 @@ class CommunityApplicationTests {
 	private void createPostDummyData() {
 		// Assume we have a list of members and categories
 		List<MemberDto> members = memberService.getList(Pageable.unpaged()).getContent();
-		List<CategoryDto> categories = categoryService.getList();
+		List<CategoryDto> categories = categoryService.getListByDepth(0);
 		for (CategoryDto category : categories) {
 			for (CategoryDto subcategory : category.getChildren()) {
 				for (CategoryDto tab : subcategory.getChildren()) {
@@ -115,7 +115,7 @@ class CommunityApplicationTests {
 	}
 
 	private void createCommentDummyData() {
-		List<CategoryDto> categories = categoryService.getList();
+		List<CategoryDto> categories = categoryService.getListByDepth(0);
 		List<MemberDto> members = memberService.getList(Pageable.unpaged()).getContent();
 
 		// 탭에 있는 포스트에 0개부터 11개까지 댓글을 작성한다 (작성자는 랜덤)
