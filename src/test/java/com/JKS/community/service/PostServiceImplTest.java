@@ -1,9 +1,17 @@
 package com.JKS.community.service;
 
-import com.JKS.community.dto.*;
-import com.JKS.community.entity.*;
-
-import com.JKS.community.repository.*;
+import com.JKS.community.dto.CategoryFormDto;
+import com.JKS.community.dto.MemberFormDto;
+import com.JKS.community.dto.PostDto;
+import com.JKS.community.dto.PostFormDto;
+import com.JKS.community.entity.Category;
+import com.JKS.community.entity.Member;
+import com.JKS.community.entity.Post;
+import com.JKS.community.entity.Reaction;
+import com.JKS.community.repository.CategoryRepository;
+import com.JKS.community.repository.MemberRepository;
+import com.JKS.community.repository.PostRepository;
+import com.JKS.community.repository.ReactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
