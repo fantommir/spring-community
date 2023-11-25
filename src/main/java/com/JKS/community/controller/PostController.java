@@ -44,11 +44,6 @@ public class PostController {
         return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 
-    // 페이지 번호와 페이지 크기를 파라미터로 받아 게시글 목록 조회
-    // 예: /posts?page=0&size=10
-    // page는 0부터 시작하며 size는 한 페이지에 표시할 게시글 수를 의미합니다.
-    // 이 값들은 Spring Data JPA의 Pageable 인터페이스를 통해 자동으로 처리됩니다.
-
     @GetMapping
     public Page<PostDto> getList(Pageable pageable) {
         return postService.getList(pageable);
