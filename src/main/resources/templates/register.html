@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
+    <title>회원가입</title>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css" rel="stylesheet"/>
 </head>
 <body>
-<section class="vh-100">
-    <div class="mask d-flex align-items-center h-100 gradient-custom-3">
+<div th:replace="~{fragment/header :: header}"></div>
+<div class="container mt-5">
+    <div class="d-flex align-items-center h-100 gradient-custom-3">
         <div class="container h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-12 col-md-9 col-lg-7 col-xl-6">
                     <div class="card" style="border-radius: 15px;">
                         <div class="card-body p-5">
-                            <h2 class="text-uppercase text-center mb-5">Create an account</h2>
+                            <h2 class="text-uppercase text-center mb-5">계정 생성</h2>
 
                             <!-- Registration Form -->
                             <form th:action="@{/register}" th:object="${memberFormDto}" method="post">
@@ -22,50 +24,50 @@
                                 <!-- Name -->
                                 <div class='form-outline mb-4'>
                                     <input type='text' id='name' th:field='*{name}'
-                                           placeholder='Your Name'
+                                           placeholder='이름'
                                            required autofocus
                                            class='form-control form-control-lg'/>
-                                    <label class="form-label" for='name'>Name</label>
+                                    <label class="form-label" for='name'>이름</label>
                                 </div>
 
                                 <!-- Email -->
                                 <div class='form-outline mb-4'>
                                     <input type='email' id='email' th:field='*{email}'
-                                           placeholder='Your Email'
+                                           placeholder='이메일'
                                            required
                                            class='form-control form-control-lg'/>
-                                    <label class="form-label" for='email'>Email</label>
+                                    <label class="form-label" for='email'>이메일</label>
                                 </div>
 
                                 <!-- Password -->
                                 <div class='form-outline mb-4'>
                                     <input type ='password' id ='password' th:field ='*{password}'
-                                           placeholder ='Password'
+                                           placeholder ='비밀번호'
                                            required
                                            minlength ='8'
                                            maxlength ='20'
                                            pattern ="^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$"
-                                           title ="Please include at least 1 number and at least 1 letter."
+                                           title ="최소 한 개의 숫자와 알파벳을 포함해 주세요."
                                            autoComplete ="new-password"
                                            class ="form-control form-control-lg"/>
-                                    <label class="form-label" for="password">Password</label>
+                                    <label class="form-label" for="password">비밀번호</label>
                                 </div>
 
                                 <!-- Repeat Password -->
                                 <div class='form-outline mb-4'>
                                     <input type='password' id='confirm_password'
-                                           placeholder ='Repeat Password'
+                                           placeholder ='비밀번호 확인'
                                            required
                                            class ="form-control form-control-lg"/>
-                                    <label class="form-label" for="confirm_password">Repeat Password</label>
+                                    <label class="form-label" for="confirm_password">비밀번호 확인</label>
                                 </div>
 
                                 <div class="d-flex justify-content-center">
-                                    <button type="submit" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">Register</button>
+                                    <button type="submit" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body">회원가입</button>
                                 </div>
 
-                                <p class="text-center text-muted mt-5 mb-0">Have already an account?
-                                    <a th:href="@{/login}" class="fw-bold text-body"><u>Login here</u></a>
+                                <p class="text-center text-muted mt-5 mb-0">이미 계정이 있으신가요?
+                                    <a th:href="@{/login}" class="fw-bold text-body"><u>여기에서 로그인</u></a>
                                 </p>
 
                             </form>
@@ -75,7 +77,7 @@
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
@@ -85,7 +87,7 @@
         const password = document.getElementById("password");
         const confirm_password = document.getElementById("confirm_password");
         if(password.value !== confirm_password.value) {
-            confirm_password.setCustomValidity("Passwords Don't Match");
+            confirm_password.setCustomValidity("비밀번호가 일치하지 않습니다.");
         } else {
             confirm_password.setCustomValidity('');
         }

@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css" rel="stylesheet"/>
 </head>
 <body>
+<div th:replace="~{fragment/header :: header}"></div>
 
 <div class="d-flex align-items-center justify-content-center vh-100">
     <form th:action="@{/login}" method="post" id="loginForm" style="width:25%;">
