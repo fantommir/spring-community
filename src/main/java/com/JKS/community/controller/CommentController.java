@@ -22,7 +22,6 @@ public class CommentController {
     @PostMapping("/")
     public ResponseEntity<CommentDto> create(@Valid @RequestBody CommentFormDto commentFormDto) {
         CommentDto createdComment = commentService.create(commentFormDto);
-        System.out.println("createdComment = " + createdComment.toString());
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
 

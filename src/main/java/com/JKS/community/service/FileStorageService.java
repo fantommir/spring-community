@@ -1,66 +1,52 @@
 package com.JKS.community.service;
 
 import com.JKS.community.entity.File;
-import jakarta.annotation.PostConstruct;
+import com.JKS.community.repository.FileRepository;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class FileStorageService {
+    private final FileRepository fileRepository;
 
-    @Value("${app.upload.dir:${user.home}}")
-    public String uploadDir;
+    @Value("${cloud.azure.storage.blob.connection-string}")
+    private String connectionString;
 
-    @PostConstruct
-    public void init() {
+    @Value("${cloud.azure.storage.blob.container-name}")
+    private String containerName;
+
+    public String uploadFile(MultipartFile multipartFile) {
         try {
-            Files.createDirectories(Paths.get(uploadDir));
+            BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
+
+            BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+            String fileName = multipartFile.getOriginalFilename() + ":" + UUID.randomUUID();
+            BlobClient blob = blobContainerClient.getBlobClient(fileName);
+
+            InputStream inputStream = multipartFile.getInputStream();
+            blob.upload(inputStream, multipartFile.getSize(), true);
+
+            File file = File.of(multipartFile.getOriginalFilename(), fileName, multipartFile.getContentType(), multipartFile.getSize(), blob.getBlobUrl());
+
+            fileRepository.save(file);
+
+            return blob.getBlobUrl();
         } catch (IOException e) {
-            throw new RuntimeException("Could not create upload directory!");
+            throw new RuntimeException("파일을 저장하지 못했습니다. 다시 시도해주세요.", e);
         }
-    }
-
-    public File storeFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("Failed to store empty file " + file.getOriginalFilename());
-        }
-
-        try {
-            String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            String uuidName = getUUID() + "_" + originalName;
-            Path path = Paths.get(uploadDir + "/" + uuidName);
-
-            if (Files.exists(path)) {
-                throw new RuntimeException("Error: File " + originalName + " already exists!");
-            }
-
-            Files.copy(file.getInputStream(), path);
-
-            File storedFile = new File();
-            storedFile.setOriginalName(originalName);
-            storedFile.setUuidName(uuidName);
-            storedFile.setType(file.getContentType());
-            storedFile.setSize(file.getSize());
-            storedFile.setPath(path.toString());
-            storedFile.setUploadTime(LocalDateTime.now());
-
-            return storedFile;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file " + file.getOriginalFilename(), e);
-        }
-    }
-
-    public String getUUID() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 }
