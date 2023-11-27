@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 
 application.yml
+application-azure.yml
 .env
 
 ### STS ###

@@ -20,10 +20,10 @@ import java.util.UUID;
 @RequestMapping("/api/files")
 public class FileController {
 
-    @Value("${AZURE_STORAGE_CONNECTION_STRING}")
+    @Value("${cloud.azure.storage.blob.connection-string}")
     private String connectionString;
 
-    @Value("${AZURE_STORAGE_CONTAINER_NAME}")
+    @Value("${cloud.azure.storage.blob.container-name}")
     private String containerName;
 
     @PostMapping("/upload")
