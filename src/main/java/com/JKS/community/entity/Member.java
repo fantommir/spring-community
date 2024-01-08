@@ -36,6 +36,9 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
     private boolean enabled = true;
 
 
@@ -61,9 +64,13 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.password = password;
     }
 
+    public void setAdmin() {
+        this.role = Role.ADMIN;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
