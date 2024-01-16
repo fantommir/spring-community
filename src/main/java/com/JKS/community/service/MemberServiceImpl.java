@@ -3,6 +3,8 @@ package com.JKS.community.service;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
+import com.JKS.community.exception.CustomException;
+import com.JKS.community.exception.ErrorCode;
 import com.JKS.community.exception.member.*;
 import com.JKS.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +27,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDto register(MemberFormDto memberFormDto) {
         if (memberRepository.findByEmail(memberFormDto.getEmail()).isPresent()) {
-            throw new MemberAlreadyExistsException("이미 존재하는 회원입니다.");
+            throw new CustomException(ErrorCode.MEMBER_DUPLICATION);
         }
 
         if (!memberFormDto.getPassword().equals(memberFormDto.getConfirm_password())) {
-            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.MEMBER_PASSWORD_MISMATCH);
         }
 
         Member member = Member.of(memberFormDto.getEmail(), memberFormDto.getName(), passwordEncoder.encode(memberFormDto.getPassword()));
