@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .tokenValiditySeconds(86400)
                         .alwaysRemember(false)
                         .userDetailsService(userDetailsService))
+//                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors
                         .configurationSource(request -> {
                             var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
