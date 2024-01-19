@@ -2,6 +2,8 @@ package com.JKS.community.controller;
 
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
+import com.JKS.community.exception.CustomException;
+import com.JKS.community.exception.ErrorCode;
 import com.JKS.community.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,9 +57,29 @@ public class MemberControllerTest {
                         .param("password", "password0")
                         .param("confirm_password", "password0")
                         .with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(email))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(name))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.name").value(name))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("회원가입 - 실패 (이미 존재하는 이메일)")
+    public void register_fail_existingEmail() throws Exception {
+        String email = "test@test.com";
+        String name = "Test User";
+        String password = "password0";
+
+        when(memberService.register(any(MemberFormDto.class))).thenThrow(new CustomException(ErrorCode.MEMBER_EMAIL_DUPLICATION));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/members/register")
+                        .param("email", email)
+                        .param("name", name)
+                        .param("password", password)
+                        .param("confirm_password", password)
+                        .with(csrf()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(ErrorCode.MEMBER_EMAIL_DUPLICATION.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.MEMBER_EMAIL_DUPLICATION.getMessage()))
                 .andDo(print());
     }
 
@@ -81,8 +104,8 @@ public class MemberControllerTest {
         // 테스트 실행
         mockMvc.perform(MockMvcRequestBuilders.get("/api/members/")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(10)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(10)))
                 .andDo(print());
     }
 
@@ -101,9 +124,9 @@ public class MemberControllerTest {
         // 테스트 실행
         mockMvc.perform(MockMvcRequestBuilders.get("/api/members/" + memberId)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test User"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@test.com"))
+                .andExpect(jsonPath("$.name").value("Test User"))
                 .andDo(print());
     }
 
@@ -136,8 +159,8 @@ public class MemberControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/members/search")
                         .param("name", name)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(5))) // 검색된 멤버만 있어야 함
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(5))) // 검색된 멤버만 있어야 함
                 .andDo(print());
     }
 
@@ -168,9 +191,9 @@ public class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(memberFormDto))
                         .with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test User"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@test.com"))
+                .andExpect(jsonPath("$.name").value("Test User"));
     }
 
 
@@ -183,7 +206,7 @@ public class MemberControllerTest {
         // 테스트 실행
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/members/" + memberId)
                         .with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+                .andExpect(status().isNoContent());
 
         // 서비스 메소드 호출 확인
         verify(memberService, times(1)).withdrawal(memberId);

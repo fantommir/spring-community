@@ -3,7 +3,8 @@ package com.JKS.community.service;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
-import com.JKS.community.exception.member.*;
+import com.JKS.community.exception.CustomException;
+import com.JKS.community.exception.ErrorCode;
 import com.JKS.community.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,7 +85,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(MemberAlreadyExistsException.class, () -> memberService.register(memberFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.register(memberFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_EMAIL_DUPLICATION);
 
         verify(memberRepository, times(1)).findByEmail(memberFormDto.getEmail());
     }
@@ -98,7 +100,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(PasswordMismatchException.class, () -> memberService.register(memberFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.register(memberFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_PASSWORD_MISMATCH);
 
         verify(memberRepository, times(1)).findByEmail(memberFormDto.getEmail());
     }
@@ -155,7 +158,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(MemberNotFoundException.class, () -> memberService.get(memberId));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.get(memberId));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -203,7 +207,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(MemberNotFoundException.class, () -> memberService.update(memberId, updateFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.update(memberId, updateFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -223,7 +228,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(IllegalArgumentException.class, () -> memberService.update(memberId, updateFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.update(memberId, updateFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_ACCESS_DENIED);
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -243,7 +249,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(PasswordMismatchException.class, () -> memberService.update(memberId, updateFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.update(memberId, updateFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_PASSWORD_MISMATCH);
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -264,7 +271,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(DuplicatePasswordException.class, () -> memberService.update(memberId, updateFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.update(memberId, updateFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_PASSWORD_DUPLICATION);
 
         verify(memberRepository, times(1)).findById(memberId);
         verify(passwordEncoder, times(1)).matches(updateFormDto.getPassword(), member.getPassword());
@@ -285,7 +293,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(InvalidPasswordException.class, () -> memberService.update(memberId, updateFormDto));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.update(memberId, updateFormDto));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_PASSWORD_INVALID);
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -312,7 +321,8 @@ class MemberServiceImplTest {
 
         // when
         // then
-        assertThrows(MemberNotFoundException.class, () -> memberService.withdrawal(memberId));
+        CustomException error = assertThrows(CustomException.class, () -> memberService.withdrawal(memberId));
+        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
 
         verify(memberRepository, times(1)).findById(memberId);
     }

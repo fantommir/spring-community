@@ -5,7 +5,6 @@ import com.JKS.community.dto.MemberFormDto;
 import com.JKS.community.entity.Member;
 import com.JKS.community.exception.CustomException;
 import com.JKS.community.exception.ErrorCode;
-import com.JKS.community.exception.member.*;
 import com.JKS.community.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDto register(MemberFormDto memberFormDto) {
         if (memberRepository.findByEmail(memberFormDto.getEmail()).isPresent()) {
-            throw new CustomException(ErrorCode.MEMBER_DUPLICATION);
+            throw new CustomException(ErrorCode.MEMBER_EMAIL_DUPLICATION);
         }
 
         if (!memberFormDto.getPassword().equals(memberFormDto.getConfirm_password())) {
@@ -51,32 +50,32 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDto get(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         return new MemberDto(member);
     }
 
     @Override
     public MemberDto update(Long memberId, MemberFormDto memberFormDto) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!member.getEmail().equals(memberFormDto.getEmail())) {
-            throw new IllegalArgumentException("본인의 정보만 수정할 수 있습니다.");
+            throw new CustomException(ErrorCode.MEMBER_ACCESS_DENIED);
         }
 
         String newPassword = memberFormDto.getPassword();
         String confirmPassword = memberFormDto.getConfirm_password();
         if (newPassword != null && !newPassword.isEmpty()) {
             if (!newPassword.equals(confirmPassword)) {
-                throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+                throw new CustomException(ErrorCode.MEMBER_PASSWORD_MISMATCH);
             }
             if (passwordEncoder.matches(newPassword, member.getPassword())) {
-                throw new DuplicatePasswordException("동일한 비밀번호로 변경할 수 없습니다.");
+                throw new CustomException(ErrorCode.MEMBER_PASSWORD_DUPLICATION);
             }
 
             Pattern pattern = Pattern.compile("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,20}$");
             if (!pattern.matcher(newPassword).matches()) {
-                throw new InvalidPasswordException("비밀번호는 알파벳과 숫자를 포함한 8~20자리여야 합니다.");
+                throw new CustomException(ErrorCode.MEMBER_PASSWORD_INVALID);
             }
             newPassword = passwordEncoder.encode(newPassword);
         } else {
@@ -91,7 +90,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void withdrawal(Long memberId) {
         memberRepository.findById(memberId)
-                        .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+                        .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         memberRepository.deleteById(memberId);
     }
