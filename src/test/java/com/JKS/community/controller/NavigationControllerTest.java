@@ -3,7 +3,7 @@ package com.JKS.community.controller;
 import com.JKS.community.dto.CategoryDto;
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.PostDto;
-import com.JKS.community.security.CustomUserDetails;
+import com.JKS.community.entity.Member;
 import com.JKS.community.security.UserDetailsService;
 import com.JKS.community.service.CategoryService;
 import com.JKS.community.service.CommentService;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -100,20 +99,26 @@ class NavigationControllerTest {
     @Test
     @DisplayName("/login POST")
     public void processLogin() throws Exception {
-        // 사용자 정보를 로드하기 위한 UserDetailsService를 모킹
-        UserDetails userDetails = new CustomUserDetails(1L, "valid_username", "valid_password", new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
+        // given
+        String email = "valid_email@email.com";
+        String name = "valid_name";
+        String validPassword = "valid_password";
 
-        // 비밀번호 검증을 위한 PasswordEncoder를 모킹
+        Member member = Member.of(email, name, validPassword);
+
+        // when
+        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
+        // then
         mockMvc.perform(post("/login")
-                        .with(csrf()) // CSRF 토큰 포함
-                        .param("username", "valid_username")
-                        .param("password", "valid_password"))
-                .andExpect(status().is3xxRedirection()) // 로그인 성공 시 3xx 상태 코드를 반환
-                .andExpect(redirectedUrl("/")); // 로그인 성공 후 "/"로 리다이렉트
+                        .with(csrf())
+                        .param("email", email)
+                        .param("password", validPassword))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
+
 
     @Test
     @DisplayName("/info GET - 로그인하지 않은 경우")
@@ -128,29 +133,31 @@ class NavigationControllerTest {
     @DisplayName("/info/{memberId} GET - 로그인한 경우")
     public void info_user() throws Exception {
         //given
-        String username = "email@email.com";
-        String validPassword = "valid_password";
-        CustomUserDetails customUserDetails = new CustomUserDetails(1L, username, validPassword, new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(customUserDetails);
+        String email = "email@email.com";
+        String name = "name";
+        String validPassword = "vaildPW0";
+
+        Member member = Member.of(email, name, validPassword);
+
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-        MemberDto memberDto = new MemberDto();
-        memberDto.setId(1L);
-        memberDto.setEmail("email");
-        memberDto.setName("name");
+        MemberDto memberDto = new MemberDto(member);
         when(memberService.get(1L)).thenReturn(memberDto);
 
         when(postService.countPostsByMember(1L)).thenReturn(3L);
         when(commentService.countCommentsByMember(1L)).thenReturn(12L);
 
         //when&then
-        mockMvc.perform(get("/info/1").with(user(customUserDetails)))
+        mockMvc.perform(get("/info/1").with(user(member)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("info"))
                 .andExpect(model().attribute("countPosts", 3L))
                 .andExpect(model().attribute("countComments", 12L))
                 .andExpect(model().attribute("memberDto", memberDto));
     }
+
+
 
     @Test
     @DisplayName("/info/{memberId}/edit GET")
@@ -207,15 +214,16 @@ class NavigationControllerTest {
     @DisplayName("/post/member GET - 로그인한 경우")
     public void postsByMember_user() throws Exception {
         // given
-        String username = "email@email.com";
+        String email = "email@email.com";
+        String name = "name";
         String validPassword = "valid_password";
-        CustomUserDetails customUserDetails = new CustomUserDetails(1L, username, validPassword, new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(customUserDetails);
+
+        Member member = Member.of(email, name, validPassword);
+
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-        MemberDto memberDto = new MemberDto();
-        memberDto.setId(1L);
-        memberDto.setName("Test Member");
+        MemberDto memberDto = new MemberDto(member);
         when(memberService.get(1L)).thenReturn(memberDto);
 
         List<PostDto> postDtos = getPostDtos(30);
@@ -228,7 +236,7 @@ class NavigationControllerTest {
         when(postService.getListByMember(1L, pageable)).thenReturn(postDtoPage);
 
         // when & then
-        mockMvc.perform(get("/post/member/1").with(user(customUserDetails)))
+        mockMvc.perform(get("/post/member/1").with(user(member)))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("memberDto", "postList"))
                 .andExpect(model().attribute("memberDto", memberDto))
@@ -241,17 +249,21 @@ class NavigationControllerTest {
     @DisplayName("/post/{postId} GET - 로그인한 경우")
     public void postView() throws Exception {
         // given
-        String username = "email@email.com";
-        String password = "valid_password";
-        CustomUserDetails customUserDetails = new CustomUserDetails(1L, username, password, new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(customUserDetails);
+        String email = "email@email.com";
+        String name = "name";
+        String validPassword = "valid_password";
+
+        Member member = Member.of(email, name, validPassword);
+
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         PostDto postDto = getPostDtos(1).get(0);
+        postDto.setMemberId(member.getId());
         when(postService.get(postDto.getId())).thenReturn(postDto);
 
         // when & then
-        mockMvc.perform(get("/post/"+postDto.getId()).with(user(customUserDetails)))
+        mockMvc.perform(get("/post/"+postDto.getId()).with(user(email)))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("memberId", postDto.getMemberId()))
                 .andExpect(model().attribute("postDto", postDto))
@@ -264,10 +276,13 @@ class NavigationControllerTest {
     @DisplayName("/{categoryId}/create GET - 로그인한 경우")
     public void createPost_user() throws Exception {
         // given
-        String username = "email@email.com";
+        String email = "email@email.com";
+        String name = "name";
         String validPassword = "valid_password";
-        CustomUserDetails customUserDetails = new CustomUserDetails(1L, username, validPassword, new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(customUserDetails);
+
+        Member member = Member.of(email, name, validPassword);
+
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         CategoryDto categoryDto = new CategoryDto();
@@ -276,23 +291,24 @@ class NavigationControllerTest {
         when(categoryService.get(1L)).thenReturn(categoryDto);
 
         // when & then
-        mockMvc.perform(get("/1/create").with(user(customUserDetails)))
+        mockMvc.perform(get("/1/create").with(user(email)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("post-form"))
                 .andExpect(model().attribute("postDto", instanceOf(PostDto.class)))
-                .andExpect(model().attribute("category", categoryDto))
-                .andExpect(model().attribute("memberId", 1L));
+                .andExpect(model().attribute("category", categoryDto));
     }
-
 
     @Test
     @DisplayName("/post/{postId}/edit GET - 로그인한 경우")
     public void editPost_user() throws Exception {
         // given
-        String username = "email@email.com";
+        String email = "email@email.com";
+        String name = "name";
         String validPassword = "valid_password";
-        CustomUserDetails customUserDetails = new CustomUserDetails(1L, username, validPassword, new ArrayList<>());
-        when(userDetailsService.loadUserByUsername(username)).thenReturn(customUserDetails);
+
+        Member member = Member.of(email, name, validPassword);
+
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(member);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         CategoryDto categoryDto = new CategoryDto();
@@ -306,13 +322,13 @@ class NavigationControllerTest {
         when(categoryService.get(postDto.getParentCategoryId())).thenReturn(categoryDto);
 
         // when & then
-        mockMvc.perform(get("/post/1/edit").with(user(customUserDetails)))
+        mockMvc.perform(get("/post/1/edit").with(user(email)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("post-form"))
                 .andExpect(model().attribute("postDto", postDto))
-                .andExpect(model().attribute("category", categoryDto))
-                .andExpect(model().attribute("memberId", 1L));
+                .andExpect(model().attribute("category", categoryDto));
     }
+
 
 
 
