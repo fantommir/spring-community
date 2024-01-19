@@ -1,4 +1,4 @@
-package com.JKS.community;
+package com.JKS.community.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

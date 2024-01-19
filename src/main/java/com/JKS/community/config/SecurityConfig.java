@@ -1,4 +1,4 @@
-package com.JKS.community;
+package com.JKS.community.config;
 
 import com.JKS.community.security.UserDetailsService;
 import lombok.RequiredArgsConstructor;
