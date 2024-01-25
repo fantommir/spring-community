@@ -9,13 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     Page<Member> findAllByNameContaining(String name, Pageable pageable);
 
     Optional<Member> findByEmail(String loginId);
-
-    Boolean existsByEmail(String loginId);
 
     @Query("SELECT COUNT(p) FROM Post p WHERE p.member = :member")
     long countPostsByMember(@Param("member") Member member);

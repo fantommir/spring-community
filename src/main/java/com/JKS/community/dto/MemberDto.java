@@ -1,13 +1,13 @@
 package com.JKS.community.dto;
 
 import com.JKS.community.entity.Member;
-import lombok.Getter;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Data
 @NoArgsConstructor
 public class MemberDto {
     private Long id;
@@ -15,6 +15,12 @@ public class MemberDto {
     private String name;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
+
+    @QueryProjection
+    public MemberDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public MemberDto(Member member) {
         this.id = member.getId();
