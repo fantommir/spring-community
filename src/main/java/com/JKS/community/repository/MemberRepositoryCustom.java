@@ -2,9 +2,9 @@ package com.JKS.community.repository;
 
 import com.JKS.community.dto.MemberDto;
 import com.JKS.community.dto.MemberSearchCondition;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface MemberRepositoryCustom {
-    List<MemberDto> search(MemberSearchCondition condition);
+    Page<MemberDto> search(MemberSearchCondition condition, Pageable pageable);
 }
