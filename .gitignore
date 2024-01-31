@@ -7,6 +7,7 @@ build/
 
 application.yml
 application-azure.yml
+application-prod.yml
 .env
 
 ### STS ###
