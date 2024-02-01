@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
 @SQLDelete(sql = "UPDATE member SET enabled = false WHERE member_id = ?")
-@Where(clause = "enabled = true")
+@SQLRestriction("enabled = true")
 public class Member extends BaseTimeEntity implements UserDetails {
 
     @Id @GeneratedValue

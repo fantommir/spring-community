@@ -6,7 +6,7 @@ FROM openjdk:17-alpine
 ARG JAR_FILE=build/libs/*.jar
 
 # JAR_FILE을 agaproject.jar로 복사 (이 부분(.jar)은 개발환경에 따라 다름)
-COPY ${JAR_FILE} app.jar
+COPY ${JAR_FILE} community.jar
 
 # 운영 및 개발에서 사용되는 환경 설정을 분리한다.
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "/community.jar"]

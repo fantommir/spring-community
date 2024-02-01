@@ -1,7 +1,6 @@
 package com.JKS.community;
 
 import com.JKS.community.entity.Member;
-import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -57,10 +56,7 @@ public class QuerydslTest {
         List<Member> fetch = queryFactory
                 .selectFrom(member)
                 .fetch();
-        //단 건
-        Member findMember1 = queryFactory
-                .selectFrom(member)
-                .fetchOne();
+
         //처음 한 건 조회
         Member findMember2 = queryFactory
                 .selectFrom(member)

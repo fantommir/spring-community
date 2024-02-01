@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @NoArgsConstructor
@@ -13,8 +14,8 @@ public class MemberDto {
     private Long id;
     private String email;
     private String name;
-    private LocalDateTime createdDate;
-    private LocalDateTime lastModifiedDate;
+    private String createdDate;
+    private String lastModifiedDate;
 
     @QueryProjection
     public MemberDto(Long id, String name) {
@@ -23,10 +24,12 @@ public class MemberDto {
     }
 
     public MemberDto(Member member) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
         this.id = member.getId();
         this.email = member.getEmail();
         this.name = member.getName();
-        this.createdDate = member.getCreatedDate();
-        this.lastModifiedDate = member.getLastModifiedDate();
+        this.createdDate = member.getCreatedDate().format(formatter);
+        this.lastModifiedDate = member.getLastModifiedDate().format(formatter);
     }
 }
