@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -96,7 +97,8 @@ public class MemberControllerTest {
         }
 
         // 페이징 처리
-        Page<MemberDto> memberPage = new PageImpl<>(members);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<MemberDto> memberPage = new PageImpl<>(members, pageable, members.size());
 
         // 서비스 메소드 동작 설정
         when(memberService.getList(any(Pageable.class))).thenReturn(memberPage);
@@ -136,7 +138,7 @@ public class MemberControllerTest {
         String name = "Test User";
         List<MemberDto> members = new ArrayList<>();
 
-        // 검색되어야 하는 멤버만 추가
+        // 검색되어야 하는 멤버 추가
         for (int i = 0; i < 5; i++) {
             MemberDto member = new MemberDto();
             member.setEmail("test" + i + "@test.com");
@@ -144,15 +146,8 @@ public class MemberControllerTest {
             members.add(member);
         }
 
-        // 검색되지 않아야 하는 멤버 추가
-        for (int i = 5; i < 10; i++) {
-            MemberDto member = new MemberDto();
-            member.setEmail("test" + i + "@test.com");
-            member.setName("Another User");
-            members.add(member);
-        }
-
-        Page<MemberDto> memberPage = new PageImpl<>(members.subList(0, 5)); // 검색된 멤버만 포함
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<MemberDto> memberPage = new PageImpl<>(members, pageable, members.size());
 
         when(memberService.getListByName(eq(name), any(Pageable.class))).thenReturn(memberPage);
 
