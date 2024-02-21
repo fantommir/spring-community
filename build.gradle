@@ -70,6 +70,9 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-clean {
-	delete file('src/main/generated')
+bootJar {
+	archiveBaseName = 'mycommunity'
+	archiveVersion =  '0.0.1-SNAPSHOT'
 }
+
+jar.enabled = false
