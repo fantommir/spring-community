@@ -67,4 +67,4 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my_community
           docker stop springboot_community
           docker rm springboot_community
-          docker run -d --name springboot_community ${{ secrets.DOCKERHUB_USERNAME }}/my_community
+          docker run -d --name springboot_community -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/my_community
