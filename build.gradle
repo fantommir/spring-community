@@ -76,3 +76,9 @@ bootJar {
 }
 
 jar.enabled = false
+
+tasks.register('copyConfig', Copy) {
+	from './config'
+	include "*.yml"
+	into 'src/main/resources'
+}
