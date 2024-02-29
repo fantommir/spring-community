@@ -1,4 +1,4 @@
 [submodule "config"]
     path = config
-    url = https://github.com/<username>/springboot-community-config.git
+    url = https://github.com/JungKiSung1012/springboot-community-config.git
     branch = main
