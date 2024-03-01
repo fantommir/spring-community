@@ -30,7 +30,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-
+      - name: Copy config files
+        run: cp config/*.yml src/main/resources/
+      
       # 2. Spring Boot 애플리케이션 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
