@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.CONFIG_TOKEN }}
+          # token: ${{ secrets.CONFIG_TOKEN }}
           submodules: recursive
       # 1. Java 17 세팅
       - name: Set up JDK 17
