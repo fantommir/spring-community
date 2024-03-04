@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE comment SET enabled = false WHERE comment_id = ?")
-@Where(clause = "enabled = true")
+@SQLRestriction("enabled = true")
 public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue
@@ -25,23 +27,26 @@ public class Comment extends BaseTimeEntity {
     private Long id;
 
     @NotNull
-    @Size(max = 1000)
+    @Size(max = 300)
+    @Column(nullable = false, length = 300)
     private String content;
+    @Setter
     private int likeCount = 0;
+    @Setter
     private int dislikeCount = 0;
     private int level = 0;
     private boolean enabled = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", nullable = false)
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,11 +74,4 @@ public class Comment extends BaseTimeEntity {
         this.content = content;
     }
 
-    public void setLikeCount(int likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public void setDislikeCount(int dislikeCount) {
-        this.dislikeCount = dislikeCount;
-    }
 }

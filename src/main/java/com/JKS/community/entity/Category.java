@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
@@ -16,20 +17,21 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE category SET enabled = false WHERE category_id = ?")
-@Where(clause = "enabled = true")
+@SQLRestriction("enabled = true")
 public class Category {
 
     @Id @GeneratedValue
     @Column(name = "category_id")
     private Long id;
 
+    @Column(nullable = false, length = 20)
     private String name;
     private Boolean enabled = true;
 
     private int depth = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", nullable = false)
     private Category parent;
 
     @Getter

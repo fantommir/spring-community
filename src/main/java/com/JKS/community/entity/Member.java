@@ -2,6 +2,7 @@ package com.JKS.community.entity;
 
 import com.JKS.community.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,12 +29,15 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Column(name = "member_id")
     private Long id;
 
+    @NotNull
     @Column(nullable = false)
     private String email;
 
+    @NotNull
     @Column(nullable = false, length = 10)
     private String name;
 
+    @NotNull
     @Column(nullable = false)
     private String password;
 
@@ -41,7 +45,6 @@ public class Member extends BaseTimeEntity implements UserDetails {
     private Role role = Role.USER;
 
     private boolean enabled = true;
-
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Post> posts = new ArrayList<>();

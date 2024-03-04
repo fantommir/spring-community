@@ -27,10 +27,6 @@ public class File {
     @Column(updatable = false)
     private LocalDateTime uploadTime;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "post_id")
-//    private Post post;
-
     public static File of(String originalName, String uuidName, String type, long size, String path) {
         File file = new File();
         file.originalName = originalName;

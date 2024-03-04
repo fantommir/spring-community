@@ -7,8 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE post SET enabled = false WHERE post_id = ?")
-@Where(clause = "enabled = true")
+@SQLRestriction("enabled = true")
 public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue
@@ -26,25 +27,29 @@ public class Post extends BaseTimeEntity {
 
     @NotNull
     @Size(max = 50)
+    @Column(nullable = false, length = 50)
     private String title;
 
     @NotNull
     @Size(max = 65535)
+    @Column(nullable = false, length = 65535)
     private String content;
 
     private int viewCount = 0;
+    @Setter
     private int likeCount = 0;
+    @Setter
     private int dislikeCount = 0;
 
     private Boolean enabled = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     // category
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     // comment
@@ -74,14 +79,6 @@ public class Post extends BaseTimeEntity {
         this.title = title;
         this.content = content;
         this.category = category;
-    }
-
-    public void setLikeCount(int likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public void setDislikeCount(int dislikeCount) {
-        this.dislikeCount = dislikeCount;
     }
 
     public void increaseViewCount() {
