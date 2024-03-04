@@ -30,7 +30,7 @@ public class Category {
     private int depth = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", nullable = false)
+    @JoinColumn(name = "parent_id")
     private Category parent;
 
     @Getter
