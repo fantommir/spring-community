@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Java Build and Docker Deployment
 
 # 동작 조건 : push 혹은 pull request가 발생
 on:
@@ -42,7 +42,7 @@ jobs:
 
       # 3. Docker 이미지 빌드
       - name: docker image build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my_community .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/springboot_community .
 
 
       # 4. DockerHub 로그인
@@ -55,7 +55,7 @@ jobs:
 
       # 5. Docker Hub 이미지 푸시
       - name: docker Hub push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/my_community
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/springboot_community
 
 
   deploy:
@@ -69,7 +69,8 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my_community
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/springboot_community
             docker stop springboot_community
             docker rm springboot_community
-            docker run -d --name springboot_community -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/my_community
+            docker run -d --name springboot_community -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/springboot_community
+            docker image prune -f
