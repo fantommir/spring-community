@@ -13,8 +13,8 @@ export default class UploadAdapter {
 
     _initRequest() {
         const xhr = this.xhr = new XMLHttpRequest();
-        // TODO: Change URL to server URL
-        xhr.open('POST', 'http://localhost:8080/api/files/upload', true);
+        const serverUrl = `${window.location.origin}/api/files/upload`;
+        xhr.open('POST', serverUrl, true);
         xhr.responseType = 'json';
 
         const csrfToken = document.querySelector('[name="_csrf"]').value;
