@@ -60,7 +60,8 @@ public class PostController {
     }
 
     @GetMapping
-    public Page<PostDto> getList(Pageable pageable) {
+    public Page<PostDto> getList(PageRequestDto pageRequest) {
+        Pageable pageable = pageRequest.toPageable();
         return postService.getList(pageable);
     }
 

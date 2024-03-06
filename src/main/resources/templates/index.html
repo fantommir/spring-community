@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCommunity</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
 
@@ -13,9 +16,97 @@
 <!-- Categories (Forums) -->
 <div th:replace="~{fragment/fragments :: categoryList}"></div>
 
-<!-- Posts -->
+<!-- 최신 게시글 -->
+<div class="container my-5">
+    <h1>최신 게시글</h1>
 
+    <!-- Post Table -->
+    <table class="table table-striped my-4">
+        <thead>
+        <tr>
+            <!--예) 치지직-사진-->
+            <th scope="col">카테고리</th>
+            <th scope="col">제목</th>
+            <th scope="col">글쓴이</th>
+            <th scope="col">날짜</th>
+            <th scope="col">조회</th>
+            <th scope="col">추천</th>
+        </tr>
+        </thead>
+
+        <tbody id='PostList'>
+        </tbody>
+    </table>
+    <div class="input-group rounded">
+        <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+        <span class="input-group-text border-0" id="search-addon">
+            <i class="fas fa-search"></i>
+         </span>
+    </div>
+    <div id='Pagination' class="btn-group mt-3"></div>
+</div>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ko.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // 페이지 로드 시 URL의 쿼리 파라미터를 읽어옵니다.
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = Math.max((urlParams.get('page') || 1) - 1, 0);
+        loadRecentPosts(page);
+    });
 
-</body >
-</html > 
+    function loadRecentPosts(page = 0, size = 20, sortField = 'createdDate', sortOrder = 'desc') {
+        $.ajax({
+            url: '/api/posts',
+            type: 'GET',
+            data: {page: page, size: size, sortField: sortField, sortOrder: sortOrder},
+            success: [
+                function (data) {
+                    const postList = $('#PostList');
+                    postList.empty();
+                    data.content.forEach(function (post) {
+                        const row = $('<tr>').append(
+                            $('<td>').text(`${post.parentCategoryName} / ${post.categoryName}`),
+                            $('<td>').append(
+                                $('<a>')
+                                    .addClass('custom-link')
+                                    .attr('href', '/post/' + post.id)
+                                    .text(post.title)
+                            ),
+                            $('<td>').text(post.memberName),
+                            $('<td>').text(moment(post.createdDate, "YYYY.MM.DD HH:mm").fromNow()),
+                            $('<td>').text(post.viewCount),
+                            $('<td>').text(post.likeCount)
+                        );
+                        postList.append(row);
+                    });
+
+                    // Pagination
+                    const pagination = $('#Pagination');
+                    pagination.empty();
+
+                    for (let i = 0; i<data.totalPages; i++) {
+                        let btnClass = i === page ? 'btn-primary' : 'btn-default';
+                        const btn =$('<button>')
+                            .addClass('btn')
+                            .addClass(btnClass)
+                            .text(i+1)
+                            .click(function() {
+                                const params = new URLSearchParams({page: String(i+1)});
+                                window.location.search = params.toString();
+                            });
+                        pagination.append(btn);
+                    }
+                }
+            ],
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+            }
+        });
+    }
+</script>
+</body>
+</html>
