@@ -1,7 +1,34 @@
 학습하면서 얻은 지식이나 헷갈렸던 부분을 정리합니다.
 
 ---
+<!-- TOC -->
+  * [Spring Security](#spring-security)
+    * [Session 방식으로 로그인 구현](#session-방식으로-로그인-구현)
+    * [UserDetails, UserDetailsService](#userdetails-userdetailsservice)
+      * [UserDetails](#userdetails)
+      * [UserDetailsService](#userdetailsservice)
+    * [CSRF(Cross Site Request Forgery)](#csrfcross-site-request-forgery)
+      * [CSRF 토큰 검증 원리](#csrf-토큰-검증-원리)
+      * [CSRF 토큰의 작동 순서](#csrf-토큰의-작동-순서)
+  * [조회수 중복 방지](#조회수-중복-방지)
+    * [쿠키/로컬 스토리지 사용](#쿠키로컬-스토리지-사용)
+    * [서버 측 세션 활용](#서버-측-세션-활용)
+    * [IP 주소와 사용자 에이전트 기반](#ip-주소와-사용자-에이전트-기반)
+    * [토큰 기반 인증 활용](#토큰-기반-인증-활용)
+  * [ES Module](#es-module)
+  * [JPA 최적화 전략](#jpa-최적화-전략)
+    * [컬렉션에 size() 사용을 피하자](#컬렉션에-size-사용을-피하자)
+  * [CascadeType.ALL / orphanRemoval](#cascadetypeall--orphanremoval)
+    * [CascadeType](#cascadetype)
+    * [orphanRemoval](#orphanremoval)
+    * [CascadeType.REMOVE와 orphanRemoval 차이](#cascadetyperemove와-orphanremoval-차이)
+  * [TEST](#test)
+    * [MOCKITO](#mockito)
+      * [Service 단위 테스트](#service-단위-테스트)
+      * [Controller 단위 테스트](#controller-단위-테스트)
+<!-- TOC -->
 
+---
 ## Spring Security
 <br>
 
@@ -62,6 +89,7 @@
     4. 서버는 요청을 받으면, 요청에 포함된 CSRF 토큰과 세션에 저장된 CSRF 토큰을 비교합니다. 두 토큰이 일치하면 요청이 유효한 것으로 판단하고, 그렇지 않으면 요청을 거부합니다.
 <br>
 
+---
 ## 조회수 중복 방지
 <br>
 
@@ -108,3 +136,146 @@
     단점
      - 인증이 필요 없는 공개적인 컨텐츠에는 적합하지 않을 수 있습니다.
      - 구현 복잡도가 상대적으로 높습니다.
+<br>
+
+---
+## ES Module
+https://zubetcha.tistory.com/entry/Javascript-ES-Module  
+https://github.com/mdn/js-examples/tree/main/module-examples
+
+    ES Module : ES6에 도입된 모듈 시스템.
+    import, export를 사용해 분리된 자바스크립트 파일끼리 서로 접근할 수 있다.
+
+    <script type="module"> 
+    모듈은 defer되어 문서 파싱 후 실행
+    모듈은 전역 스코프가 아니라 자신의 스코프를 가지므로, import한 기능에만 접근
+
+    이 태그 안에 함수를 정의했다가 전역 스코프가 아니라 에러가 발생한 적 있음.
+<br>
+
+---
+## JPA 최적화 전략
+<br>
+
+### 컬렉션에 size() 사용을 피하자
+    JPA에서 엔티티의 컬렉션에 size()를 호출하면, 해당 컬렉션에 속한 모든 엔티티가 지연 로딩되어 성능이 떨어짐.
+    따라서, 컬렉션의 크기를 알아내려면 count 쿼리를 사용하는 것이 좋음.
+
+<br>
+
+---
+## CascadeType.ALL / orphanRemoval
+<br>
+
+### CascadeType
+    ALL, PERSIST, MERGE, REMOVE, REFRESH, DETACH
+    부모 엔티티에 발생하는 모든 영속성 생명주기 이벤트를 관련된 자식 엔티티에도 적용
+<br>
+
+### orphanRemoval
+    부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제
+<br>
+
+### CascadeType.REMOVE와 orphanRemoval 차이
+    - CascadeType.REMOVE는 부모 엔티티의 삭제와 함께 자식 엔티티의 삭제를 관리
+    - orphanRemoval=true는 부모 엔티티에서 자식 엔티티의 참조가 제거될 때만 자식 엔티티를 삭제
+<br>
+
+---
+## TEST
+<br>
+
+### MOCKITO
+    @Mock, @InjectMocks 어노테이션을 사용하여 테스트 코드 작성
+    @Mock: 테스트 대상이 되는 클래스의 의존성을 Mocking
+    @InjectMocks: 테스트 대상이 되는 클래스를 Mocking
+<br>
+
+#### Service 단위 테스트
+    Service 단위 테스트에서는 Repository를 Mocking하여 테스트를 진행
+<br>
+
+```java
+@ExtendWith(MockitoExtension.class)
+class MemberServiceTest {
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @InjectMocks
+    private MemberService memberService;
+
+    @Test
+    void 회원가입() {
+        // given
+        Member member = new Member();
+        member.setEmail("temp@gmail.com");
+        member.setPassword("1234");
+
+        // when
+        memberService.join(member);
+
+        // then 
+        verify(memberRepository, times(1)).save(member);
+    }
+}
+```
+<br>
+
+#### Controller 단위 테스트
+    Controller 단위 테스트에서는 Service를 Mocking하여 테스트를 진행
+<br>
+
+```java
+@ExtendWith(MockitoExtension.class)
+class MemberControllerTest {
+
+    @Mock
+    private MemberService memberService;
+
+    @InjectMocks
+    private MemberController memberController;
+
+    @Test
+    void 회원가입() {
+        // given
+        Member member = new Member();
+        member.setEmail("");
+        member.setPassword("");
+
+        // when
+        memberController.join(member);
+        
+        // then
+        verify(memberService, times(1)).join(member);
+    }
+}
+```
+<br>
+
+### @SpringBootTst
+    애플리케이션의 모든 컴포넌트를 로드하여 실제 애플리케이션의 실행 환경과 가장 유사한 테스트 환경을 구성
+    여러 레이어(컨트롤러, 서비스, 데이터 액세스 등)와의 상호작용을 포함하는 테스트나, 전체 애플리케이션의 흐름을 테스트하는 데 적합
+    
+    @MockMvc를 빈으로 등록하지 않기 때문에 @AutoConfigureMockMvc 사용
+
+    장점
+      - 모든 빈을 로드하기 때문에 테스트 코드 작성이 간편
+      - 실제 애플리케이션 환경과 동일하게 데이터베이스와 같은 외부 시스템과의 통합을 테스트할 수 있습니다.
+    단점
+      - 모든 스프링 컨텍스트를 로드하기 때문에 테스트 실행 시간이 오래 걸림
+<br>
+
+### @WebMvcTest
+    Spring MVC 컨트롤러의 테스트에 특화된 어노테이션
+    웹 계층에 집중하여 컨트롤러를 테스트할 수 있으며, 실제 HTTP 요청과 응답을 Mock하여 테스트
+    예를 들어, HTTP 요청 처리, 모델 및 뷰 반환, HTTP 응답 상태 코드 등의 컨트롤러 로직을 테스트하는 데 적합
+
+    @ExtendWith, @MockBean을 사용해야 함
+
+    장점
+      - 웹 레이어에 집중하여 테스트하기 때문에 테스트 실행 시간이 짧음
+      - MockMvc 인스턴스를 자동으로 제공하므로, HTTP 요청과 응답에 대한 세밀한 제어와 검증이 가능
+    단점
+    - 웹 레이어에 집중하기 때문에, 서비스 레이어나 데이터 액세스 레이어와 같은 다른 레이어의 문제를 감지하지 못할 수 있다.
+<br>
