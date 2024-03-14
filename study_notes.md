@@ -10,6 +10,8 @@
     * [CSRF(Cross Site Request Forgery)](#csrfcross-site-request-forgery)
       * [CSRF 토큰 검증 원리](#csrf-토큰-검증-원리)
       * [CSRF 토큰의 작동 순서](#csrf-토큰의-작동-순서)
+    * [Authorization](#authorization)
+    * [OAuth2](#oauth2)
   * [조회수 중복 방지](#조회수-중복-방지)
     * [쿠키/로컬 스토리지 사용](#쿠키로컬-스토리지-사용)
     * [서버 측 세션 활용](#서버-측-세션-활용)
@@ -26,6 +28,18 @@
     * [MOCKITO](#mockito)
       * [Service 단위 테스트](#service-단위-테스트)
       * [Controller 단위 테스트](#controller-단위-테스트)
+    * [@SpringBootTest](#springboottest)
+    * [@WebMvcTest](#webmvctest)
+  * [Java](#java)
+    * [Record](#record)
+  * [JWT(Json Web Token)](#jwtjson-web-token)
+  * [SpringBoot 예외 처리](#springboot-예외-처리)
+  * [Swagger](#swagger)
+  * [OOP, AOP](#oop-aop)
+  * [Querydsl](#querydsl)
+  * [Docker](#docker)
+  * [서버 배포](#서버-배포)
+  * [GitHub Actions](#github-actions)
 <!-- TOC -->
 
 ---
@@ -88,6 +102,20 @@
     3. 사용자가 form을 제출하거나 어떤 요청을 보낼 때, 요청에는 세션에 저장된 CSRF 토큰이 포함됩니다. 이 토큰은 보통 HTTP header나 body에 포함됩니다.
     4. 서버는 요청을 받으면, 요청에 포함된 CSRF 토큰과 세션에 저장된 CSRF 토큰을 비교합니다. 두 토큰이 일치하면 요청이 유효한 것으로 판단하고, 그렇지 않으면 요청을 거부합니다.
 <br>
+
+### Authorization
+> 모든 요청을 인터셉트하여 Filter Chain을 통해 인증 및 권한 부여를 수행  
+> * 전역 인증
+>   * .requestMatcher("/users").hasRole("USER")  
+> * 메소드 인증
+>   * @EnableMethodSecurity를 사용하면 @PreAuthorize, @PostAuthorize 등을 사용하여 메소드 단위로 권한을 부여할 수 있음  
+>   * @PreAuthorize("hasRole('USER')")  
+
+<br>
+
+### OAuth2
+> OAuth2는 인증 및 권한 부여 프레임워크로, 사용자의 리소스에 대한 접근 권한을 제어하는 프로토콜
+
 
 ---
 ## 조회수 중복 방지
@@ -253,7 +281,7 @@ class MemberControllerTest {
 ```
 <br>
 
-### @SpringBootTst
+### @SpringBootTest
     애플리케이션의 모든 컴포넌트를 로드하여 실제 애플리케이션의 실행 환경과 가장 유사한 테스트 환경을 구성
     여러 레이어(컨트롤러, 서비스, 데이터 액세스 등)와의 상호작용을 포함하는 테스트나, 전체 애플리케이션의 흐름을 테스트하는 데 적합
     
@@ -278,4 +306,69 @@ class MemberControllerTest {
       - MockMvc 인스턴스를 자동으로 제공하므로, HTTP 요청과 응답에 대한 세밀한 제어와 검증이 가능
     단점
     - 웹 레이어에 집중하기 때문에, 서비스 레이어나 데이터 액세스 레이어와 같은 다른 레이어의 문제를 감지하지 못할 수 있다.
+<br>
+
+---
+## Java
+<br>
+
+### Record
+> 불변 데이터 객체를 쉽게 생성할 수 있도록 하는 새로운 유형의 클래스  
+> 생성자, getter, equals, hashCode, toString 메소드를 자동으로 생성  
+> 일반적으로 DTO(Data Transfer Object)로 사용
+
+```java
+public record Point(int x, int y) { }
+```
+
+---
+## JWT(Json Web Token)
+> 주요 목적은 보안이 아니라 **신뢰성 보장**  
+> 클라이언트와 서버 간 정보를 안전하게 전달하기 위한 토큰 기반의 인증 방식  
+> 일반적으로 stateless 서버에서 사용  
+> 
+> 예시  
+> > 우편함(공개 키)은 누구나 접근할 수 있지만, 열쇠(개인 키)는 우편함의 주인만 가지고 있음  
+> > 누군가가 우편함에 편지(JWT)를 넣으면(암호화하면), 그 편지는 우편함의 열쇠를 가진 사람만 열어볼 수 있다(복호화할 수 있다).  
+>
+> Header, payload, Signatrue 세 부분으로 구성되며, 'header.payload.signature' 형태
+> * Header: 토큰의 타입과 해싱 알고리즘 정보  
+> * Payload: 토큰에 담을 정보. 일반적으로 사용자에 관한 정보나 권한 등  
+> * Signature: 토큰의 유효성 검증을 위한 암호화된 문자열  
+
+<br>
+
+---
+## SpringBoot 예외 처리
+
+<br>
+
+---
+## Swagger
+
+<br>
+
+---
+## OOP, AOP
+
+<br>
+
+---
+## Querydsl
+
+<br>
+
+---
+## Docker
+
+<br>
+
+---
+## 서버 배포
+
+<br>
+
+---
+## GitHub Actions
+
 <br>
