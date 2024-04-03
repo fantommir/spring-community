@@ -15,7 +15,8 @@
   * [Spring Security](#spring-security)
     * [권한](#권한)
   * [SpringBoot 버전 관리](#springboot-버전-관리)
-  * [서버 배포](#서버-배포)
+  * [서버 배포(Azure VM)](#서버-배포azure-vm)
+    * [Port, 방화벽](#port-방화벽)
 <!-- TOC -->
 
 ---
@@ -155,10 +156,28 @@ public class Member implements UserDetails {
 
 ---
 ## SpringBoot 버전 관리
+상황
+> 스프링부트 3.1.7 -> 3.2.0으로 업그레이드 후, 기존에 잘 동작하던 테스트에서 에러 발생  
+> Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: (was java.lang.UnsupportedOperationException)]
+
+원인 및 해결
+> 3.2.0에선 PageImpl<> 생성자에 Pageable 인스턴스와 리스트의 크기를 추가로 전달해야 한다.
+```java
+// 3.1.7
+Page<MemberDto> memberPage = new PageImpl<>(members);
+
+// 3.2.0
+Pageable pageable = PageRequest.of(0, 10);
+Page<MemberDto> memberPage = new PageImpl<>(members, pageable, members.size());
+```
 
 <br>
 
 ---
-## 서버 배포
+## 서버 배포(Azure VM)
+
+### Port, 방화벽
+> HTTP(80), HTTPS(443)만 열고 SSH(22) 포트를 안 열어서 연결에 문제가 있었음  
+> SSH(22) 포트를 여니까 cmd에서 SSH 접속 성공
 
 <br>
