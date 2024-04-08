@@ -14,8 +14,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("커뮤니티 프로젝트 API")
-                        .description("샘플 API 문서입니다.")
+                        .title("Spring Community API")
+                        .description("Swagger API 문서입니다.")
                         .version("1.0.0"))
                 .components(new Components()
                         .addSecuritySchemes("basicAuth",
