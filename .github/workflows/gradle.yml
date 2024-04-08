@@ -59,7 +59,7 @@ jobs:
       - name: Run tests
         run: ./gradlew test --info
         env:
-          SPRING_PROFILES_ACTIVE: azure, test
+          SPRING_PROFILES_ACTIVE: azure, prod
 
   docker-build-and-push:
     needs: test
