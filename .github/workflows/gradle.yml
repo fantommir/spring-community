@@ -65,7 +65,7 @@ jobs:
           mysql password: 'community'
           
       - name: Run tests
-        run: ./gradlew test
+        run: ./gradlew test --info
 
   docker-build-and-push:
     needs: test
