@@ -56,14 +56,6 @@ jobs:
       - name: Copy config files
         run: cp config/*.yml src/main/resources/
           
-      - name: Setup MySQL
-        uses: samin/mysql-action@v1.3
-        with:
-          character set server: 'utf8'
-          mysql database: 'community'
-          mysql user: 'ksjung'
-          mysql password: 'community'
-          
       - name: Run tests
         run: ./gradlew test --info
 
