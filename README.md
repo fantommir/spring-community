@@ -7,6 +7,10 @@
 ![js](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)  
 ![js](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
 ---
+[프로젝트를 진행하며 공부한 내용들](study_notes.md)  
+[프로젝트를 진행하며 발생한 오류와 해결](troubleshooting.md)
+
+---
 
 <!-- TOC -->
 * [SpringCommunity 🌱](#springcommunity-)
@@ -16,7 +20,6 @@
   * [주요 기능 ✨](#주요-기능-)
   * [배운 점 및 성장 경험 📚](#배운-점-및-성장-경험-)
   * [스크린샷 📸](#스크린샷-)
-  * [설치 및 실행 방법 🚀](#설치-및-실행-방법-)
 <!-- TOC -->
 
 ---
@@ -67,9 +70,7 @@
 - 로그인 페이지  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/5c9013ab-5220-4be2-a286-24791523128a)
 - 게시글 조회 페이지(이미지 있는 걸로 변경)  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/2b5342b5-119e-4939-8852-8c433309269c)
 - 댓글 및 대댓글 ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/a0338e0a-862b-4bb9-bc44-1221af3477ce)
-- Swagger API 문서
+- Swagger API 문서 ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/b4a4e232-1a21-4ebc-84db-7be1210629d5)
 - GitHub Actions CI/CD
 - 테스트 코드
 ---
-## 설치 및 실행 방법 🚀
-- (프로젝트를 로컬에서 실행하기 위한 단계별 안내)
