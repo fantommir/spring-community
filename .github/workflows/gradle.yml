@@ -45,6 +45,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Copy config files
+        run: cp config/*.yml src/main/resources/
           
       - name: Setup MySQL
         uses: samin/mysql-action@v1.3
