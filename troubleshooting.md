@@ -181,3 +181,8 @@ Page<MemberDto> memberPage = new PageImpl<>(members, pageable, members.size());
 > SSH(22) 포트를 여니까 cmd에서 SSH 접속 성공
 
 <br>
+
+---
+## GitHub Actions
+### Test
+GitHub Actions에 테스트를 추가하면서, 

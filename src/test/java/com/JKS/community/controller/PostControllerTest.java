@@ -127,13 +127,15 @@ class PostControllerTest {
 
     @Test
     public void getList() throws Exception {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        PageRequestDto pageRequestDto = new PageRequestDto("title", "asc", 0, 10);
+        Pageable pageable = pageRequestDto.toPageable();
         Page<PostDto> postDtoPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
         when(postService.getList(pageable)).thenReturn(postDtoPage);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/posts")
-                        .param("sort", "title,asc")
+                        .param("sortField", "title")
+                        .param("sortOrder", "asc")
                         .param("page", "0")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
