@@ -23,9 +23,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Start H2 Database Server
-        run: java -cp h2*.jar org.h2.tools.Server -tcp -tcpAllowOthers -ifNotExists &
         
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -61,6 +58,8 @@ jobs:
           
       - name: Run tests
         run: ./gradlew test --info
+        env:
+          SPRING_PROFILES_ACTIVE: azure, test
 
   docker-build-and-push:
     needs: test
