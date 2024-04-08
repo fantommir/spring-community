@@ -17,6 +17,11 @@
   * [SpringBoot 버전 관리](#springboot-버전-관리)
   * [서버 배포(Azure VM)](#서버-배포azure-vm)
     * [Port, 방화벽](#port-방화벽)
+  * [GitHub Actions](#github-actions)
+    * [Test](#test)
+      * [오류 1: Checkout 누락](#오류-1-checkout-누락)
+      * [DB 연결 오류](#db-연결-오류)
+      * [해결](#해결)
 <!-- TOC -->
 
 ---
@@ -185,4 +190,68 @@ Page<MemberDto> memberPage = new PageImpl<>(members, pageable, members.size());
 ---
 ## GitHub Actions
 ### Test
-GitHub Actions에 테스트를 추가하면서, 
+#### 오류 1: Checkout 누락
+원인 : checkout을 누락해서 서브모듈을 읽어오지 못함
+
+    Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'fileController' defined in file [/home/runner/work/spring-community/spring-community/build/classes/java/main/com/JKS/community/controller/FileController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'fileStorageService': Injection of autowired dependencies failed
+    Caused by: java.lang.IllegalArgumentException: Could not resolve placeholder 'cloud.azure.storage.blob.connection-string' in value "${cloud.azure.storage.blob.connection-string}"
+
+#### DB 연결 오류
+원인 : h2 db 사용 시, 기존 spring.datasource.url이 localhost로 되어있는데 GitHub Actions에서는 localhost로 접속할 수 없음(불확실)
+
+    Caused by: java.net.ConnectException: Connection refused
+    Caused by: org.hibernate.service.spi.ServiceException: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')   
+    Caused by: org.hibernate.HibernateException: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')
+    Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')
+    Caused by: org.hibernate.service.spi.ServiceException: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')
+    Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect'
+    Caused by: org.hibernate.service.spi.ServiceException: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'javax.persistence.jdbc.url', 'hibernate.connection.url', or 'hibernate.dialect')
+
+#### 해결
+```yml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout이 서브모듈의 내용을 읽어오는 부분. 추가해주지 않으면 서브모듈의 내용을 읽어오지 못함
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CONFIG_TOKEN }}
+          submodules: recursive
+          
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Copy config files
+        run: cp config/*.yml src/main/resources/
+          
+      - name: Run tests
+        run: ./gradlew test
+        env:
+          # h2 db 사용 시, localhost 관련 오류 발생 (불확실)
+          # prod 프로필을 활성화하여 실제 DB에 접속하도록 설정
+          SPRING_PROFILES_ACTIVE: azure, prod
+```
+<br>
+
+---
+### jobs은 독립 실행
+원인 : jobs는 독립적으로 실행되기 때문에 build와 push를 다른 job으로 분리할 경우 build에서 생성한 파일을 push에서 사용할 수 없음
+1. 동일 job으로 묶어서 실행 
+2. artifacts를 사용하여 파일을 저장하고, 다른 job에서 사용
+
+
+    [2/2] COPY build/libs/mycommunity-0.0.1-SNAPSHOT.jar mycommunity.jar:
+    
+    Dockerfile:9
+    7 |
+    8 | # JAR_FILE을 agaproject.jar로 복사 (이 부분(.jar)은 개발환경에 따라 다름) 9 | >>> COPY ${JAR_FILE} mycommunity.jar 10 |
+    11 | # 운영 및 개발에서 사용되는 환경 설정을 분리한다.
+    ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref ac927ac7-3fde-4cd9-abf3-9664575eda9c::vzwmv32b08ian1tygqq0dygdk: failed to walk /var/lib/docker/tmp/buildkit-mount2695678863/build/libs: lstat /var/lib/docker/tmp/buildkit-mount2695678863/build/libs: no such file or directory
+    Error: Process completed with exit code 1.
