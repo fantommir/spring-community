@@ -56,20 +56,26 @@
 
 ---
 ## 배운 점 및 성장 경험 📚
-- Docker와 GitHub Actions를 활용한 CI/CD 파이프라인 구축을 통해, 개발과 배포 과정의 자동화와 효율성을 경험했습니다.
-- Linux 환경에서의 서버 운영 및 관리를 통해, 시스템 운영에 대한 이해도를 높였습니다.
-- REST API 설계 및 Swagger를 통한 문서화 작업을 통해 API 개발의 표준화 및 유지 보수의 효율성을 향상시킴.
-- 사용자의 관점에서 출발하여 기능을 구현하고, 문제를 해결하는 과정에서 개발자로서의 문제 해결 능력을 향상시켰습니다.
-- 다양한 기술 스택을 적용하며, 새로운 기술 학습의 중요성과 적응력을 깨달음.
+이 프로젝트를 통해 얻은 경험은 개발자로서의 지식과 기술, 그리고 문제 해결 능력의 성장에 큰 영향을 미쳤습니다. 복잡한 개발 환경에서의 실제 작업을 통해, 이론과 실습의 균형을 잡는 중요성을 깨달았으며, 다음과 같은 구체적인 성장 경험을 얻었습니다:
 
-프로젝트를 통해 얻은 이러한 경험과 성과들은 앞으로의 개발자 생활에 있어 소중한 자산이 될 것입니다. 또한, 지속적인 학습과 성장을 통해 더 나은 개발자가 되기 위한 발판을 마련하였습니다.
+- **CI/CD 파이프라인의 구축과 자동화의 힘**: Docker와 GitHub Actions를 활용하여 CI/CD 파이프라인을 구축함으로써, 소프트웨어 개발 과정에서의 자동화가 얼마나 중요한지를 실감했습니다. 이를 통해 코드의 통합에서 배포에 이르기까지의 과정을 더욱 효율적이고 신속하게 만들 수 있었습니다.
+
+- **Linux 시스템 관리의 중요성**: Azure VM(Ubuntu)를 사용하여 서버를 운영하고 관리하는 과정에서 Linux 시스템에 대한 이해도가 크게 향상되었습니다. 이 경험은 시스템 운영과 관리에 있어서의 기술적 인사이트를 제공했습니다.
+
+- **REST API의 설계 및 문서화**: RESTful API를 설계하고 Swagger를 통해 문서화하는 과정을 통해, API 개발의 표준화와 유지 보수의 중요성을 더 깊이 이해하게 되었습니다. 이는 팀원들과의 효율적인 협업뿐만 아니라, 외부 개발자와의 소통에 있어서도 큰 도움이 되었습니다.
+
+- **사용자 중심의 개발 접근 방식**: 프로젝트를 진행하며 사용자의 관점에서 출발하여 기능을 구현하고 문제를 해결하는 과정을 통해, 사용자 중심의 개발이 얼마나 중요한지를 실감했습니다. 이는 제품의 사용성과 만족도를 높이는 데 핵심적인 역할을 했습니다.
+
+- **새로운 기술의 학습과 적응**: Spring Boot, Spring Security, JPA, QueryDsl, Docker, GitHub Actions, Azure VM 등 다양한 기술 스택을 적용하며, 새로운 기술을 배우고 적응하는 과정에서 기술적 유연성과 학습 능력이 크게 향상되었습니다.
+
+이러한 경험과 성장은 저를 더욱 성숙한 개발자로 발전시켰으며, 앞으로의 개발 생활에 있어 소중한 자산이 될 것입니다. 지속적인 학습과 성장을 통해 더 나은 개발자로 발전하기 위한 확고한 기반을 마련했다고 자부합니다.
 
 ---
 ## 스크린샷 📸
 - 메인 페이지  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/5ff50bff-2a6b-41b7-94f2-13efe79918ee)
 - 로그인 페이지  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/5c9013ab-5220-4be2-a286-24791523128a)
-- 게시글 조회 페이지(이미지 있는 걸로 변경)  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/2b5342b5-119e-4939-8852-8c433309269c)
-- 댓글 및 대댓글 ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/a0338e0a-862b-4bb9-bc44-1221af3477ce)
+- 게시글 조회 페이지  ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/cafbfd6e-1a00-4261-9fc3-454346a4da6e)
+- 댓글/대댓글 ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/a0338e0a-862b-4bb9-bc44-1221af3477ce)
 - Swagger API 문서 ![image](https://github.com/JungKiSung1012/spring-community/assets/80134129/b4a4e232-1a21-4ebc-84db-7be1210629d5)
 - GitHub Actions CI/CD
 - 테스트 코드

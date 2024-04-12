@@ -1,9 +1,9 @@
 name: Java Build and Docker Deployment
 
-# 동작 조건 : push 혹은 pull request가 발생
+# 동작 조건 : pull request가 발생
 on:
-  push:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
