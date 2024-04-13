@@ -22,6 +22,7 @@
       * [오류 1: Checkout 누락](#오류-1-checkout-누락)
       * [DB 연결 오류](#db-연결-오류)
       * [해결](#해결)
+    * [jobs](#jobs)
 <!-- TOC -->
 
 ---
@@ -241,7 +242,7 @@ jobs:
 <br>
 
 ---
-### jobs은 독립 실행
+### jobs
 원인 : jobs는 독립적으로 실행되기 때문에 build와 push를 다른 job으로 분리할 경우 build에서 생성한 파일을 push에서 사용할 수 없음
 1. 동일 job으로 묶어서 실행 
 2. artifacts를 사용하여 파일을 저장하고, 다른 job에서 사용

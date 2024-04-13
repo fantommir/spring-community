@@ -34,6 +34,7 @@
     * [Record](#record)
   * [JWT(Json Web Token)](#jwtjson-web-token)
   * [SpringBoot 예외 처리](#springboot-예외-처리)
+    * [에러 핸들링 방법](#에러-핸들링-방법)
   * [Swagger](#swagger)
   * [OOP, AOP](#oop-aop)
   * [Querydsl](#querydsl)
@@ -340,6 +341,17 @@ public record Point(int x, int y) { }
 
 ---
 ## SpringBoot 예외 처리
+
+> **왜 BasicErrorController를 사용하지 않고 에러 처리 로직을 구현하는가?**
+> 1. **맞춤형 에러 응답**: 기본적인 형태의 에러 응답 대신, 애플리케이션의 요구 사항이나 사용자에게 더 친숙한 형태의 에러 메시지 제공이 필요할 때.
+> 2. **통일된 에러 응답 포맷**: REST API에서 모든 응답의 포맷을 일관되게 유지하기 위해, 에러 응답도 API의 나머지 부분과 동일한 포맷을 유지해야 할 때.
+> 3. **세부적인 에러 핸들링**: 특정 상황이나 예외 유형에 대해 더 세부적인 에러 핸들링 로직을 구현해야 할 때.
+> 4. **보안상의 이유**: 기본 에러 메시지가 민감한 정보를 노출할 수 있으므로, 보안을 강화하기 위해 커스텀 에러 핸들링을 통해 정보 노출을 제한할 때.
+
+### 에러 핸들링 방법
+> 1. **@ControllerAdvice와 @ExceptionHandler 사용**: 전역에서 발생할 수 있는 예외를 처리하기 위해 @ControllerAdvice를 사용하고, 특정 예외 유형을 처리하기 위해 @ExceptionHandler를 사용.
+> 2. **ResponseEntityExceptionHandler 상속**: 스프링이 제공하는 ResponseEntityExceptionHandler 클래스를 상속받아, 다양한 예외 상황에 대해 커스텀 에러 응답을 제공.
+> 3. **ErrorController 인터페이스 구현**: 스프링 부트의 기본 에러 경로(/error)를 처리하는 커스텀 컨트롤러를 만들기 위해 ErrorController 인터페이스를 구현.
 
 <br>
 
