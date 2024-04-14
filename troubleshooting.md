@@ -256,3 +256,32 @@ jobs:
     11 | # 운영 및 개발에서 사용되는 환경 설정을 분리한다.
     ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref ac927ac7-3fde-4cd9-abf3-9664575eda9c::vzwmv32b08ian1tygqq0dygdk: failed to walk /var/lib/docker/tmp/buildkit-mount2695678863/build/libs: lstat /var/lib/docker/tmp/buildkit-mount2695678863/build/libs: no such file or directory
     Error: Process completed with exit code 1.
+
+<br>
+
+---
+## SSL, HTTPS
+### 배경
+
+    Google Oauth2를 사용하려면 TLS를 사용해야 함
+    TLS는 도메인이 필요 -> 무료 도메인 발급받은 김에 HTTPS까지 적용해볼까?
+
+
+> 1. Azure 서버에서 Let’s Encrypt로 SSL 인증서 발급
+> 2. PEM 파일들을 PKCS12 파일로 변환
+> 3. PKCS12을 로컬 PC로 옮겨야 함 -> SCP 사용
+> 4. **여기서 문제 발생**
+>    1. 서버 터미널에서 SCP 명령어를 사용하려고 하면 Permission denied 발생
+>    2. root 계정으로 접속하려고 비밀번호를 입력하면 Permission denied (publickey,password). 발생
+>    3. SSL 인증서를 로컬 PC로 옮기고 application.yml을 수정했는데도 '주의 요함' 표시가 나타남
+
+<br>
+
+### 해결
+
+> 1. 서버->로컬로 파일을 옮기려면 로컬 PC에서 SCP 명령어를 사용해야 함
+> 2. 비밀번호를 사용하려면 PasswordAuthentication를 yes로 변경해야 함. 그래서 그냥 SSH 키를 사용해서 해결
+> 3. 인증서를 발급받을 때 서버 도메인으로 발급받았는데 로컬 PC에서는 localhost로 접속하기 때문에 주의 요함 표시가 나타남
+<br>
+
+---
