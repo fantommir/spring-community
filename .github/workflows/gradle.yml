@@ -28,7 +28,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Copy config files
-        run: cp config/*.yml src/main/resources/
+        run: find config -type f ! -name 'readme.md' -exec cp -t src/main/resources/ {} +
           
       - name: Run tests
         run: ./gradlew test
@@ -56,13 +56,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Copy config files
-        run: cp config/*.yml src/main/resources/
+        run: find config -type f ! -name 'readme.md' -exec cp -t src/main/resources/ {} +
       
       # 2. Spring Boot 애플리케이션 빌드
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: clean bootJar
+        run: ./gradlew clean bootJar
 
 
       # 3. Docker 이미지 빌드
