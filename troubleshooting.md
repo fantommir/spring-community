@@ -266,14 +266,19 @@ jobs:
     Google Oauth2를 사용하려면 TLS를 사용해야 함
     TLS는 도메인이 필요 -> 무료 도메인 발급받은 김에 HTTPS까지 적용해볼까?
 
-
 > 1. Azure 서버에서 Let’s Encrypt로 SSL 인증서 발급
 > 2. PEM 파일들을 PKCS12 파일로 변환
-> 3. PKCS12을 로컬 PC로 옮겨야 함 -> SCP 사용
+> 3. PKCS12을 로컬 PC로 옮겨야 함 -> SCP 사용  
+>   > **추가**  
+>   > keystore.p12를 사용할 필요가 없었음. nginx가 그냥 pem 파일로 인증서 검증하는 방식을 사용해서 굳이 앱에서도 SSL 검증할 필요가 없었음.
 > 4. **여기서 문제 발생**
 >    1. 서버 터미널에서 SCP 명령어를 사용하려고 하면 Permission denied 발생
 >    2. root 계정으로 접속하려고 비밀번호를 입력하면 Permission denied (publickey,password). 발생
 >    3. SSL 인증서를 로컬 PC로 옮기고 application.yml을 수정했는데도 '주의 요함' 표시가 나타남
+> 5. **새 문제 발생**
+>    1. nginx 설정도 제대로 했는데, https://spring-community.kro.kr/ 로 접속하면 Bad Request 발생
+>    > Bad Request 
+>    > This combination of host and port requires TLS.
 
 <br>
 
@@ -282,6 +287,9 @@ jobs:
 > 1. 서버->로컬로 파일을 옮기려면 로컬 PC에서 SCP 명령어를 사용해야 함
 > 2. 비밀번호를 사용하려면 PasswordAuthentication를 yes로 변경해야 함. 그래서 그냥 SSH 키를 사용해서 해결
 > 3. 인증서를 발급받을 때 서버 도메인으로 발급받았는데 로컬 PC에서는 localhost로 접속하기 때문에 주의 요함 표시가 나타남
+> 4. nginx에서 SSL 인증서로 관리한 후 HTTP로 프록시 패스(서버의 내부 네트워크를 통해 클라이언트의 요청을 다른 서버로 전달하는 과정)를 해주는데, 앱에서도 server.ssl.enabled = true로 설정하여 HTTP로 프록시해서 들어온 요청을 허용하지 않았던 문제  
+> -> 애플리케이션에서는 SSL 검증을 하지 않도록 설정
+
 <br>
 
 ---
