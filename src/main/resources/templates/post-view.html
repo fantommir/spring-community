@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head><title>Post View</title>
+<head><title>MyCommunity</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
@@ -273,7 +273,6 @@
         let replyLink = $('<a>').attr('href', '#!').addClass('reply-link').data('comment-id', comment.id).append($('<i>').addClass('fas fa-reply fa-xs'), $('<span>').addClass('small').text(' reply'));
         dFlexDiv2.append(pTag1, replyLink);
         let pTag2 = $('<p>').addClass("small mb-0");
-        console.log(comment.parentMemberId + ' ' + comment.parentMemberName);
         if (comment.parentMemberId) {
             let mention = $('<a>').attr('href', '/info/' + comment.parentMemberId).text('@' + comment.parentMemberName);
             pTag2.append(mention, ' ');
