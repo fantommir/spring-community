@@ -1,17 +1,21 @@
 package com.JKS.community.entity;
 
+import com.JKS.community.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Getter @Setter
-public class File {
+@SQLDelete(sql = "UPDATE file SET enabled = false WHERE file_id = ?")
+@SQLRestriction("enabled = true")
+public class File extends BaseTimeEntity {
     @Id @GeneratedValue
     @Column(name = "file_id")
     private Long id;
@@ -23,9 +27,9 @@ public class File {
     private long size;
     private String path;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime uploadTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     public static File of(String originalName, String uuidName, String type, long size, String path) {
         File file = new File();

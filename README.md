@@ -17,6 +17,7 @@
   * [프로젝트 소개 📖](#프로젝트-소개-)
   * [프로젝트 목적 🎯](#프로젝트-목적-)
   * [기술 스택 🛠](#기술-스택-)
+  * [ERD 📊](#erd-)
   * [주요 기능 ✨](#주요-기능-)
   * [배운 점 및 성장 경험 📚](#배운-점-및-성장-경험-)
   * [스크린샷 📸](#스크린샷-)
@@ -40,6 +41,10 @@
 - **Database**: H2(개발), MySQL(배포)
 - **Frontend**: Thymeleaf
 - **ETC**: Azure Blob Storage
+
+---
+## ERD 📊
+![image](https://github.com/JeongGiSeong/spring-community/assets/80134129/e4fda01c-c4aa-4087-8162-be43e914735a)
 
 ---
 ## 주요 기능 ✨
