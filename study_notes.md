@@ -41,6 +41,7 @@
   * [Docker](#docker)
   * [서버 배포](#서버-배포)
   * [GitHub Actions](#github-actions)
+  * [웹사이트 접속 과정](#웹사이트-접속-과정)
 <!-- TOC -->
 
 ---
@@ -352,36 +353,6 @@ public record Point(int x, int y) { }
 > 1. **@ControllerAdvice와 @ExceptionHandler 사용**: 전역에서 발생할 수 있는 예외를 처리하기 위해 @ControllerAdvice를 사용하고, 특정 예외 유형을 처리하기 위해 @ExceptionHandler를 사용.
 > 2. **ResponseEntityExceptionHandler 상속**: 스프링이 제공하는 ResponseEntityExceptionHandler 클래스를 상속받아, 다양한 예외 상황에 대해 커스텀 에러 응답을 제공.
 > 3. **ErrorController 인터페이스 구현**: 스프링 부트의 기본 에러 경로(/error)를 처리하는 커스텀 컨트롤러를 만들기 위해 ErrorController 인터페이스를 구현.
-
-<br>
-
----
-## Swagger
-
-<br>
-
----
-## OOP, AOP
-
-<br>
-
----
-## Querydsl
-
-<br>
-
----
-## Docker
-
-<br>
-
----
-## 서버 배포
-
-<br>
-
----
-## GitHub Actions
 
 <br>
 
