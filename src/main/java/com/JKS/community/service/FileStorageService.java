@@ -49,4 +49,11 @@ public class FileStorageService {
             throw new RuntimeException("파일을 저장하지 못했습니다. 다시 시도해주세요.", e);
         }
     }
+
+    public void deleteFile(String fileName) {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
+        BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
+        BlobClient blob = blobContainerClient.getBlobClient(fileName);
+        blob.delete();
+    }
 }
